@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Você S.A.</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde: #1D9E75; --ambar: #BA7517; --roxo: #534AB7; --coral: #D85A30;
+  --cinza: #888780; --preto: #1a1a1a; --fundo: #FAFAF8; --borda: #E8E6DF; --card: #FFFFFF;
+  --verde-bg: #E1F5EE; --ambar-bg: #FAEEDA; --roxo-bg: #EEEDFE; --coral-bg: #FAECE7;
+  --info-bg: #E6F1FB; --info-txt: #185FA5;
+  --suc-bg: #E1F5EE; --suc-txt: #085041;
+  --warn-bg: #FAEEDA; --warn-txt: #633806;
+  --dan-bg: #FCEBEB; --dan-txt: #A32D2D;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--fundo);color:var(--preto);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+
+/* ── NAV ── */
+.main-nav{display:flex;gap:2px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:100;overflow-x:auto}
+.main-nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;font-size:13px;font-family:inherit;padding:7px 14px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--cinza);cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.nav-btn:hover{background:var(--fundo)}
+.nav-btn.on{background:var(--fundo);color:var(--preto);border-color:var(--borda)}
+
+/* ── PAGES ── */
+.page{display:none;max-width:720px;margin:0 auto;padding:24px 16px 80px}
+.page.on{display:block}
+
+/* ── TYPOGRAPHY ── */
+.serif{font-family:'DM Serif Display',serif}
+.sec-num{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:6px}
+h2.serif{font-size:26px;line-height:1.2;margin-bottom:16px}
+.sec-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin:20px 0 8px}
+.sec-label:first-child{margin-top:0}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:18px 20px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stat{background:var(--fundo);border:1px solid var(--borda);border-radius:10px;padding:14px}
+.stat-label{font-size:11px;color:var(--cinza);margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:600;line-height:1}
+.stat-sub{font-size:11px;color:#bbb;margin-top:3px}
+
+/* ── ALERTS ── */
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.6;margin-bottom:14px}
+.alert-info{background:var(--info-bg);border:1px solid #B5D4F4;color:var(--info-txt)}
+.alert-warn{background:var(--warn-bg);border:1px solid #F0C070;color:var(--warn-txt)}
+.alert-suc{background:var(--suc-bg);border:1px solid #9FE1CB;color:var(--suc-txt)}
+.alert strong{font-weight:600}
+
+/* ── RULE LIST ── */
+.rule-list{list-style:none;padding:0}
+.rule-list li{font-size:14px;color:#444;padding:9px 0 9px 20px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6}
+.rule-list li:last-child{border-bottom:none}
+.rule-list li::before{content:'→';position:absolute;left:0;top:10px;font-size:11px;color:var(--cinza)}
+.rule-list li strong{color:var(--preto);font-weight:600}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--borda);margin:32px 0}
+
+/* ════════════════════════════
+   CHECK-IN
+════════════════════════════ */
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.greeting{font-size:20px;font-weight:600}
+.sub-date{font-size:12px;color:var(--cinza);margin-top:2px}
+.streak-pill{background:var(--roxo-bg);color:var(--roxo);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.streak-pill svg{flex-shrink:0}
+
+.habit-card{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .15s;user-select:none}
+.habit-card.done{border-color:var(--verde);background:#f0faf6}
+.habit-card.skip{opacity:.4;pointer-events:none}
+.habit-left{display:flex;align-items:center;gap:12px}
+.habit-icon{width:36px;height:36px;border-radius:10px;background:var(--fundo);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.habit-card.done .habit-icon{background:#dcf5ec}
+.habit-name{font-size:14px;font-weight:500}
+.habit-days{font-size:11px;color:var(--cinza);margin-top:1px}
+.habit-toggle{width:28px;height:28px;border-radius:50%;border:1.5px solid #d0d0ce;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;color:transparent}
+.habit-card.done .habit-toggle{background:var(--verde);border-color:var(--verde);color:#fff}
+
+.energy-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.e-btn{padding:12px 8px;border-radius:10px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;color:var(--cinza);font-family:inherit}
+.e-btn.on-low{background:#fff0f0;border-color:#E24B4A;color:#A32D2D}
+.e-btn.on-ok{background:var(--warn-bg);border-color:var(--ambar);color:var(--warn-txt)}
+.e-btn.on-high{background:var(--suc-bg);border-color:var(--verde);color:var(--suc-txt)}
+
+.nota-area{width:100%;border:1px solid var(--borda);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;color:var(--preto);background:var(--card);resize:none;min-height:76px;transition:border-color .15s}
+.nota-area:focus{outline:none;border-color:var(--roxo)}
+
+.save-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--preto);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:opacity .15s;font-family:inherit;margin-top:12px}
+.save-btn:active{opacity:.8}
+.toast{text-align:center;font-size:13px;color:var(--verde);font-weight:500;height:22px;margin-top:6px}
+
+/* ════════════════════════════
+   DASHBOARD
+════════════════════════════ */
+.period-tabs{display:flex;gap:4px;margin-bottom:16px}
+.ptab{flex:1;padding:8px;border-radius:8px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;text-align:center;color:var(--cinza);transition:all .15s;font-family:inherit}
+.ptab.on{background:var(--fundo);color:var(--preto);border-color:var(--preto)}
+
+.prog-item{margin-bottom:14px}
+.prog-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.prog-name{font-size:13px;font-weight:500}
+.prog-pct{font-size:12px;color:var(--cinza)}
+.bar-bg{height:7px;background:var(--borda);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s}
+.week-dots{display:flex;gap:4px;margin-top:6px}
+.wd{width:30px;height:30px;border-radius:50%;border:1px solid var(--borda);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#bbb;flex-shrink:0}
+.wd.done{background:var(--verde);border-color:var(--verde);color:#fff}
+.wd.today{border-color:var(--roxo);color:var(--roxo)}
+.wd.skip{background:var(--fundo);color:#ddd}
+
+/* Gráfico barras */
+.chart-wrap{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:16px 20px;margin-bottom:12px}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--cinza)}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:80px}
+.bc-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.bc-bar{width:100%;border-radius:4px 4px 0 0;transition:height .4s;min-height:2px}
+.bc-label{font-size:10px;color:var(--cinza);text-align:center}
+.bc-val{font-size:10px;font-weight:600;color:var(--cinza)}
+
+/* Calendário de calor */
+.heatmap-wrap{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:16px 20px;margin-bottom:12px}
+.heatmap-title{font-size:13px;font-weight:600;margin-bottom:12px;color:var(--cinza)}
+.heatmap-grid{display:flex;flex-wrap:wrap;gap:3px}
+.hm-cell{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.hm-0{background:var(--borda)}
+.hm-1{background:#9FE1CB}
+.hm-2{background:#5DCAA5}
+.hm-3{background:#1D9E75}
+.hm-4{background:#085041}
+.hm-future{background:transparent;border:1px solid var(--borda)}
+
+/* ════════════════════════════
+   OKRs
+════════════════════════════ */
+.q-badge-active{display:inline-flex;align-items:center;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px}
+.pillar-card{background:var(--card);border:1px solid var(--borda);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.pillar-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.pillar-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.pillar-chev{font-size:20px;color:var(--cinza);transition:transform .2s;line-height:1}
+.pillar-body{display:none;padding:0 18px 14px;border-top:1px solid var(--borda)}
+.pillar-body.open{display:block}
+.okr-q{margin-top:12px}
+.okr-q-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin-bottom:4px}
+.okr-q-title{font-size:13px;font-weight:600;margin-bottom:6px}
+.kr{font-size:12px;color:#555;padding:4px 0 4px 14px;position:relative;line-height:1.5;border-bottom:1px solid #f5f5f3}
+.kr:last-child{border-bottom:none}
+.kr::before{content:'→';position:absolute;left:0;top:5px;font-size:10px;color:#ccc}
+.okr-q.aq .okr-q-lbl{color:var(--roxo)}
+.okr-q.aq .okr-q-title{color:var(--preto)}
+.qbadge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.q1b{background:var(--info-bg);color:var(--info-txt)}
+.q2b{background:var(--suc-bg);color:var(--suc-txt)}
+.q3b{background:var(--warn-bg);color:var(--warn-txt)}
+.q4b{background:var(--dan-bg);color:var(--dan-txt)}
+
+/* ════════════════════════════
+   HISTÓRICO
+════════════════════════════ */
+.hi-item{padding:12px 0;border-bottom:1px solid var(--borda)}
+.hi-item:last-child{border-bottom:none}
+.hi-date{font-size:11px;color:var(--cinza);margin-bottom:5px;font-weight:500}
+.hi-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.hi-tag{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:500}
+.hi-tag.done{background:var(--suc-bg);color:var(--suc-txt)}
+.hi-tag.miss{background:var(--fundo);color:var(--cinza)}
+.hi-meta{font-size:12px;color:#aaa;line-height:1.5}
+.empty{text-align:center;padding:40px 20px;color:#bbb;font-size:14px;line-height:1.7}
+
+/* ════════════════════════════
+   MANUAL
+════════════════════════════ */
+.rotina-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.rotina-grid{grid-template-columns:1fr}}
+.rotina-card{background:var(--card);border:1px solid var(--borda);border-radius:12px;overflow:hidden}
+.rotina-hd{padding:10px 14px;border-bottom:1px solid var(--borda);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza)}
+.rotina-row{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid #f5f5f3;align-items:flex-start}
+.rotina-row:last-child{border-bottom:none}
+.rotina-time{font-size:11px;color:var(--cinza);min-width:50px;flex-shrink:0;padding-top:1px;font-weight:500}
+.rotina-desc{font-size:13px;color:#444;line-height:1.5}
+.rotina-desc strong{color:var(--preto);font-weight:600}
+
+.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.wday{background:var(--card);border:1px solid var(--borda);border-radius:9px;overflow:hidden}
+.wday-hd{font-size:9px;font-weight:600;text-align:center;padding:5px;border-bottom:1px solid var(--borda);color:var(--cinza);text-transform:uppercase;letter-spacing:.06em}
+.wblk{font-size:10px;padding:5px 7px;border-bottom:1px solid var(--borda);line-height:1.4}
+.wblk:last-child{border-bottom:none}
+.wblk-t{color:var(--cinza);margin-bottom:1px;font-size:9px}
+.wblk-l{font-weight:600;font-size:10px}
+.c-fac{background:rgba(136,135,128,.08)}
+.c-trab{background:rgba(136,135,128,.05)}
+.c-corp{background:rgba(29,158,117,.1)}
+.c-ment{background:rgba(55,138,221,.1)}
+.c-neg{background:rgba(186,117,23,.1)}
+.c-son{background:rgba(83,74,183,.1)}
+.c-liv{background:rgba(216,90,48,.1)}
+
+.idiom-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:480px){.idiom-grid{grid-template-columns:1fr}}
+.idiom-card{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:14px}
+.idiom-hd{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ibadge{font-size:10px;padding:2px 7px;border-radius:12px;font-weight:600}
+.idiom-sub{font-size:12px;color:var(--cinza);margin-bottom:8px;line-height:1.5}
+.ibar-bg{height:5px;background:var(--borda);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.ibar-fill{height:100%;border-radius:3px}
+.ibar-lbl{font-size:11px;color:var(--cinza)}
+
+.tl{position:relative;padding-left:22px}
+.tl::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;width:1px;background:var(--borda)}
+.tl-item{position:relative;margin-bottom:24px}
+.tl-item:last-child{margin-bottom:0}
+.tl-dot{position:absolute;left:-18px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--fundo)}
+.tl-per{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--cinza);margin-bottom:3px}
+.tl-foc{font-size:15px;font-weight:600;margin-bottom:5px}
+.tl-desc{font-size:13px;color:#555;line-height:1.6}
+
+.princ{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--borda);align-items:flex-start}
+.princ:last-child{border-bottom:none}
+.princ-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--roxo);min-width:28px;line-height:1;padding-top:2px}
+.princ-text{font-size:13px;color:#444;line-height:1.6}
+.princ-text strong{color:var(--preto);font-weight:600}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:440px){.metrics-grid{grid-template-columns:repeat(2,1fr)}}
+.metric{background:var(--card);border:1px solid var(--borda);border-radius:10px;padding:12px}
+.metric-label{font-size:11px;color:var(--cinza);margin-bottom:3px}
+.metric-val{font-size:18px;font-weight:600}
+.metric-target{font-size:11px;color:#bbb;margin-top:2px}
+
+/* ════════════════════════════
+   ONBOARDING
+════════════════════════════ */
+.onboard{max-width:440px;margin:0 auto;padding:40px 20px}
+.ob-label{font-size:13px;font-weight:600;color:var(--preto);margin-bottom:6px}
+.ob-input{width:100%;padding:13px 14px;border:1px solid var(--borda);border-radius:10px;font-size:15px;font-family:inherit;color:var(--preto);background:var(--card);margin-bottom:14px}
+.ob-input:focus{outline:none;border-color:var(--roxo)}
+.ob-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--preto);color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+</style>
+</head>
+<body>
+
+<nav class="main-nav" id="main-nav" style="display:none">
+  <button class="nav-btn on" onclick="nav('checkin',this)">✓ Check-in</button>
+  <button class="nav-btn" onclick="nav('dashboard',this)">Dashboard</button>
+  <button class="nav-btn" onclick="nav('okrs',this)">OKRs</button>
+  <button class="nav-btn" onclick="nav('historico',this)">Histórico</button>
+  <button class="nav-btn" onclick="nav('manual',this)">Manual</button>
+</nav>
+
+<!-- ONBOARDING -->
+<div id="pg-onboard">
+  <div class="onboard">
+    <div style="margin-bottom:24px">
+      <div style="font-family:'DM Serif Display',serif;font-size:36px;color:var(--roxo);margin-bottom:6px">Você S.A.</div>
+      <div style="font-size:14px;color:var(--cinza);line-height:1.6">Seu sistema de desenvolvimento pessoal de 12 meses. Preencha uma vez e o app se constrói com você.</div>
+    </div>
+    <div class="ob-label">Seu nome</div>
+    <input class="ob-input" id="ob-name" type="text" placeholder="Ex: João">
+    <div class="ob-label">Data de início do plano</div>
+    <input class="ob-input" id="ob-date" type="date">
+    <button class="ob-btn" onclick="finishOnboard()">Começar meu plano</button>
+  </div>
+</div>
+
+<!-- CHECK-IN -->
+<div id="pg-checkin" class="page" style="display:none">
+  <div class="topbar">
+    <div><div class="greeting" id="greeting"></div><div class="sub-date" id="sub-date"></div></div>
+    <div class="streak-pill">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span id="streak-val">0d</span>
+    </div>
+  </div>
+  <div class="sec-label">Hábitos de hoje</div>
+  <div id="habit-list"></div>
+  <div class="sec-label">Energia</div>
+  <div class="energy-btns">
+    <button class="e-btn" id="e1" onclick="setEnergy(1)">Baixa</button>
+    <button class="e-btn" id="e2" onclick="setEnergy(2)">Ok</button>
+    <button class="e-btn" id="e3" onclick="setEnergy(3)">Alta</button>
+  </div>
+  <div class="sec-label">Nota <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+  <textarea class="nota-area" id="nota-area" placeholder="Vitória, obstáculo, algo que quer lembrar..."></textarea>
+  <button class="save-btn" onclick="saveDay()">Salvar check-in</button>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="page" style="display:none">
+  <div class="period-tabs">
+    <button class="ptab on" onclick="setPeriod('semana',this)">Semana</button>
+    <button class="ptab" onclick="setPeriod('mes',this)">Mês</button>
+    <button class="ptab" onclick="setPeriod('trimestre',this)">Trimestre</button>
+    <button class="ptab" onclick="setPeriod('total',this)">Total</button>
+  </div>
+  <div class="stat-grid" id="dash-stats"></div>
+  <div class="heatmap-wrap" id="heatmap-wrap">
+    <div class="heatmap-title">Calendário de consistência — últimos 84 dias</div>
+    <div class="heatmap-grid" id="heatmap"></div>
+  </div>
+  <div class="chart-wrap" id="chart-wrap">
+    <div class="chart-title" id="chart-title">Hábitos por dia — últimos 7 dias</div>
+    <div class="bar-chart" id="bar-chart"></div>
+  </div>
+  <div class="sec-label">Por hábito</div>
+  <div id="dash-habits"></div>
+</div>
+
+<!-- OKRs -->
+<div id="pg-okrs" class="page" style="display:none">
+  <div id="q-badge"></div>
+  <div id="pillar-list"></div>
+</div>
+
+<!-- HISTÓRICO -->
+<div id="pg-historico" class="page" style="display:none">
+  <div class="sec-label">Registros</div>
+  <div class="card" style="padding:0 20px">
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- MANUAL -->
+<div id="pg-manual" class="page" style="display:none">
+
+  <div style="margin-bottom:28px">
+    <div style="font-family:'DM Serif Display',serif;font-size:32px;color:var(--roxo);margin-bottom:4px">Você S.A.</div>
+    <div style="font-size:14px;color:var(--cinza)">Manual do sistema · 12 meses · 4 pilares</div>
+  </div>
+
+  <!-- ROTINA -->
+  <div class="sec-num">01</div>
+  <h2 class="serif">Rotina diária</h2>
+
+  <div class="week-grid" style="margin-bottom:14px">
+    <div class="wday"><div class="wday-hd">Seg</div><div class="wblk c-fac"><div class="wblk-t">07–12h30</div><div class="wblk-l">Faculdade</div></div><div class="wblk c-trab"><div class="wblk-t">13–19h</div><div class="wblk-l">Assessoria</div></div><div class="wblk c-ment"><div class="wblk-t">19h30</div><div class="wblk-l">Estudo</div></div><div class="wblk c-son"><div class="wblk-t">23h</div><div class="wblk-l">Dormir</div></div></div>
+    <div class="wday"><div class="wday-hd">Ter</div><div class="wblk c-fac"><div class="wblk-t">07–12h30</div><div class="wblk-l">Faculdade</div></div><div class="wblk c-trab"><div class="wblk-t">13–19h</div><div class="wblk-l">Assessoria</div></div><div class="wblk c-corp"><div class="wblk-t">19h30</div><div class="wblk-l">Treino</div></div><div class="wblk c-son"><div class="wblk-t">23h</div><div class="wblk-l">Dormir</div></div></div>
+    <div class="wday"><div class="wday-hd">Qua</div><div class="wblk c-fac"><div class="wblk-t">07–12h30</div><div class="wblk-l">Faculdade</div></div><div class="wblk c-trab"><div class="wblk-t">13–19h</div><div class="wblk-l">Assessoria</div></div><div class="wblk c-ment"><div class="wblk-t">19h30</div><div class="wblk-l">Estudo</div></div><div class="wblk c-son"><div class="wblk-t">23h</div><div class="wblk-l">Dormir</div></div></div>
+    <div class="wday"><div class="wday-hd">Qui</div><div class="wblk c-fac"><div class="wblk-t">07–12h30</div><div class="wblk-l">Faculdade</div></div><div class="wblk c-trab"><div class="wblk-t">13–19h</div><div class="wblk-l">Assessoria</div></div><div class="wblk c-corp"><div class="wblk-t">19h30</div><div class="wblk-l">Treino</div></div><div class="wblk c-son"><div class="wblk-t">23h</div><div class="wblk-l">Dormir</div></div></div>
+    <div class="wday"><div class="wday-hd">Sex</div><div class="wblk c-fac"><div class="wblk-t">07–12h30</div><div class="wblk-l">Faculdade</div></div><div class="wblk c-trab"><div class="wblk-t">13–17h</div><div class="wblk-l">Assessoria</div></div><div class="wblk c-neg"><div class="wblk-t">17–19h</div><div class="wblk-l">Estratégia</div></div><div class="wblk c-liv"><div class="wblk-t">19h+</div><div class="wblk-l">Livre</div></div></div>
+  </div>
+
+  <div class="rotina-grid" style="margin-bottom:28px">
+    <div class="rotina-card">
+      <div class="rotina-hd">Dias úteis</div>
+      <div class="rotina-row"><div class="rotina-time">06h15</div><div class="rotina-desc"><strong>Acordar</strong> + inglês 20 min</div></div>
+      <div class="rotina-row"><div class="rotina-time">07–12h30</div><div class="rotina-desc">Faculdade. <strong>Deslocamento = podcast inglês</strong></div></div>
+      <div class="rotina-row"><div class="rotina-time">13–19h</div><div class="rotina-desc">Assessoria. Foco total.</div></div>
+      <div class="rotina-row"><div class="rotina-time">19–19h30</div><div class="rotina-desc">Transição. Jantar, descomprimir.</div></div>
+      <div class="rotina-row"><div class="rotina-time">Ter/Qui</div><div class="rotina-desc"><strong>Treino 60–90 min</strong></div></div>
+      <div class="rotina-row"><div class="rotina-time">Seg/Qua</div><div class="rotina-desc"><strong>Estudo 90 min</strong> — idioma + negócios</div></div>
+      <div class="rotina-row"><div class="rotina-time">Sex 17h</div><div class="rotina-desc"><strong>Revisão semanal</strong> + estratégia</div></div>
+      <div class="rotina-row"><div class="rotina-time">23h</div><div class="rotina-desc"><strong>Dormir.</strong> Meta: 7h.</div></div>
+    </div>
+    <div class="rotina-card">
+      <div class="rotina-hd">Fim de semana</div>
+      <div class="rotina-row"><div class="rotina-time">Sáb 08h30</div><div class="rotina-desc"><strong>Treino principal 90 min</strong></div></div>
+      <div class="rotina-row"><div class="rotina-time">Sáb 10h30</div><div class="rotina-desc"><strong>Deep work negócio 90 min</strong></div></div>
+      <div class="rotina-row"><div class="rotina-time">Sáb 13h+</div><div class="rotina-desc">Livre total</div></div>
+      <div class="rotina-row"><div class="rotina-time">Dom 09h</div><div class="rotina-desc"><strong>Estudo focado 2h</strong></div></div>
+      <div class="rotina-row"><div class="rotina-time">Dom 11h</div><div class="rotina-desc"><strong>Revisão idioma 45 min</strong></div></div>
+      <div class="rotina-row"><div class="rotina-time">Dom 12h</div><div class="rotina-desc">Planejamento semana + tarde livre</div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- EXECUÇÃO -->
+  <div class="sec-num">02</div>
+  <h2 class="serif">Como executar: 4 fases</h2>
+  <div class="alert alert-info">Instale 1 hábito de cada vez. Três hábitos bem feitos valem mais do que dez mal iniciados.</div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:var(--info-txt)"></div>Fase 1 — Instalar (semanas 1–4)</div><ul class="rule-list"><li><strong>Hábito 1 — Sono às 23h:</strong> alarme 22h30 para wind down. Celular fora do quarto.</li><li><strong>Hábito 2 — Inglês no deslocamento:</strong> BBC Learning English ou Huberman Lab. Ligar ao sair de casa.</li><li><strong>Hábito 3 — Treino ter + qui 19h30:</strong> roupa separada na véspera. 45 min já é suficiente.</li></ul></div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:var(--suc-txt)"></div>Fase 2 — Manter (semanas 5–12)</div><ul class="rule-list"><li><strong>Regra dos 2 dias:</strong> nunca pule 2 dias seguidos do mesmo hábito. Versão reduzida conta.</li><li><strong>Revisão toda sexta:</strong> quantos treinos? Inglês quantos dias? O que me fez falhar?</li><li><strong>Proteger energia:</strong> 19h–19h30 é transição sagrada. Se exausto, troque treino por caminhada.</li></ul></div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:var(--warn-txt)"></div>Fase 3 — Revisar (final de cada mês)</div><ul class="rule-list"><li><strong>60 min no último domingo:</strong> corpo, mente, negócio, tempo — o que evoluiu?</li><li><strong>Permitido ajustar:</strong> horário, app, duração dos blocos.</li><li><strong>Proibido cancelar:</strong> a frequência mínima dos hábitos.</li></ul></div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:var(--dan-txt)"></div>Fase 4 — Escalar (a partir do Q2)</div><ul class="rule-list"><li>Q1 estabilizado → espanhol + 3º treino no sábado</li><li>Q2 estabilizado → alemão + estudo técnico no domingo</li><li>Q3 estabilizado → japonês + 4 treinos/semana</li><li><strong>Nunca 2 hábitos novos na mesma semana.</strong></li></ul></div>
+
+  <div style="margin-top:16px">
+    <div class="sec-label">5 princípios inegociáveis</div>
+    <div class="princ"><div class="princ-num">01</div><div class="princ-text"><strong>Sono antes de tudo.</strong> 7h de sono vale mais do que 1h extra de estudo privado de sono.</div></div>
+    <div class="princ"><div class="princ-num">02</div><div class="princ-text"><strong>Micro-hábitos nos dias úteis.</strong> Inglês 20 min e dormir às 23h. O resto fica no fim de semana.</div></div>
+    <div class="princ"><div class="princ-num">03</div><div class="princ-text"><strong>Deslocamento é estudo.</strong> Podcast em inglês no transporte vale mais do que app à noite cansado.</div></div>
+    <div class="princ"><div class="princ-num">04</div><div class="princ-text"><strong>Fim de semana sagrado.</strong> Sáb = corpo + negócio. Dom = mente + idioma. Tarde sempre livre.</div></div>
+    <div class="princ"><div class="princ-num">05</div><div class="princ-text"><strong>Celebrar marcos.</strong> 30 dias de streak: jantar fora. Meta batida: comemorar com sócio.</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- IDIOMAS -->
+  <div class="sec-num">03</div>
+  <h2 class="serif">Plano de idiomas</h2>
+  <div class="alert alert-warn">4 idiomas ao mesmo tempo = não aprender nenhum. Siga a ordem.</div>
+  <div class="idiom-grid" style="margin-bottom:20px">
+    <div class="idiom-card"><div class="idiom-hd">Inglês <span class="ibadge" style="background:var(--info-bg);color:var(--info-txt)">Q1</span></div><div class="idiom-sub">A2 → B1 conversacional</div><div class="ibar-bg"><div class="ibar-fill" style="width:20%;background:#378ADD"></div></div><div class="ibar-lbl">A2 → B1</div></div>
+    <div class="idiom-card"><div class="idiom-hd">Espanhol <span class="ibadge" style="background:var(--suc-bg);color:var(--suc-txt)">Q2</span></div><div class="idiom-sub">A1 → A2+ sólido</div><div class="ibar-bg"><div class="ibar-fill" style="width:15%;background:var(--verde)"></div></div><div class="ibar-lbl">A1 → A2+</div></div>
+    <div class="idiom-card"><div class="idiom-hd">Alemão <span class="ibadge" style="background:var(--warn-bg);color:var(--warn-txt)">Q3</span></div><div class="idiom-sub">500 palavras base</div><div class="ibar-bg"><div class="ibar-fill" style="width:5%;background:var(--ambar)"></div></div><div class="ibar-lbl">Zero → A1 parcial</div></div>
+    <div class="idiom-card"><div class="idiom-hd">Japonês <span class="ibadge" style="background:var(--dan-bg);color:var(--dan-txt)">Q4</span></div><div class="idiom-sub">Hiragana + katakana</div><div class="ibar-bg"><div class="ibar-fill" style="width:10%;background:var(--coral)"></div></div><div class="ibar-lbl">Básico → silabários</div></div>
+  </div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:#378ADD"></div>Ferramentas — inglês (Q1)</div><ul class="rule-list"><li><strong>Deslocamento:</strong> BBC Learning English ou Huberman Lab</li><li><strong>20 min manhã:</strong> Anki com baralho pré-feito ou Duolingo</li><li><strong>Noites seg/qua:</strong> shadowing — repetir em voz alta vídeos do YouTube</li><li><strong>Medir:</strong> teste EF SET gratuito todo mês</li></ul></div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:var(--verde)"></div>Ferramentas — espanhol (Q2)</div><ul class="rule-list"><li><strong>Vantagem:</strong> lusófono já tem 60–70% do espanhol gratuitamente</li><li><strong>15 min/dia:</strong> Language Transfer (gratuito, excelente) + Duolingo</li><li><strong>Passivo:</strong> 1 série espanhola/semana (La Casa de Papel)</li></ul></div>
+
+  <div class="divider"></div>
+
+  <!-- ROADMAP -->
+  <div class="sec-num">04</div>
+  <h2 class="serif">Roadmap trimestral</h2>
+  <div class="tl">
+    <div class="tl-item"><div class="tl-dot" style="background:#378ADD"></div><div class="tl-per">Q1 · Meses 1–3 · Fundação</div><div class="tl-foc">Instalar os 3 hábitos base</div><div class="tl-desc">Sono às 23h, inglês no deslocamento, 2 treinos/semana. Mapear receita da assessoria e definir meta anual. Nada mais.</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:var(--verde)"></div><div class="tl-per">Q2 · Meses 4–6 · Aceleração</div><div class="tl-foc">Adicionar camadas sobre base sólida</div><div class="tl-desc">Espanhol entra. 3º treino no sábado. Inglês A2→B1. Aumentar ticket médio ou captação.</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:var(--ambar)"></div><div class="tl-per">Q3 · Meses 7–9 · Escala</div><div class="tl-foc">Sistema quase no piloto automático</div><div class="tl-desc">Alemão entra. 4 treinos/semana. Inglês em reuniões. Processos documentados na assessoria.</div></div>
+    <div class="tl-item"><div class="tl-dot" style="background:var(--coral)"></div><div class="tl-per">Q4 · Meses 10–12 · Colheita</div><div class="tl-foc">Medir, celebrar e planejar o próximo ciclo</div><div class="tl-desc">Japonês entra se Q3 estiver estável. Review anual. Planejar Você S.A. Ano 2.</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MÉTRICAS -->
+  <div class="sec-num">05</div>
+  <h2 class="serif">Métricas semanais</h2>
+  <p style="color:#555;margin-bottom:14px;font-size:14px">Revisar toda sexta-feira em 20 minutos.</p>
+  <div class="metrics-grid" style="margin-bottom:16px">
+    <div class="metric"><div class="metric-label">Sono médio</div><div class="metric-val">— h</div><div class="metric-target">Meta: 7h</div></div>
+    <div class="metric"><div class="metric-label">Treinos</div><div class="metric-val">—x</div><div class="metric-target">Meta Q1: 2x</div></div>
+    <div class="metric"><div class="metric-label">Inglês</div><div class="metric-val">—/7</div><div class="metric-target">Meta: 6/7</div></div>
+    <div class="metric"><div class="metric-label">Streak</div><div class="metric-val">— d</div><div class="metric-target">Marco: 30d</div></div>
+    <div class="metric"><div class="metric-label">Receita</div><div class="metric-val">—</div><div class="metric-target">Meta: Q1</div></div>
+    <div class="metric"><div class="metric-label">Revisões</div><div class="metric-val">—/4</div><div class="metric-target">Meta: 4/mês</div></div>
+  </div>
+  <div class="card"><div class="card-title"><div class="dot" style="background:var(--roxo)"></div>Perguntas da revisão (toda sexta)</div><ul class="rule-list"><li><strong>Corpo:</strong> quantos treinos? Dormi bem? Energia alta ou baixa?</li><li><strong>Mente:</strong> inglês quantos dias? Aprendi algo que já usei?</li><li><strong>Negócio:</strong> maior avanço comercial? Estou no ritmo da meta mensal?</li><li><strong>Tempo:</strong> a rotina funcionou? O que me fez desviar?</li><li><strong>Energia geral:</strong> de 1 a 10, como está minha disposição?</li></ul></div>
+
+</div>
+
+<script>
+const HABITS=[
+  {id:'sono',icon:'🌙',name:'Sono 7h+',days:'todo dia',allDays:true},
+  {id:'ingles',icon:'🇬🇧',name:'Inglês 20 min',days:'todo dia',allDays:true},
+  {id:'treino',icon:'🥊',name:'Treino',days:'ter, qui, sáb',allDays:false,weekdays:[2,4,6]},
+  {id:'estudo',icon:'📚',name:'Estudo / negócio',days:'seg, qua, dom',allDays:false,weekdays:[1,3,0]},
+];
+const ENERGY=['','Baixa','Ok','Alta'];
+const ECLASS=['','on-low','on-ok','on-high'];
+const DLABELS=['D','S','T','Q','Q','S','S'];
+const OKRS_DATA={
+  corpo:{icon:'🏃',name:'Corpo',quarters:[
+    {q:'Q1',label:'Instalar movimento',krs:['Treinar 2x/semana (ter+qui) por 8 semanas','Dormir 7h em 5 dias/semana','Tela off 30 min antes de dormir']},
+    {q:'Q2',label:'Elevar frequência',krs:['3 treinos/semana + sábado','Sono 7h em 6/7 dias']},
+    {q:'Q3–Q4',label:'Alta performance',krs:['4 treinos/semana','Evento: corrida ou kickboxing']},
+  ]},
+  mente:{icon:'🧠',name:'Mente',quarters:[
+    {q:'Q1',label:'Inglês diário',krs:['20 min/dia','Streak 30 dias','1 livro negócios/mês']},
+    {q:'Q2',label:'Inglês A2→B1 + espanhol',krs:['Conversa simples em inglês','Espanhol 15 min/dia']},
+    {q:'Q3–Q4',label:'B1, espanhol A2, alemão',krs:['Reunião em inglês','500 palavras alemão','Japonês Q4 se estável']},
+  ]},
+  negocio:{icon:'💼',name:'Negócio',quarters:[
+    {q:'Q1',label:'Diagnóstico + meta',krs:['Mapear receita com sócio','Definir meta anual','Identificar 3 gargalos']},
+    {q:'Q2',label:'Ticket e captação',krs:['Revisar portfólio','Fechar novos clientes','1 técnica venda/mês']},
+    {q:'Q3–Q4',label:'Escala com processos',krs:['Documentar processos','80% da meta até setembro','Avaliar expansão']},
+  ]},
+  tempo:{icon:'⏱',name:'Tempo',quarters:[
+    {q:'Q1',label:'Estruturar semana',krs:['Blocos ter/qui e seg/qua','Revisão toda sexta','Eliminar 1 atividade improdutiva']},
+    {q:'Q2',label:'Proteger desenvolvimento',krs:['Manter blocos 8 semanas','Delegar 1 tarefa operacional','1 fds desconectado/mês']},
+    {q:'Q3–Q4',label:'Piloto automático',krs:['Hábitos sem força 80% dos dias','Review trimestral com sócio','Férias 3–5 dias']},
+  ]},
+};
+
+let cfg={};
+let ts={habits:{},energy:0,nota:''};
+let period='semana';
+
+const todayKey=()=>new Date().toISOString().slice(0,10);
+const getData=()=>{try{return JSON.parse(localStorage.getItem('voce_sa_data')||'{"log":[]}')}catch(e){return{log:[]}}};
+const setData=d=>localStorage.setItem('voce_sa_data',JSON.stringify(d));
+const getCfg=()=>{try{return JSON.parse(localStorage.getItem('voce_sa_cfg')||'{}')}catch(e){return{}}};
+const setCfg=c=>localStorage.setItem('voce_sa_cfg',JSON.stringify(c));
+
+function getActiveQ(s){
+  if(!s)return 1;
+  const m=Math.floor((new Date()-new Date(s))/86400000/30);
+  return m<3?1:m<6?2:m<9?3:4;
+}
+function calcStreak(log){
+  let s=0;const today=todayKey();let d=new Date();d.setDate(d.getDate()-1);
+  while(s<365){const k=d.toISOString().slice(0,10);const e=log.find(x=>x.date===k);if(!e||!Object.values(e.habits||{}).some(Boolean))break;s++;d.setDate(d.getDate()-1);}
+  const te=log.find(x=>x.date===today);if(te&&Object.values(te.habits||{}).some(Boolean))s++;
+  return s;
+}
+function getBestStreak(log){
+  let best=0,cur=0;
+  const sorted=[...log].sort((a,b)=>a.date.localeCompare(b.date));
+  sorted.forEach((e,i)=>{
+    if(Object.values(e.habits||{}).some(Boolean)){
+      if(i===0){cur=1;}else{const diff=(new Date(e.date+'T12:00:00')-new Date(sorted[i-1].date+'T12:00:00'))/86400000;cur=diff===1?cur+1:1;}
+      if(cur>best)best=cur;
+    }
+  });
+  return best;
+}
+function fmtDate(iso){return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'});}
+function isExpected(h,date){if(h.allDays)return true;return h.weekdays.includes(new Date(date+'T12:00:00').getDay());}
+
+function getPeriodDates(p){
+  const today=new Date();const days=[];
+  if(p==='semana'){for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);days.push(d.toISOString().slice(0,10));}}
+  else if(p==='mes'){const y=today.getFullYear(),m=today.getMonth();const dim=new Date(y,m+1,0).getDate();for(let i=1;i<=dim;i++){days.push(new Date(y,m,i).toISOString().slice(0,10));}}
+  else if(p==='trimestre'){const aq=getActiveQ(cfg.startDate);const start=new Date(cfg.startDate);const qs=new Date(start);qs.setMonth(start.getMonth()+(aq-1)*3);const qe=new Date(qs);qe.setMonth(qs.getMonth()+3);let d=new Date(qs);while(d<=today&&d<qe){days.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}}
+  else{const start=new Date(cfg.startDate||todayKey());let d=new Date(start);while(d<=today){days.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}}
+  return days;
+}
+
+function init(){
+  cfg=getCfg();
+  if(!cfg.name||!cfg.startDate){
+    document.getElementById('pg-onboard').style.display='block';
+    document.getElementById('ob-date').value=todayKey();
+    return;
+  }
+  document.getElementById('pg-onboard').style.display='none';
+  document.getElementById('main-nav').style.display='flex';
+  document.getElementById('pg-checkin').style.display='block';
+  renderCheckin();renderDashboard();renderOKRs();renderHistorico();
+}
+
+function finishOnboard(){
+  const name=document.getElementById('ob-name').value.trim();
+  const date=document.getElementById('ob-date').value;
+  if(!name||!date){alert('Preencha seu nome e a data de início.');return;}
+  cfg={name,startDate:date};setCfg(cfg);
+  document.getElementById('pg-onboard').style.display='none';
+  document.getElementById('main-nav').style.display='flex';
+  nav('checkin',document.querySelector('.nav-btn'));
+  renderCheckin();renderDashboard();renderOKRs();renderHistorico();
+}
+
+function renderCheckin(){
+  const data=getData();const today=todayKey();
+  const ex=data.log.find(e=>e.date===today);
+  ts=ex?{habits:{...ex.habits},energy:ex.energy||0,nota:ex.nota||''}:{habits:{},energy:0,nota:''};
+  const h=new Date().getHours();
+  document.getElementById('greeting').textContent=(h<12?'Bom dia':h<18?'Boa tarde':'Boa noite')+', '+cfg.name;
+  document.getElementById('sub-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('streak-val').textContent=calcStreak(data.log)+'d';
+  document.getElementById('habit-list').innerHTML=HABITS.map(h=>{
+    const done=!!ts.habits[h.id];const exp=isExpected(h,today);
+    return`<div class="habit-card ${done?'done':''} ${!exp?'skip':''}" onclick="toggleHabit('${h.id}',this)">
+      <div class="habit-left"><div class="habit-icon">${h.icon}</div>
+      <div><div class="habit-name">${h.name}</div><div class="habit-days">${exp?h.days:'não esperado hoje'}</div></div></div>
+      <div class="habit-toggle">${done?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':''}</div>
+    </div>`;
+  }).join('');
+  [1,2,3].forEach(i=>{const b=document.getElementById('e'+i);if(b)b.className='e-btn'+(ts.energy===i?' '+ECLASS[i]:'');});
+  const na=document.getElementById('nota-area');if(na)na.value=ts.nota;
+}
+
+function toggleHabit(id,card){
+  ts.habits[id]=!ts.habits[id];const done=ts.habits[id];
+  card.className='habit-card'+(done?' done':'')+(card.classList.contains('skip')?' skip':'');
+  card.querySelector('.habit-toggle').innerHTML=done?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':'';
+}
+function setEnergy(val){
+  ts.energy=val;
+  [1,2,3].forEach(i=>{const b=document.getElementById('e'+i);if(b)b.className='e-btn'+(i===val?' '+ECLASS[i]:'');});
+}
+function saveDay(){
+  const na=document.getElementById('nota-area');ts.nota=na?na.value:'';
+  const data=getData();const today=todayKey();
+  const idx=data.log.findIndex(e=>e.date===today);
+  const entry={date:today,habits:{...ts.habits},energy:ts.energy,nota:ts.nota};
+  if(idx>=0)data.log[idx]=entry;else data.log.push(entry);
+  data.log.sort((a,b)=>b.date.localeCompare(a.date));
+  if(data.log.length>365)data.log=data.log.slice(0,365);
+  setData(data);
+  const t=document.getElementById('toast');t.textContent='Check-in salvo!';setTimeout(()=>{t.textContent='';},2500);
+  document.getElementById('streak-val').textContent=calcStreak(data.log)+'d';
+  renderDashboard();renderHistorico();
+}
+
+function renderDashboard(){
+  const data=getData();const log=data.log;
+  const dates=getPeriodDates(period);
+  let td=0,tp=0;
+  dates.forEach(date=>{const entry=log.find(e=>e.date===date);HABITS.forEach(h=>{if(isExpected(h,date)){tp++;if(entry&&entry.habits[h.id])td++;}});});
+  const pct=tp>0?Math.round(td/tp*100):0;
+  const streak=calcStreak(log);const best=getBestStreak(log);
+  const totalDays=log.length;
+  const avgEnergy=()=>{const v=log.filter(e=>e.energy>0).map(e=>e.energy);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10:0;};
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat"><div class="stat-label">Conclusão geral</div><div class="stat-val">${pct}%</div><div class="stat-sub">${td} de ${tp} esperados</div></div>
+    <div class="stat"><div class="stat-label">Streak atual</div><div class="stat-val">${streak}d</div><div class="stat-sub">melhor: ${best}d</div></div>
+    <div class="stat"><div class="stat-label">Dias registrados</div><div class="stat-val">${totalDays}</div><div class="stat-sub">de 365 no plano</div></div>
+    <div class="stat"><div class="stat-label">Energia média</div><div class="stat-val">${avgEnergy()>0?['','Baixa','Ok','Alta'][Math.round(avgEnergy())]:'—'}</div><div class="stat-sub">${avgEnergy()>0?avgEnergy().toFixed(1)+'/3':'sem dados'}</div></div>
+  `;
+
+  // Heatmap
+  const hg=document.getElementById('heatmap');
+  const hDays=[];for(let i=83;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);hDays.push(d.toISOString().slice(0,10));}
+  const today=todayKey();
+  hg.innerHTML=hDays.map(date=>{
+    if(date>today)return`<div class="hm-cell hm-future" title="${date}"></div>`;
+    const entry=log.find(e=>e.date===date);
+    if(!entry)return`<div class="hm-cell hm-0" title="${date}"></div>`;
+    const done=HABITS.filter(h=>isExpected(h,date)&&entry.habits[h.id]).length;
+    const exp=HABITS.filter(h=>isExpected(h,date)).length;
+    const lvl=exp===0?0:Math.ceil(done/exp*4);
+    return`<div class="hm-cell hm-${lvl}" title="${date}: ${done}/${exp} hábitos"></div>`;
+  }).join('');
+
+  // Gráfico de barras — últimos 7 dias
+  const last7=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);last7.push(d.toISOString().slice(0,10));}
+  const bc=document.getElementById('bar-chart');
+  const maxH=HABITS.length;
+  bc.innerHTML=last7.map(date=>{
+    const entry=log.find(e=>e.date===date);
+    const exp=HABITS.filter(h=>isExpected(h,date)).length;
+    const done=entry?HABITS.filter(h=>isExpected(h,date)&&entry.habits[h.id]).length:0;
+    const pct2=exp>0?done/exp:0;
+    const color=pct2>=0.8?'var(--verde)':pct2>=0.5?'var(--ambar)':'var(--borda)';
+    const h=Math.max(done/maxH*72,2);
+    const dow=new Date(date+'T12:00:00').getDay();
+    return`<div class="bc-col">
+      <div class="bc-val">${entry?done:''}</div>
+      <div class="bc-bar" style="height:${h}px;background:${color}"></div>
+      <div class="bc-label">${DLABELS[dow]}</div>
+    </div>`;
+  }).join('');
+
+  // Por hábito
+  const ph=document.getElementById('dash-habits');
+  const showDots=period==='semana';
+  ph.innerHTML=HABITS.map(h=>{
+    let hd=0,hp=0;
+    dates.forEach(date=>{if(isExpected(h,date)){hp++;const entry=log.find(e=>e.date===date);if(entry&&entry.habits[h.id])hd++;}});
+    const p2=hp>0?Math.round(hd/hp*100):0;
+    const color=p2>=80?'var(--verde)':p2>=50?'var(--ambar)':'#E24B4A';
+    const dots=showDots?`<div class="week-dots">${dates.map(date=>{const dow=new Date(date+'T12:00:00').getDay();const entry=log.find(e=>e.date===date);const done=entry&&entry.habits[h.id];const isT=date===todayKey();const exp=isExpected(h,date);return`<div class="wd ${done?'done':''} ${isT&&!done?'today':''} ${!exp?'skip':''}">${DLABELS[dow]}</div>`;}).join('')}</div>`:''
+    return`<div class="card" style="padding:14px 16px;margin-bottom:8px"><div class="prog-header"><div class="prog-name">${h.icon} ${h.name}</div><div class="prog-pct">${hd}/${hp} · ${p2}%</div></div><div class="bar-bg"><div class="bar-fill" style="width:${p2}%;background:${color}"></div></div>${dots}</div>`;
+  }).join('');
+}
+
+function setPeriod(p,el){period=p;document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderDashboard();}
+
+function renderOKRs(){
+  const aq=getActiveQ(cfg.startDate);
+  const ql=['','Fundação','Aceleração','Escala','Colheita'];
+  const qc=['','q1b','q2b','q3b','q4b'];
+  document.getElementById('q-badge').innerHTML=`<div class="q-badge-active ${qc[aq]}" style="background:var(--${['','info','suc','warn','dan'][aq]}-bg);color:var(--${['','info','suc','warn','dan'][aq]}-txt);border:1px solid currentColor">Q${aq} — ${ql[aq]} · trimestre ativo</div>`;
+  document.getElementById('pillar-list').innerHTML=Object.values(OKRS_DATA).map(p=>`
+    <div class="pillar-card">
+      <div class="pillar-header" onclick="togglePillar(this)">
+        <div class="pillar-title">${p.icon} ${p.name}</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
+        ${p.quarters.map(qo=>{const qn=parseInt(qo.q);const isA=qn===aq||(qo.q.includes('–')&&aq>=3);return`<div class="okr-q ${isA?'aq':''}"><div class="okr-q-lbl">${qo.q}${isA?' ← você está aqui':''}</div><div class="okr-q-title"><span class="qbadge ${qc[qn]||'q3b'}">${qo.q}</span> ${qo.label}</div>${qo.krs.map(kr=>`<div class="kr">${kr}</div>`).join('')}</div>`;}).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function togglePillar(hdr){
+  const body=hdr.nextElementSibling;const chev=hdr.querySelector('.pillar-chev');
+  const open=body.classList.toggle('open');chev.style.transform=open?'rotate(90deg)':'';
+}
+
+function renderHistorico(){
+  const data=getData();const hl=document.getElementById('history-list');
+  if(!data.log.length){hl.innerHTML='<div class="empty">Nenhum registro ainda.<br>Faça seu primeiro check-in!</div>';return;}
+  hl.innerHTML=data.log.slice(0,30).map(e=>{
+    const done=HABITS.filter(h=>e.habits&&e.habits[h.id]);
+    const miss=HABITS.filter(h=>isExpected(h,e.date)&&!(e.habits&&e.habits[h.id]));
+    const eLabel=e.energy?ENERGY[e.energy]:'';const nota=e.nota?e.nota.slice(0,70)+(e.nota.length>70?'…':''):'';
+    return`<div class="hi-item"><div class="hi-date">${fmtDate(e.date)}</div><div class="hi-tags">${done.map(h=>`<span class="hi-tag done">${h.icon} ${h.name}</span>`).join('')}${miss.map(h=>`<span class="hi-tag miss">${h.icon} ${h.name}</span>`).join('')}</div>${eLabel||nota?`<div class="hi-meta">${eLabel?'Energia: '+eLabel:''}${eLabel&&nota?' · ':''}${nota}</div>`:''}</div>`;
+  }).join('');
+}
+
+function nav(id,el){
+  const pages=['checkin','dashboard','okrs','historico','manual'];
+  pages.forEach(p=>{const pg=document.getElementById('pg-'+p);if(pg)pg.style.display='none';});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  const target=document.getElementById('pg-'+id);
+  if(target){target.style.display='block';if(target.classList.contains('page')||id==='manual')target.style.display='block';}
+  if(el)el.classList.add('on');
+  if(id==='dashboard')renderDashboard();
+  if(id==='historico')renderHistorico();
+}
+
+init();
+</script>
+</body>
+</html>
