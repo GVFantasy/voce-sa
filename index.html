@@ -93,7 +93,17 @@ body.dark .stat{background:#1C1C1E}
 .ob-btn-back{padding:13px 18px;border-radius:12px;border:1px solid var(--borda);background:transparent;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--cinza)}
 .ob-btn-next{flex:1;padding:13px;border-radius:12px;border:none;background:var(--preto);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
 .ob-btn-next:disabled{opacity:.4;cursor:default}
-
+.ob-slider{overflow:hidden;position:relative;min-height:320px}
+.ob-step{position:absolute;width:100%;top:0;left:0;opacity:0;pointer-events:none;transform:translateX(60px);transition:opacity .3s ease,transform .3s ease}
+.ob-step.on{opacity:1;pointer-events:all;transform:translateX(0);position:relative}
+.ob-step.out-left{opacity:0;transform:translateX(-60px);transition:opacity .2s,transform .2s}
+.ob-option{transition:all .18s ease}
+.ob-option:hover{border-color:var(--roxo);background:var(--roxo-bg);color:var(--roxo);transform:translateY(-1px)}
+.ob-chip{transition:all .15s ease}
+.ob-chip:hover{border-color:var(--roxo);background:var(--roxo-bg);color:var(--roxo)}
+.ob-day-btn{transition:all .15s ease}
+.ob-day-btn:hover{border-color:var(--roxo);color:var(--roxo);background:var(--roxo-bg)}
+  
 /* CHECK-IN */
 .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
 .greeting{font-size:19px;font-weight:600}
@@ -312,18 +322,26 @@ body.dark .stat{background:#1C1C1E}
     <div class="ob-progress" id="ob-progress"></div>
 
     <div class="ob-step on" id="obs-1">
-      <div class="ob-question">Como você quer ser chamado?</div>
-      <div class="ob-hint">Esse nome vai aparecer no seu painel todo dia.</div>
-      <input class="ob-input" id="ob-name" type="text" placeholder="Seu nome">
-      <div class="ob-nav"><button class="ob-btn-next" onclick="obNext(1)">Continuar →</button></div>
-    </div>
+  <div style="text-align:center;padding:20px 0 8px">
+    <div style="font-size:44px;margin-bottom:12px">🚀</div>
+    <div class="ob-question" style="text-align:center">Bem-vindo ao Você S.A.</div>
+    <div class="ob-hint" style="text-align:center">Seu sistema de desenvolvimento pessoal de 12 meses. Vamos montar seu plano em menos de 2 minutos.</div>
+  </div>
+  <div class="ob-nav"><button class="ob-btn-next" onclick="obNext(1)">Começar →</button></div>
+</div>
 
     <div class="ob-step" id="obs-2">
-      <div class="ob-question">Como está sua vida hoje?</div>
-      <div class="ob-hint">Seja honesto. Isso calibra o ponto de partida do plano.</div>
-      <textarea class="ob-textarea" id="ob-situation" placeholder="Ex: Trabalho muito, não cuido da saúde, quero crescer no negócio..."></textarea>
-      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(2)">←</button><button class="ob-btn-next" onclick="obNext(2)">Continuar →</button></div>
-    </div>
+  <div class="ob-question">Como está sua vida hoje?</div>
+  <div class="ob-hint">Escolha o que mais se encaixa agora.</div>
+  <div class="ob-options" id="ob-situation-opts" style="grid-template-columns:1fr">
+    <button class="ob-option ob-option-full" data-val="sobrecarregado" onclick="obSingle('situation',this)"><span class="ob-option-icon">😓</span><div><div style="font-weight:600">Sobrecarregado</div><div style="font-size:11px;color:var(--cinza)">Só trabalho, sem tempo pra nada</div></div></button>
+    <button class="ob-option ob-option-full" data-val="desorganizado" onclick="obSingle('situation',this)"><span class="ob-option-icon">🌀</span><div><div style="font-weight:600">Desorganizado</div><div style="font-size:11px;color:var(--cinza)">Quero evoluir mas não sei por onde começar</div></div></button>
+    <button class="ob-option ob-option-full" data-val="estagnado" onclick="obSingle('situation',this)"><span class="ob-option-icon">📉</span><div><div style="font-weight:600">Estagnado</div><div style="font-size:11px;color:var(--cinza)">Sinto que não estou evoluindo</div></div></button>
+    <button class="ob-option ob-option-full" data-val="recomeçando" onclick="obSingle('situation',this)"><span class="ob-option-icon">🌱</span><div><div style="font-weight:600">Recomeçando</div><div style="font-size:11px;color:var(--cinza)">Tive uma pausa e quero retomar</div></div></button>
+    <button class="ob-option ob-option-full" data-val="acelerando" onclick="obSingle('situation',this)"><span class="ob-option-icon">⚡</span><div><div style="font-weight:600">Acelerando</div><div style="font-size:11px;color:var(--cinza)">Já tenho ritmo, quero ir mais longe</div></div></button>
+  </div>
+  <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(2)">←</button><button class="ob-btn-next" onclick="obNext(2)">Continuar →</button></div>
+</div>
 
     <div class="ob-step" id="obs-3">
       <div class="ob-question">Quais áreas da vida você quer desenvolver?</div>
@@ -447,11 +465,18 @@ body.dark .stat{background:#1C1C1E}
     </div>
 
     <div class="ob-step" id="obs-7">
-      <div class="ob-question">O que seria uma vitória real para você em 12 meses?</div>
-      <div class="ob-hint">Uma frase. Ambicioso mas honesto. Isso vira o headline do seu plano.</div>
-      <textarea class="ob-textarea" id="ob-meta" placeholder="Ex: Ter um corpo saudável, falar inglês no trabalho e dobrar o faturamento"></textarea>
-      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(7)">←</button><button class="ob-btn-next" onclick="obNext(7)">Criar meu plano →</button></div>
-    </div>
+  <div class="ob-question">Qual é sua maior prioridade em 12 meses?</div>
+  <div class="ob-hint">Selecione tudo que faz sentido para você.</div>
+  <div class="ob-options" id="ob-metas" style="grid-template-columns:1fr">
+    <button class="ob-option ob-option-full" data-val="corpo" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">💪</span><div><div style="font-weight:600">Ter um corpo saudável e com energia</div></div></button>
+    <button class="ob-option ob-option-full" data-val="idioma" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">🗣️</span><div><div style="font-weight:600">Falar um novo idioma com confiança</div></div></button>
+    <button class="ob-option ob-option-full" data-val="negocio" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">📈</span><div><div style="font-weight:600">Crescer meu negócio ou carreira</div></div></button>
+    <button class="ob-option ob-option-full" data-val="rotina" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">⏱</span><div><div style="font-weight:600">Ter uma rotina organizada e consistente</div></div></button>
+    <button class="ob-option ob-option-full" data-val="conhecimento" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">🧠</span><div><div style="font-weight:600">Aprender habilidades que me diferenciam</div></div></button>
+    <button class="ob-option ob-option-full" data-val="equilibrio" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">⚖️</span><div><div style="font-weight:600">Ter mais equilíbrio e qualidade de vida</div></div></button>
+  </div>
+  <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(7)">←</button><button class="ob-btn-next" onclick="obNext(7)">Criar meu plano →</button></div>
+</div>
 
     <div class="ob-step" id="obs-8">
       <div style="text-align:center;padding:48px 0">
