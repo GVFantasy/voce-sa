@@ -21,7 +21,33 @@ body.dark{--fundo:#111112;--card:#1C1C1E;--borda:#2C2C2E;--preto:#F5F5F0;--cinza
 body.dark .auth-input,body.dark .ob-input,body.dark .ob-textarea,body.dark .nota-area,body.dark .prof-input{background:#2C2C2E;border-color:#3A3A3C;color:#F5F5F0}
 body.dark .e-btn,body.dark .ob-option,body.dark .ob-chip,body.dark .hd-chip,body.dark .review-opt,body.dark .pomo-btn{background:#2C2C2E;border-color:#3A3A3C;color:#F5F5F0}
 body.dark .stat{background:#1C1C1E}
-
+.streak-boom{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.streak-boom.show{opacity:1;pointer-events:all}
+.streak-boom-inner{background:var(--roxo);color:#fff;border-radius:20px;padding:28px 40px;text-align:center;transform:scale(.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.streak-boom.show .streak-boom-inner{transform:scale(1)}
+.streak-boom-num{font-family:'DM Serif Display',serif;font-size:64px;line-height:1}
+.streak-boom-label{font-size:14px;opacity:.85;margin-top:6px}
+.streak-boom-close{font-size:11px;opacity:.6;margin-top:12px;cursor:pointer}
+.energy-chart-wrap{background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+.energy-chart-title{font-size:12px;font-weight:600;color:var(--cinza);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.energy-chart{display:flex;align-items:flex-end;gap:3px;height:52px}
+.ec-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.ec-bar{width:100%;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s}
+.ec-lbl{font-size:8px;color:var(--cinza);text-align:center}
+.bib-item{padding:12px 0;border-bottom:1px solid var(--borda)}
+.bib-item:last-child{border-bottom:none}
+.bib-tipo{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--cinza);margin-bottom:3px}
+.bib-titulo{font-size:14px;font-weight:500;margin-bottom:3px}
+.bib-nota{font-size:12px;color:var(--cinza);line-height:1.5}
+.bib-date{font-size:11px;color:#bbb;margin-top:4px}
+.plan-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--roxo-bg);color:var(--roxo);cursor:pointer;white-space:nowrap;border:none;font-family:inherit}
+.plan-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.plan-modal-inner{background:var(--card);border-radius:16px 16px 0 0;padding:20px 18px 36px;width:100%;max-width:480px}
+.plan-modal-title{font-size:16px;font-weight:600;margin-bottom:16px}
+.plan-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--borda);cursor:pointer}
+.plan-row:last-of-type{border-bottom:none}
+.plan-row-left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500}
+.plan-row.active .plan-row-left{color:var(--roxo)}
 .main-nav{display:flex;gap:2px;padding:8px 10px;background:var(--card);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:100;overflow-x:auto}
 .main-nav::-webkit-scrollbar{display:none}
 .nav-btn{flex-shrink:0;font-size:12px;font-family:inherit;padding:6px 12px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--cinza);cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
@@ -489,21 +515,37 @@ body.dark .stat{background:#1C1C1E}
 </div>
 
 <!-- APP -->
+  <div class="streak-boom" id="streak-boom" onclick="hideBoom()">
+  <div class="streak-boom-inner">
+    <div class="streak-boom-num" id="streak-boom-num">🔥 0</div>
+    <div class="streak-boom-label" id="streak-boom-label">dias seguidos!</div>
+    <div class="streak-boom-close">toque para fechar</div>
+  </div>
+</div>
+<div class="plan-modal" id="plan-modal" style="display:none" onclick="closePlanModal(event)">
+  <div class="plan-modal-inner" onclick="event.stopPropagation()">
+    <div class="plan-modal-title">Seus planos</div>
+    <div id="plan-list"></div>
+    <button onclick="addPlan()" style="width:100%;padding:12px;border-radius:10px;border:1px dashed var(--borda);background:transparent;font-size:14px;cursor:pointer;font-family:inherit;color:var(--cinza);margin-top:12px">+ Novo plano</button>
+    <button onclick="closePlanModal()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--preto);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px">Fechar</button>
+  </div>
+</div>
 <div id="app" style="display:none">
-  <nav class="main-nav">
+ <nav class="main-nav">
     <button class="nav-btn on" onclick="nav('checkin',this)">✓ Hoje</button>
     <button class="nav-btn" onclick="nav('dashboard',this)">📊</button>
     <button class="nav-btn" onclick="nav('okrs',this)">🎯</button>
     <button class="nav-btn" onclick="nav('historico',this)">📋</button>
     <button class="nav-btn" onclick="nav('conquistas',this)">🏆</button>
+    <button class="nav-btn" onclick="nav('biblioteca',this)">📚</button>
     <button class="nav-btn" onclick="nav('pomodoro',this)">⏱</button>
     <button class="nav-btn" onclick="nav('perfil',this)">⚙️</button>
     <button class="nav-btn" onclick="nav('manual',this)">📖</button>
   </nav>
   <div class="sync-bar">
     <div><span class="sync-dot" id="sync-dot"></span><span id="sync-txt">Conectando...</span></div>
-    <div style="font-size:11px;color:var(--cinza)" id="user-info"></div>
-  </div>
+<button class="plan-badge" id="plan-badge" onclick="openPlanModal()">⬡ Principal</button>
+<div style="font-size:11px;color:var(--cinza)" id="user-info"></div>  </div>
 
   <!-- CHECK-IN -->
   <div id="pg-checkin" class="page on">
@@ -565,8 +607,8 @@ body.dark .stat{background:#1C1C1E}
     </div>
     <div class="stat-grid" id="dash-stats"></div>
     <div class="heatmap-wrap"><div class="heatmap-title">Consistência — últimos 84 dias</div><div class="heatmap-grid" id="heatmap"></div></div>
-    <div class="chart-wrap"><div class="chart-title">Hábitos por dia — últimos 7 dias</div><div class="bar-chart" id="bar-chart"></div></div>
-    <div class="sec-label">Por hábito</div>
+<div class="chart-wrap"><div class="chart-title">Hábitos por dia — últimos 7 dias</div><div class="bar-chart" id="bar-chart"></div></div>
+<div class="energy-chart-wrap"><div class="energy-chart-title"><span>Energia — últimos 14 dias</span><span id="energy-best-day" style="font-size:11px;color:var(--verde);font-weight:600"></span></div><div class="energy-chart" id="energy-chart"></div></div>    <div class="sec-label">Por hábito</div>
     <div id="dash-habits"></div>
   </div>
 
@@ -635,6 +677,12 @@ body.dark .stat{background:#1C1C1E}
       <div class="prof-section-title">Idiomas ativos</div>
       <div id="idiom-toggles"></div>
     </div>
+  <div class="prof-section">
+  <div class="prof-section-title">Lembrete diário</div>
+  <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
+  <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" onclick="toggleReminder(this)"></div></div>
+  <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
+</div>
     <div class="prof-section">
       <div class="prof-section-title">Aparência</div>
       <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" onclick="toggleDark()"></div></div>
@@ -646,6 +694,36 @@ body.dark .stat{background:#1C1C1E}
     </div>
   </div>
 
+
+  <!-- BIBLIOTECA -->
+<div id="pg-biblioteca" class="page" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div style="font-family:'DM Serif Display',serif;font-size:22px">Biblioteca</div>
+    <button onclick="showAddLivro()" id="btn-add-livro" style="padding:7px 14px;border-radius:8px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--preto)">+ Adicionar</button>
+  </div>
+  <div id="add-livro-form" style="display:none;margin-bottom:12px">
+    <div class="card">
+      <div class="sec-label">Tipo</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="ob-chip on" data-val="livro" onclick="obSingle('livro-tipo',this)">📘 Livro</button>
+        <button class="ob-chip" data-val="curso" onclick="obSingle('livro-tipo',this)">🎓 Curso</button>
+        <button class="ob-chip" data-val="video" onclick="obSingle('livro-tipo',this)">▶️ Vídeo</button>
+        <button class="ob-chip" data-val="podcast" onclick="obSingle('livro-tipo',this)">🎙️ Podcast</button>
+        <button class="ob-chip" data-val="artigo" onclick="obSingle('livro-tipo',this)">📄 Artigo</button>
+      </div>
+      <div class="sec-label">Título</div>
+      <input id="livro-titulo" class="auth-input" type="text" placeholder="Nome do livro, curso ou recurso" style="margin-bottom:10px">
+      <div class="sec-label">O que você aprendeu? <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+      <textarea id="livro-nota" class="nota-area" placeholder="Resumo, insight principal, algo que vai aplicar..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="saveLivro()" class="save-btn" style="margin-top:0">Salvar</button>
+        <button onclick="document.getElementById('add-livro-form').style.display='none'" style="padding:12px 16px;border-radius:10px;border:1px solid var(--borda);background:transparent;font-size:14px;cursor:pointer;font-family:inherit;color:var(--cinza)">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="bib-stats" style="margin-bottom:10px"></div>
+  <div class="card" style="padding:0 18px"><div id="biblioteca-list"></div></div>
+</div>
   <!-- MANUAL -->
   <div id="pg-manual" class="page" style="display:none">
     <div style="margin-bottom:22px"><div style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--roxo);margin-bottom:3px">Você S.A.</div><div style="font-size:13px;color:var(--cinza)">Manual do sistema · 12 meses · 4 pilares</div></div>
