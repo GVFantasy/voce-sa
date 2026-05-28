@@ -1352,8 +1352,7 @@ renderEnergyChart();
     dates.forEach(date=>{const entry=log.find(e=>e.date===date);const exp=isExpected(h,date);if(exp){hp++;if(entry&&entry.habits[h.id])hd++;}else if(entry&&entry.habits[h.id])extras++;});
     const p2=hp>0?Math.round(hd/hp*100):0;
     const color=p2>=80?'var(--verde)':p2>=50?'var(--ambar)':'#E24B4A';
-    const dots=showDots?`<div class="week-dots">${dates.map(date=>{const dow=new Date(date+'T12:00:00').getDay();const entry=log.find(e=>e.date===date);const done=entry&&entry.habits[h.id];const isT=date===today;const exp=isExpected(h,date);return`<div class="wd ${done&&exp?'done':''} ${done&&!exp?'extra':''} ${isT&&!done?'today':''} ${!exp&&!done?'skip':''}">${DLABELS[dow]}</div>`;}).join('')}</div>`:''
-    return`<div class="card" style="padding:12px 14px;margin-bottom:8px">
+const dots=showDots?('<div class="week-dots">'+dates.map(date=>{const dow=new Date(date+'T12:00:00').getDay();const entry=log.find(e=>e.date===date);const done=entry&&entry.habits[h.id];const isT=date===today;const exp=isExpected(h,date);const cls=(done&&exp?'done ':[])+(done&&!exp?'extra ':[])+(isT&&!done?'today ':[])+((!exp&&!done)?'skip':'');return'<div class="wd '+cls+'">'+DLABELS[dow]+'</div>';}).join('')+'</div>'):'';    return`<div class="card" style="padding:12px 14px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div style="font-size:13px;font-weight:500">${h.icon} ${h.name}${extras>0?` <span style="font-size:10px;color:var(--ambar);font-weight:600">+${extras} extra</span>`:''}</div>
         <div style="font-size:11px;color:var(--cinza)">${hd}/${hp} · ${p2}%</div>
