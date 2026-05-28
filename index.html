@@ -993,8 +993,8 @@ function showObStep(n){
 }
 
 function obNext(step){
-  if(step===1){const name=document.getElementById('ob-name').value.trim();if(!name)return;obData.name=name;showObStep(2);}
-  else if(step===2){obData.situation=document.getElementById('ob-situation').value.trim();showObStep(3);}
+  if(step===1){obData.name=currentUser?.email?.split('@')[0]||'Usuário';showObStep(2);}
+  else if(step===2){obData.situation=obData.situation||'';showObStep(3);}
   else if(step===3){
     if(!obData.areas.length)return;
     if(obData.areas.includes('corpo'))showObStep(4);
@@ -1344,9 +1344,8 @@ function renderDashboard(){
     const dow=new Date(date+'T12:00:00').getDay();
     return`<div class="bc-col"><div class="bc-val">${entry?done:''}</div><div class="bc-bar" style="height:${Math.max(done/(userHabits.length||1)*68,2)}px;background:${color}"></div><div class="bc-label">${DLABELS[dow]}</div></div>`;
   }).join('');
-  renderEnergyChart();
+renderEnergyChart();
   // Por hábito
-  document.getElementById('dash-habits').innerHTML=userHabits.map(h=>{
   const showDots=period==='semana';
   document.getElementById('dash-habits').innerHTML=userHabits.map(h=>{
     let hd=0,hp=0,extras=0;
