@@ -1661,10 +1661,9 @@ function nav(id,el){
   if(id==='historico')renderHistorico();
   if(id==='conquistas')renderConquistas();
   if(id==='perfil'){renderPerfil();savePerfil();}
-if(id==='pomodoro'){renderPomodoroTime();renderPomodoroSessions();}
+  if(id==='pomodoro'){renderPomodoroTime();renderPomodoroSessions();}
   if(id==='biblioteca')renderBiblioteca();
 }
-
 // INIT
 async function init(){
   const{data:{session}}=await sb.auth.getSession();
