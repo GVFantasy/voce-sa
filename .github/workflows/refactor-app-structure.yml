@@ -1,0 +1,54 @@
+name: Refactor app structure
+
+on:
+  push:
+    branches:
+      - refactor/app-structure
+
+permissions:
+  contents: write
+
+jobs:
+  split-app-files:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refactor/app-structure
+      - name: Split CSS and JavaScript from index.html
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          index_path = Path('index.html')
+          html = index_path.read_text(encoding='utf-8')
+
+          style_match = re.search(r'<style>\n(?P<css>[\s\S]*?)\n</style>', html)
+          script_matches = list(re.finditer(r'<script>\n(?P<js>[\s\S]*?)\n</script>', html))
+
+          if not style_match:
+              raise SystemExit('CSS block not found')
+          if len(script_matches) != 1:
+              raise SystemExit(f'Expected 1 inline script block, found {len(script_matches)}')
+
+          css = style_match.group('css')
+          js = script_matches[0].group('js')
+
+          html = html[:style_match.start()] + '<link rel="stylesheet" href="css/styles.css">' + html[style_match.end():]
+          html = re.sub(r'<script>\n[\s\S]*?\n</script>\n</body>', '<script src="js/app.js"></script>\n</body>', html, count=1)
+
+          Path('css').mkdir(exist_ok=True)
+          Path('js').mkdir(exist_ok=True)
+          index_path.write_text(html, encoding='utf-8')
+          Path('css/styles.css').write_text(css + '\n', encoding='utf-8')
+          Path('js/app.js').write_text(js + '\n', encoding='utf-8')
+          Path('.github/workflows/refactor-app-structure.yml').unlink()
+      - name: Commit refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html css/styles.css js/app.js .github/workflows/refactor-app-structure.yml
+          git commit -m "refactor: split app structure"
+          git push origin refactor/app-structure
