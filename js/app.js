@@ -257,7 +257,7 @@ function obNext(step){
   }
   else if(step===5){showObStep(6);}
   else if(step===6){showObStep(7);}
-  else if(step===7){obData.meta=document.getElementById('ob-meta').value.trim();showObStep(8);generatePlan();}
+  else if(step===7){obData.meta=(obData.metas||[]).join(', ');showObStep(8);generatePlan();}
 }
 
 function obBack(step){
@@ -309,6 +309,8 @@ function obSingle(group,btn){
   if(group==='horario')obData.horario=btn.dataset.val;
   else if(group==='tempo-livre')obData.tempoLivre=btn.dataset.val;
   else if(group==='corpo-nivel')obData.corpoNivel=btn.dataset.val;
+  else if(group==='situation')obData.situation=btn.dataset.val;
+  else if(group==='livro-tipo')newLivroTipo=btn.dataset.val;
   else if(group==='pomo-sub')pomodoro.subject=btn.dataset.val;
 }
 
@@ -719,6 +721,7 @@ function savePerfil(){
   userCfg.sonoMeta=parseInt(document.getElementById('pref-sono').value)||7;
   userCfg.inglesMeta=parseInt(document.getElementById('pref-ingles').value)||20;
   saveCfgLocal();
+  saveCfgRemote();
 }
 
 function toggleDark(){document.body.classList.toggle('dark');const isDark=document.body.classList.contains('dark');localStorage.setItem('voce_sa_dark',isDark?'1':'0');document.getElementById('dark-toggle').classList.toggle('on',isDark);}
