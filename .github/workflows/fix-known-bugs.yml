@@ -1,13 +1,13 @@
 name: Fix known bugs
 
-on: [push]
+'on':
+  push:
 
 permissions:
   contents: write
 
 jobs:
   fix:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
