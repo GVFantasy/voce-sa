@@ -1,0 +1,121 @@
+name: Fix known bugs
+
+on:
+  push:
+    paths:
+      - .github/workflows/fix-known-bugs.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply targeted fixes
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+
+          app_path = Path('js/app.js')
+          app = app_path.read_text(encoding='utf-8')
+
+          old_meta = "else if(step===7){obData.meta=document.getElementById('ob-meta').value.trim();showObStep(8);generatePlan();}"
+          new_meta = "else if(step===7){obData.meta=(obData.metas||[]).join(', ');showObStep(8);generatePlan();}"
+          if old_meta not in app:
+              raise SystemExit('Missing onboarding meta bug pattern')
+          app = app.replace(old_meta, new_meta, 1)
+
+          old_single = """function obSingle(group,btn){
+  document.querySelectorAll('[data-group="'+group+'"]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if(group==='horario')obData.horario=btn.dataset.val;
+  else if(group==='tempo-livre')obData.tempoLivre=btn.dataset.val;
+  else if(group==='corpo-nivel')obData.corpoNivel=btn.dataset.val;
+  else if(group==='pomo-sub')pomoSubject=btn.dataset.val;
+}
+"""
+          new_single = """function obSingle(group,btn){
+  document.querySelectorAll('[data-group="'+group+'"]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if(group==='horario')obData.horario=btn.dataset.val;
+  else if(group==='tempo-livre')obData.tempoLivre=btn.dataset.val;
+  else if(group==='corpo-nivel')obData.corpoNivel=btn.dataset.val;
+  else if(group==='situation')obData.situation=btn.dataset.val;
+  else if(group==='livro-tipo')newLivroTipo=btn.dataset.val;
+  else if(group==='pomo-sub')pomoSubject=btn.dataset.val;
+}
+"""
+          if old_single not in app:
+              raise SystemExit('Missing obSingle pattern')
+          app = app.replace(old_single, new_single, 1)
+
+          old_perfil = """function savePerfil(){
+  userCfg.sonoMeta=parseInt(document.getElementById('pref-sono').value)||7;
+  userCfg.inglesMeta=parseInt(document.getElementById('pref-ingles').value)||20;
+  saveCfgLocal();
+}
+"""
+          new_perfil = """function savePerfil(){
+  userCfg.sonoMeta=parseInt(document.getElementById('pref-sono').value)||7;
+  userCfg.inglesMeta=parseInt(document.getElementById('pref-ingles').value)||20;
+  saveCfgLocal();
+  saveCfgRemote();
+}
+"""
+          if old_perfil not in app:
+              raise SystemExit('Missing savePerfil pattern')
+          app = app.replace(old_perfil, new_perfil, 1)
+          app_path.write_text(app, encoding='utf-8')
+
+          sw_path = Path('service-worker.js')
+          sw = sw_path.read_text(encoding='utf-8')
+          marker = 'self.addEventListener("fetch", event => {'
+          if marker not in sw:
+              raise SystemExit('Missing service worker fetch listener')
+          safer_fetch = '''self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
+
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  if (!isSameOrigin) return;
+
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+
+      return fetch(event.request).then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
+        return response;
+      });
+    })
+  );
+});
+'''
+          sw = sw[:sw.index(marker)] + safer_fetch
+          sw_path.write_text(sw, encoding='utf-8')
+
+          Path('.github/workflows/fix-known-bugs.yml').unlink()
+          PY
+      - name: Commit fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/app.js service-worker.js .github/workflows/fix-known-bugs.yml
+          git commit -m "fix: address onboarding and PWA cache issues"
+          git push origin main
