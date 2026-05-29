@@ -1,9 +1,6 @@
 name: Fix known bugs
 
-on:
-  push:
-    paths:
-      - .github/workflows/fix-known-bugs.yml
+on: [push]
 
 permissions:
   contents: write
@@ -14,9 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply targeted fixes
+        shell: bash
         run: |
           python3 <<'PY'
           from pathlib import Path
@@ -26,31 +22,33 @@ jobs:
 
           old_meta = "else if(step===7){obData.meta=document.getElementById('ob-meta').value.trim();showObStep(8);generatePlan();}"
           new_meta = "else if(step===7){obData.meta=(obData.metas||[]).join(', ');showObStep(8);generatePlan();}"
-          if old_meta not in app:
-              raise SystemExit('Missing onboarding meta bug pattern')
+          if old_meta not in app and new_meta not in app:
+              raise SystemExit('Missing onboarding meta pattern')
           app = app.replace(old_meta, new_meta, 1)
 
           old_single = """function obSingle(group,btn){
-  document.querySelectorAll('[data-group="'+group+'"]').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
+  const parent=btn.closest('.ob-options,.ob-chips');
+  if(parent)parent.querySelectorAll('.ob-option,.ob-chip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
   if(group==='horario')obData.horario=btn.dataset.val;
   else if(group==='tempo-livre')obData.tempoLivre=btn.dataset.val;
   else if(group==='corpo-nivel')obData.corpoNivel=btn.dataset.val;
-  else if(group==='pomo-sub')pomoSubject=btn.dataset.val;
+  else if(group==='pomo-sub')pomodoro.subject=btn.dataset.val;
 }
 """
           new_single = """function obSingle(group,btn){
-  document.querySelectorAll('[data-group="'+group+'"]').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
+  const parent=btn.closest('.ob-options,.ob-chips');
+  if(parent)parent.querySelectorAll('.ob-option,.ob-chip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
   if(group==='horario')obData.horario=btn.dataset.val;
   else if(group==='tempo-livre')obData.tempoLivre=btn.dataset.val;
   else if(group==='corpo-nivel')obData.corpoNivel=btn.dataset.val;
   else if(group==='situation')obData.situation=btn.dataset.val;
   else if(group==='livro-tipo')newLivroTipo=btn.dataset.val;
-  else if(group==='pomo-sub')pomoSubject=btn.dataset.val;
+  else if(group==='pomo-sub')pomodoro.subject=btn.dataset.val;
 }
 """
-          if old_single not in app:
+          if old_single not in app and new_single not in app:
               raise SystemExit('Missing obSingle pattern')
           app = app.replace(old_single, new_single, 1)
 
@@ -67,7 +65,7 @@ jobs:
   saveCfgRemote();
 }
 """
-          if old_perfil not in app:
+          if old_perfil not in app and new_perfil not in app:
               raise SystemExit('Missing savePerfil pattern')
           app = app.replace(old_perfil, new_perfil, 1)
           app_path.write_text(app, encoding='utf-8')
@@ -113,9 +111,10 @@ jobs:
           Path('.github/workflows/fix-known-bugs.yml').unlink()
           PY
       - name: Commit fixes
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add js/app.js service-worker.js .github/workflows/fix-known-bugs.yml
           git commit -m "fix: address onboarding and PWA cache issues"
-          git push origin main
+          git push
