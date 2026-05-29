@@ -2,12 +2,16 @@
   "name": "Voc\u00ea S.A.",
   "short_name": "Voc\u00ea S.A.",
   "description": "Seu sistema de desenvolvimento pessoal.",
+  "id": "./",
+  "lang": "pt-BR",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["fullscreen", "standalone"],
   "orientation": "portrait",
   "background_color": "#FAFAF8",
   "theme_color": "#534AB7",
+  "categories": ["productivity", "lifestyle"],
   "icons": [
     {
       "src": "icons/icon-192.png",
