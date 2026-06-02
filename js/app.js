@@ -484,7 +484,7 @@ function setHabitDetail(habitId,key,val){
   const groups=detail.querySelectorAll('.hd-chips');
   groups.forEach((group,gi)=>{
     const gKey=gi===0?'time':'method';
-    group.querySelectorAll('.hd-chip').forEach(chip=>{chip.classList.toggle('on',chip.textContent===val&&gKey===key);});
+    if(gKey===key){group.querySelectorAll('.hd-chip').forEach(chip=>{chip.classList.toggle('on',chip.textContent===val);});}
   });
 }
 
@@ -494,29 +494,34 @@ function setEnergy(val){
 }
 
 async function saveDay(){
+  if(!currentUser){showToast('Sessão expirada. Faça login novamente.','err');return;}
   const na=document.getElementById('nota-area');ts.nota=na?na.value:'';
   const btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Salvando...';
-  // Atualiza estado local imediatamente (offline-first)
   const entry={date:todayKey(),habits:{...ts.habits},energy:ts.energy,nota:ts.nota,idiomDetails:{...ts.idiomDetails}};
   const idx=log.findIndex(e=>e.date===todayKey());
   if(idx>=0)log[idx]=entry;else log.unshift(entry);
   const prevStreak=calcStreak(log.filter(e=>e.date!==todayKey()));
   const newStreak=calcStreak(log);
   document.getElementById('streak-val').textContent=newStreak+'d';
-  // Sincroniza com Supabase
   setSyncStatus('syncing','Salvando...');
-  const{error}=await sb.from('checkins').upsert({
-    user_id:currentUser.id,date:todayKey(),
-    habits:ts.habits,energy:ts.energy,nota:ts.nota,idiomDetails:ts.idiomDetails
-  },{onConflict:'user_id,date'});
-  btn.disabled=false;btn.textContent='Salvar check-in';
-  if(error){
+  try{
+    const{error}=await sb.from('checkins').upsert({
+      user_id:currentUser.id,date:todayKey(),
+      habits:ts.habits,energy:ts.energy,nota:ts.nota,idiomDetails:ts.idiomDetails
+    },{onConflict:'user_id,date'});
+    btn.disabled=false;btn.textContent='Salvar check-in';
+    if(error){
+      setSyncStatus('err','Erro ao salvar');
+      showToast('Erro ao salvar: '+error.message,'err');
+    } else {
+      setSyncStatus('ok','Sincronizado');
+      const t=document.getElementById('toast');if(t)t.textContent='';
+      showToast('Check-in salvo com sucesso!');
+    }
+  }catch(e){
+    btn.disabled=false;btn.textContent='Salvar check-in';
     setSyncStatus('err','Sem conexão');
     showToast('Check-in salvo localmente. Sem conexão com o servidor.','info');
-  } else {
-    setSyncStatus('ok','Sincronizado');
-    const t=document.getElementById('toast');t.textContent='✓ Check-in salvo!';setTimeout(()=>{t.textContent='';},2000);
-    showToast('Check-in salvo com sucesso!');
   }
   if(newStreak>0&&newStreak>=prevStreak)showBoom(newStreak);
   renderDashboard();renderHistorico();renderConquistas();
