@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Você S.A.</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#534AB7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Voc&ecirc; S.A.">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="pg-auth">
+  <div class="auth-wrap">
+    <div class="auth-logo">Você S.A.</div>
+    <div class="auth-sub">Seu sistema de desenvolvimento pessoal.<br>Sincroniza em qualquer dispositivo.</div>
+    <div id="auth-err" class="auth-err"></div>
+    <label class="auth-label">Email</label>
+    <input class="auth-input" id="auth-email" type="email" placeholder="seu@email.com" oninput="clearFieldErr('auth-email-err')">
+    <div class="field-err" id="auth-email-err"></div>
+    <label class="auth-label">Senha</label>
+    <input class="auth-input" id="auth-pass" type="password" placeholder="Mínimo 6 caracteres" oninput="clearFieldErr('auth-pass-err')">
+    <div class="field-err" id="auth-pass-err"></div>
+    <button class="btn-primary" id="auth-btn" onclick="submitAuth()" style="margin-bottom:10px">Entrar</button>
+    <div class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Não tem conta? <span>Criar conta grátis</span></div>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="pg-onboard" style="display:none">
+  <div class="ob-wrap">
+    <div class="ob-progress" id="ob-progress"></div>
+
+    <div class="ob-step on" id="obs-1">
+  <div style="text-align:center;padding:20px 0 8px">
+    <div style="font-size:44px;margin-bottom:12px">🚀</div>
+    <div class="ob-question" style="text-align:center">Bem-vindo ao Você S.A.</div>
+    <div class="ob-hint" style="text-align:center">Seu sistema de desenvolvimento pessoal de 12 meses. Vamos montar seu plano em menos de 2 minutos.</div>
+  </div>
+  <div class="ob-nav"><button class="ob-btn-next" onclick="obNext(1)">Começar →</button></div>
+</div>
+
+    <div class="ob-step" id="obs-2">
+  <div class="ob-question">Como está sua vida hoje?</div>
+  <div class="ob-hint">Escolha o que mais se encaixa agora.</div>
+  <div class="ob-options" id="ob-situation-opts" style="grid-template-columns:1fr">
+    <button class="ob-option ob-option-full" data-val="sobrecarregado" onclick="obSingle('situation',this)"><span class="ob-option-icon">😓</span><div><div style="font-weight:600">Sobrecarregado</div><div style="font-size:11px;color:var(--cinza)">Só trabalho, sem tempo pra nada</div></div></button>
+    <button class="ob-option ob-option-full" data-val="desorganizado" onclick="obSingle('situation',this)"><span class="ob-option-icon">🌀</span><div><div style="font-weight:600">Desorganizado</div><div style="font-size:11px;color:var(--cinza)">Quero evoluir mas não sei por onde começar</div></div></button>
+    <button class="ob-option ob-option-full" data-val="estagnado" onclick="obSingle('situation',this)"><span class="ob-option-icon">📉</span><div><div style="font-weight:600">Estagnado</div><div style="font-size:11px;color:var(--cinza)">Sinto que não estou evoluindo</div></div></button>
+    <button class="ob-option ob-option-full" data-val="recomeçando" onclick="obSingle('situation',this)"><span class="ob-option-icon">🌱</span><div><div style="font-weight:600">Recomeçando</div><div style="font-size:11px;color:var(--cinza)">Tive uma pausa e quero retomar</div></div></button>
+    <button class="ob-option ob-option-full" data-val="acelerando" onclick="obSingle('situation',this)"><span class="ob-option-icon">⚡</span><div><div style="font-weight:600">Acelerando</div><div style="font-size:11px;color:var(--cinza)">Já tenho ritmo, quero ir mais longe</div></div></button>
+  </div>
+  <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(2)">←</button><button class="ob-btn-next" onclick="obNext(2)">Continuar →</button></div>
+</div>
+
+    <div class="ob-step" id="obs-3">
+      <div class="ob-question">Quais áreas da vida você quer desenvolver?</div>
+      <div class="ob-hint">Selecione quantas quiser. Essas serão os pilares do seu plano.</div>
+      <div class="ob-options" id="ob-areas">
+        <button class="ob-option" data-val="corpo" onclick="obToggleArea(this)"><span class="ob-option-icon">🏃</span><div><div style="font-weight:600">Corpo</div><div style="font-size:11px;color:var(--cinza)">Saúde, energia, exercício</div></div></button>
+        <button class="ob-option" data-val="mente" onclick="obToggleArea(this)"><span class="ob-option-icon">🧠</span><div><div style="font-weight:600">Mente</div><div style="font-size:11px;color:var(--cinza)">Estudo, idiomas, leitura</div></div></button>
+        <button class="ob-option" data-val="negocio" onclick="obToggleArea(this)"><span class="ob-option-icon">💼</span><div><div style="font-weight:600">Negócio</div><div style="font-size:11px;color:var(--cinza)">Empreendedorismo, carreira</div></div></button>
+        <button class="ob-option" data-val="financas" onclick="obToggleArea(this)"><span class="ob-option-icon">💰</span><div><div style="font-weight:600">Finanças</div><div style="font-size:11px;color:var(--cinza)">Investimentos, controle</div></div></button>
+        <button class="ob-option" data-val="tempo" onclick="obToggleArea(this)"><span class="ob-option-icon">⏱</span><div><div style="font-weight:600">Tempo</div><div style="font-size:11px;color:var(--cinza)">Rotina, produtividade</div></div></button>
+        <button class="ob-option" data-val="relacoes" onclick="obToggleArea(this)"><span class="ob-option-icon">❤️</span><div><div style="font-weight:600">Relações</div><div style="font-size:11px;color:var(--cinza)">Família, social, amor</div></div></button>
+      </div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(3)">←</button><button class="ob-btn-next" id="ob-next-3" onclick="obNext(3)" disabled>Continuar →</button></div>
+    </div>
+
+    <div class="ob-step" id="obs-4">
+      <div class="ob-question">Qual é sua situação física hoje?</div>
+      <div class="ob-hint">Sem julgamento — só para calibrar o ritmo do plano.</div>
+      <div class="ob-options" id="ob-corpo-level">
+        <button class="ob-option ob-option-full" data-val="zero" onclick="obSingle('corpo-nivel',this)"><span class="ob-option-icon">😴</span><div><div style="font-weight:600">Sedentário</div><div style="font-size:11px;color:var(--cinza)">Não pratico exercício há muito tempo</div></div></button>
+        <button class="ob-option ob-option-full" data-val="irregular" onclick="obSingle('corpo-nivel',this)"><span class="ob-option-icon">🚶</span><div><div style="font-weight:600">Irregular</div><div style="font-size:11px;color:var(--cinza)">Treino às vezes, sem consistência</div></div></button>
+        <button class="ob-option ob-option-full" data-val="ativo" onclick="obSingle('corpo-nivel',this)"><span class="ob-option-icon">💪</span><div><div style="font-weight:600">Ativo mas sobrecarregado</div><div style="font-size:11px;color:var(--cinza)">Treino mas preciso de mais equilíbrio</div></div></button>
+      </div>
+      <div class="ob-hint" style="margin-top:10px">Qual exercício você prefere?</div>
+      <div class="ob-chips" id="ob-exercicios">
+        <button class="ob-chip" data-val="academia" onclick="obToggleChip('exercicio',this)">Academia 🏋️</button>
+        <button class="ob-chip" data-val="corrida" onclick="obToggleChip('exercicio',this)">Corrida 🏃</button>
+        <button class="ob-chip" data-val="ciclismo" onclick="obToggleChip('exercicio',this)">Ciclismo 🚴</button>
+        <button class="ob-chip" data-val="luta" onclick="obToggleChip('exercicio',this)">Luta / Artes marciais 🥊</button>
+        <button class="ob-chip" data-val="natacao" onclick="obToggleChip('exercicio',this)">Natação 🏊</button>
+        <button class="ob-chip" data-val="caminhada" onclick="obToggleChip('exercicio',this)">Caminhada 🚶</button>
+        <button class="ob-chip" data-val="yoga" onclick="obToggleChip('exercicio',this)">Yoga / Pilates 🧘</button>
+        <button class="ob-chip" data-val="futebol" onclick="obToggleChip('exercicio',this)">Futebol / Esportes ⚽</button>
+      </div>
+      <div class="ob-hint" style="margin-top:10px;margin-bottom:8px;font-weight:500;color:var(--preto)">Quais dias você quer treinar?</div>
+      <div class="ob-days-grid" id="ob-treino-dias">
+        <button class="ob-day-btn" data-val="0" onclick="obToggleDay('treino',this)">Dom</button>
+        <button class="ob-day-btn" data-val="1" onclick="obToggleDay('treino',this)">Seg</button>
+        <button class="ob-day-btn" data-val="2" onclick="obToggleDay('treino',this)">Ter</button>
+        <button class="ob-day-btn" data-val="3" onclick="obToggleDay('treino',this)">Qua</button>
+        <button class="ob-day-btn" data-val="4" onclick="obToggleDay('treino',this)">Qui</button>
+        <button class="ob-day-btn" data-val="5" onclick="obToggleDay('treino',this)">Sex</button>
+        <button class="ob-day-btn" data-val="6" onclick="obToggleDay('treino',this)">Sáb</button>
+      </div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(4)">←</button><button class="ob-btn-next" onclick="obNext(4)">Continuar →</button></div>
+    </div>
+
+    <div class="ob-step" id="obs-5">
+      <div class="ob-question">O que você quer aprender?</div>
+      <div class="ob-hint">Selecione idiomas e áreas de estudo.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px">Idiomas</div>
+      <div class="ob-chips" id="ob-idiomas">
+        <button class="ob-chip" data-val="ingles" onclick="obToggleChip('idioma',this)">Inglês 🇬🇧</button>
+        <button class="ob-chip" data-val="espanhol" onclick="obToggleChip('idioma',this)">Espanhol 🇪🇸</button>
+        <button class="ob-chip" data-val="alemao" onclick="obToggleChip('idioma',this)">Alemão 🇩🇪</button>
+        <button class="ob-chip" data-val="japones" onclick="obToggleChip('idioma',this)">Japonês 🇯🇵</button>
+        <button class="ob-chip" data-val="frances" onclick="obToggleChip('idioma',this)">Francês 🇫🇷</button>
+        <button class="ob-chip" data-val="italiano" onclick="obToggleChip('idioma',this)">Italiano 🇮🇹</button>
+        <button class="ob-chip" data-val="mandarin" onclick="obToggleChip('idioma',this)">Mandarim 🇨🇳</button>
+        <button class="ob-chip" data-val="coreano" onclick="obToggleChip('idioma',this)">Coreano 🇰🇷</button>
+        <button class="ob-chip" data-val="russo" onclick="obToggleChip('idioma',this)">Russo 🇷🇺</button>
+        <button class="ob-chip" data-val="arabe" onclick="obToggleChip('idioma',this)">Árabe 🇸🇦</button>
+        <button class="ob-chip" data-val="libras" onclick="obToggleChip('idioma',this)">Libras 🤟</button>
+      </div>
+      <div id="ob-idioma-dias-wrap" style="display:none">
+        <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px;margin-top:12px">Quais dias você vai estudar idiomas?</div>
+        <div class="ob-days-grid" id="ob-idioma-dias">
+          <button class="ob-day-btn" data-val="0" onclick="obToggleDay('idioma',this)">Dom</button>
+          <button class="ob-day-btn" data-val="1" onclick="obToggleDay('idioma',this)">Seg</button>
+          <button class="ob-day-btn" data-val="2" onclick="obToggleDay('idioma',this)">Ter</button>
+          <button class="ob-day-btn" data-val="3" onclick="obToggleDay('idioma',this)">Qua</button>
+          <button class="ob-day-btn" data-val="4" onclick="obToggleDay('idioma',this)">Qui</button>
+          <button class="ob-day-btn" data-val="5" onclick="obToggleDay('idioma',this)">Sex</button>
+          <button class="ob-day-btn" data-val="6" onclick="obToggleDay('idioma',this)">Sáb</button>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px;margin-top:12px">Outras áreas de estudo</div>
+      <div class="ob-chips">
+        <button class="ob-chip" data-val="negocios" onclick="obToggleChip('aprender',this)">Negócios</button>
+        <button class="ob-chip" data-val="tecnologia" onclick="obToggleChip('aprender',this)">Tecnologia</button>
+        <button class="ob-chip" data-val="marketing" onclick="obToggleChip('aprender',this)">Marketing</button>
+        <button class="ob-chip" data-val="financas" onclick="obToggleChip('aprender',this)">Finanças</button>
+        <button class="ob-chip" data-val="lideranca" onclick="obToggleChip('aprender',this)">Liderança</button>
+        <button class="ob-chip" data-val="vendas" onclick="obToggleChip('aprender',this)">Vendas</button>
+        <button class="ob-chip" data-val="design" onclick="obToggleChip('aprender',this)">Design</button>
+        <button class="ob-chip" data-val="outro" onclick="obToggleChip('aprender',this)">Outro</button>
+      </div>
+      <div id="ob-estudo-dias-wrap">
+        <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px;margin-top:12px">Quais dias você vai estudar?</div>
+        <div class="ob-days-grid" id="ob-estudo-dias">
+          <button class="ob-day-btn" data-val="0" onclick="obToggleDay('estudo',this)">Dom</button>
+          <button class="ob-day-btn" data-val="1" onclick="obToggleDay('estudo',this)">Seg</button>
+          <button class="ob-day-btn" data-val="2" onclick="obToggleDay('estudo',this)">Ter</button>
+          <button class="ob-day-btn" data-val="3" onclick="obToggleDay('estudo',this)">Qua</button>
+          <button class="ob-day-btn" data-val="4" onclick="obToggleDay('estudo',this)">Qui</button>
+          <button class="ob-day-btn" data-val="5" onclick="obToggleDay('estudo',this)">Sex</button>
+          <button class="ob-day-btn" data-val="6" onclick="obToggleDay('estudo',this)">Sáb</button>
+        </div>
+      </div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(5)">←</button><button class="ob-btn-next" onclick="obNext(5)">Continuar →</button></div>
+    </div>
+
+    <div class="ob-step" id="obs-6">
+      <div class="ob-question">Como é seu dia hoje?</div>
+      <div class="ob-hint">Isso define onde encaixar os hábitos sem quebrar sua rotina.</div>
+      <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px">Horário de trabalho</div>
+      <div class="ob-options" style="margin-bottom:14px">
+        <button class="ob-option" data-val="manha" onclick="obSingle('horario',this)"><span class="ob-option-icon">🌅</span><div><div style="font-weight:600">Manhã</div><div style="font-size:11px;color:var(--cinza)">6h–14h</div></div></button>
+        <button class="ob-option" data-val="comercial" onclick="obSingle('horario',this)"><span class="ob-option-icon">🏢</span><div><div style="font-weight:600">Comercial</div><div style="font-size:11px;color:var(--cinza)">8h–18h</div></div></button>
+        <button class="ob-option" data-val="tarde" onclick="obSingle('horario',this)"><span class="ob-option-icon">🌆</span><div><div style="font-weight:600">Tarde/Noite</div><div style="font-size:11px;color:var(--cinza)">14h–22h</div></div></button>
+        <button class="ob-option" data-val="flex" onclick="obSingle('horario',this)"><span class="ob-option-icon">🔄</span><div><div style="font-weight:600">Flexível</div><div style="font-size:11px;color:var(--cinza)">Varia</div></div></button>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px">Tempo livre por dia</div>
+      <div class="ob-chips">
+        <button class="ob-chip" data-val="30min" onclick="obSingle('tempo-livre',this)">Menos de 1h</button>
+        <button class="ob-chip" data-val="1h" onclick="obSingle('tempo-livre',this)">1–2h</button>
+        <button class="ob-chip" data-val="2h" onclick="obSingle('tempo-livre',this)">2–4h</button>
+        <button class="ob-chip" data-val="4h" onclick="obSingle('tempo-livre',this)">4h+</button>
+      </div>
+      <div class="ob-nav" style="margin-top:14px"><button class="ob-btn-back" onclick="obBack(6)">←</button><button class="ob-btn-next" onclick="obNext(6)">Continuar →</button></div>
+    </div>
+
+    <div class="ob-step" id="obs-7">
+  <div class="ob-question">Qual é sua maior prioridade em 12 meses?</div>
+  <div class="ob-hint">Selecione tudo que faz sentido para você.</div>
+  <div class="ob-options" id="ob-metas" style="grid-template-columns:1fr">
+    <button class="ob-option ob-option-full" data-val="corpo" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">💪</span><div><div style="font-weight:600">Ter um corpo saudável e com energia</div></div></button>
+    <button class="ob-option ob-option-full" data-val="idioma" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">🗣️</span><div><div style="font-weight:600">Falar um novo idioma com confiança</div></div></button>
+    <button class="ob-option ob-option-full" data-val="negocio" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">📈</span><div><div style="font-weight:600">Crescer meu negócio ou carreira</div></div></button>
+    <button class="ob-option ob-option-full" data-val="rotina" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">⏱</span><div><div style="font-weight:600">Ter uma rotina organizada e consistente</div></div></button>
+    <button class="ob-option ob-option-full" data-val="conhecimento" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">🧠</span><div><div style="font-weight:600">Aprender habilidades que me diferenciam</div></div></button>
+    <button class="ob-option ob-option-full" data-val="equilibrio" onclick="obToggleOpt('meta',this)"><span class="ob-option-icon">⚖️</span><div><div style="font-weight:600">Ter mais equilíbrio e qualidade de vida</div></div></button>
+  </div>
+  <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(7)">←</button><button class="ob-btn-next" onclick="obNext(7)">Criar meu plano →</button></div>
+</div>
+
+    <div class="ob-step" id="obs-8">
+      <div style="text-align:center;padding:48px 0">
+        <div style="font-size:44px;margin-bottom:18px">⚙️</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px">Montando seu plano...</div>
+        <div style="font-size:13px;color:var(--cinza)" id="ob-generating"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+  <div class="streak-boom" id="streak-boom" onclick="hideBoom()">
+  <div class="streak-boom-inner">
+    <div class="streak-boom-num" id="streak-boom-num">🔥 0</div>
+    <div class="streak-boom-label" id="streak-boom-label">dias seguidos!</div>
+    <div class="streak-boom-close">toque para fechar</div>
+  </div>
+</div>
+<div class="plan-modal" id="plan-modal" style="display:none" onclick="closePlanModal(event)">
+  <div class="plan-modal-inner" onclick="event.stopPropagation()">
+    <div class="plan-modal-title">Seus planos</div>
+    <div id="plan-list"></div>
+    <button onclick="addPlan()" style="width:100%;padding:12px;border-radius:10px;border:1px dashed var(--borda);background:transparent;font-size:14px;cursor:pointer;font-family:inherit;color:var(--cinza);margin-top:12px">+ Novo plano</button>
+    <button onclick="closePlanModal()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--preto);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px">Fechar</button>
+  </div>
+</div>
+<div id="app" style="display:none">
+ <nav class="main-nav">
+    <button class="nav-btn on" onclick="nav('checkin',this)">✓ Hoje</button>
+    <button class="nav-btn" onclick="nav('dashboard',this)">📊</button>
+    <button class="nav-btn" onclick="nav('okrs',this)">🎯</button>
+    <button class="nav-btn" onclick="nav('historico',this)">📋</button>
+    <button class="nav-btn" onclick="nav('conquistas',this)">🏆</button>
+    <button class="nav-btn" onclick="nav('biblioteca',this)">📚</button>
+    <button class="nav-btn" onclick="nav('pomodoro',this)">⏱</button>
+    <button class="nav-btn" onclick="nav('perfil',this)">⚙️</button>
+    <button class="nav-btn" onclick="nav('manual',this)">📖</button>
+  </nav>
+  <div class="sync-bar">
+    <div><span class="sync-dot" id="sync-dot"></span><span id="sync-txt">Conectando...</span></div>
+<button class="plan-badge" id="plan-badge" onclick="openPlanModal()">⬡ Principal</button>
+<div style="font-size:11px;color:var(--cinza)" id="user-info"></div>  </div>
+
+  <!-- CHECK-IN -->
+  <div id="pg-checkin" class="page on">
+    <div class="topbar">
+      <div><div class="greeting" id="greeting"></div><div class="sub-date" id="sub-date"></div></div>
+      <div class="streak-pill" onclick="nav('conquistas',null)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span id="streak-val">0d</span>
+      </div>
+    </div>
+    <div id="weekly-review-banner" style="display:none">
+      <div class="review-card">
+        <div class="review-title">Revisão da semana 📋</div>
+        <div class="review-sub">Como foi? Vamos ajustar o que precisar.</div>
+        <div id="review-stats"></div>
+        <div id="review-impact" class="impact-box" style="display:none"></div>
+        <div class="review-q">Como foi a semana no geral?</div>
+        <div class="review-options" id="review-feel">
+          <button class="review-opt" onclick="setReviewFeel('facil',this)">😊 Fácil</button>
+          <button class="review-opt" onclick="setReviewFeel('ok',this)">😐 Ok</button>
+          <button class="review-opt" onclick="setReviewFeel('pesada',this)">😰 Pesada</button>
+        </div>
+        <div class="review-q" style="margin-top:10px">Quer ajustar algo na próxima semana?</div>
+        <div class="review-options" id="review-adjust">
+          <button class="review-opt" onclick="toggleReviewAdjust('treinos',this)">Treinos</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('estudo',this)">Estudo</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('sono',this)">Sono</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('nada',this)">Tudo certo ✓</button>
+        </div>
+        <button class="btn-primary" style="margin-top:12px" onclick="saveWeeklyReview()">Salvar revisão</button>
+      </div>
+    </div>
+    <div class="sec-label">Hábitos de hoje</div>
+    <div id="habit-list"></div>
+    <div class="sec-label">Energia</div>
+    <div class="energy-btns">
+      <button class="e-btn" id="e1" onclick="setEnergy(1)">😴 Baixa</button>
+      <button class="e-btn" id="e2" onclick="setEnergy(2)">😐 Ok</button>
+      <button class="e-btn" id="e3" onclick="setEnergy(3)">⚡ Alta</button>
+    </div>
+    <div class="sec-label">Nota <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+    <div class="reflection-q" id="reflection-q"></div>
+    <textarea class="nota-area" id="nota-area" placeholder="Vitória, obstáculo, algo que quer lembrar..."></textarea>
+    <button class="save-btn" id="save-btn" onclick="saveDay()">Salvar check-in</button>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="pg-dashboard" class="page" style="display:none">
+    <div id="dash-hero-wrap"></div>
+    <div id="dash-focus-wrap"></div>
+    <div id="dash-trim-wrap"></div>
+    <div class="dash-compare" id="dash-compare"></div>
+    <div class="period-tabs">
+      <button class="ptab on" onclick="setPeriod('semana',this)">Semana</button>
+      <button class="ptab" onclick="setPeriod('mes',this)">Mês</button>
+      <button class="ptab" onclick="setPeriod('trimestre',this)">Trimestre</button>
+      <button class="ptab" onclick="setPeriod('total',this)">Total</button>
+    </div>
+    <div class="stat-grid" id="dash-stats"></div>
+    <div class="heatmap-wrap"><div class="heatmap-title">Consistência — últimos 84 dias</div><div class="heatmap-grid" id="heatmap"></div></div>
+<div class="chart-wrap"><div class="chart-title">Hábitos por dia — últimos 7 dias</div><div class="bar-chart" id="bar-chart"></div></div>
+<div class="energy-chart-wrap"><div class="energy-chart-title"><span>Energia — últimos 14 dias</span><span id="energy-best-day" style="font-size:11px;color:var(--verde);font-weight:600"></span></div><div class="energy-chart" id="energy-chart"></div></div>    <div class="sec-label">Por hábito</div>
+    <div id="dash-habits"></div>
+  </div>
+
+  <!-- OKRs -->
+  <div id="pg-okrs" class="page" style="display:none">
+    <div id="q-badge"></div>
+    <div id="user-mission" style="font-size:13px;color:var(--cinza);margin-bottom:14px;font-style:italic;line-height:1.5"></div>
+    <div id="pillar-list"></div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div id="pg-historico" class="page" style="display:none">
+    <div class="sec-label">Registros</div>
+    <div class="card" style="padding:0 18px"><div id="history-list"></div></div>
+  </div>
+
+  <!-- CONQUISTAS -->
+  <div id="pg-conquistas" class="page" style="display:none">
+    <div class="streak-big">
+      <div class="streak-num" id="streak-big-num">0</div>
+      <div class="streak-label">dias consecutivos</div>
+      <div class="streak-best" id="streak-best-label"></div>
+    </div>
+    <div class="sec-label">Conquistas</div>
+    <div class="achiev-grid" id="achiev-grid"></div>
+  </div>
+
+  <!-- POMODORO -->
+  <div id="pg-pomodoro" class="page" style="display:none">
+    <div class="sec-label">Modo foco</div>
+    <div class="pomo-wrap">
+      <div class="pomo-circle" id="pomo-circle"><div><div class="pomo-time" id="pomo-time">25:00</div><div class="pomo-sub" id="pomo-label">Foco</div></div></div>
+      <div class="pomo-btns">
+        <button class="pomo-btn primary" id="pomo-start" onclick="pomodoroToggle()">Iniciar</button>
+        <button class="pomo-btn" onclick="pomodoroReset()">Resetar</button>
+      </div>
+      <div class="pomo-sessions" id="pomo-sessions"></div>
+    </div>
+    <div class="sec-label">O que vai estudar?</div>
+    <div class="ob-chips" id="pomo-subject" style="margin-bottom:12px">
+      <button class="ob-chip" data-val="idioma" onclick="obSingle('pomo-sub',this)">Idioma</button>
+      <button class="ob-chip" data-val="negocios" onclick="obSingle('pomo-sub',this)">Negócios</button>
+      <button class="ob-chip" data-val="tecnico" onclick="obSingle('pomo-sub',this)">Técnico</button>
+      <button class="ob-chip" data-val="faculdade" onclick="obSingle('pomo-sub',this)">Faculdade</button>
+      <button class="ob-chip" data-val="leitura" onclick="obSingle('pomo-sub',this)">Leitura</button>
+    </div>
+    <div class="alert alert-suc" id="pomo-complete" style="display:none">✅ Sessão concluída! Contabilizado no check-in de hoje.</div>
+  </div>
+
+  <!-- PERFIL -->
+  <div id="pg-perfil" class="page" style="display:none">
+    <div class="prof-section">
+      <div class="prof-section-title">Conta</div>
+      <div class="prof-row"><div class="prof-label">Nome</div><div class="prof-val" id="prof-nome"></div></div>
+      <div class="prof-row"><div class="prof-label">Email</div><div class="prof-val" id="prof-email"></div></div>
+      <div class="prof-row"><div class="prof-label">Início do plano</div><div class="prof-val" id="prof-inicio"></div></div>
+      <div class="prof-row"><div class="prof-label">Trimestre ativo</div><div class="prof-val" id="prof-trimestre"></div></div>
+    </div>
+    <div class="prof-section">
+      <div class="prof-section-title">Ajustes táticos</div>
+      <div class="prof-row"><div class="prof-label">Meta sono (horas)</div><input class="prof-input" id="pref-sono" type="number" min="5" max="10" value="7" onchange="savePerfil()"></div>
+      <div class="prof-row"><div class="prof-label">Meta idioma (min/dia)</div><input class="prof-input" id="pref-ingles" type="number" min="10" max="120" value="20" onchange="savePerfil()"></div>
+      <div class="tactical-note">⚠️ Ajustes táticos não alteram seu plano de 12 meses. O destino continua o mesmo.</div>
+    </div>
+    <div class="prof-section">
+      <div class="prof-section-title">Idiomas ativos</div>
+      <div id="idiom-toggles"></div>
+    </div>
+  <div class="prof-section">
+  <div class="prof-section-title">Lembrete diário</div>
+  <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
+  <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" onclick="toggleReminder(this)"></div></div>
+  <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
+</div>
+    <div class="prof-section">
+      <div class="prof-section-title">Aparência</div>
+      <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" onclick="toggleDark()"></div></div>
+    </div>
+    <div class="prof-section">
+      <div class="prof-section-title">Dados</div>
+      <button class="btn-primary" style="background:var(--verde);margin-bottom:8px" onclick="exportCSV()">Exportar histórico CSV</button>
+      <button class="btn-primary" style="background:#E24B4A" onclick="signOut()">Sair da conta</button>
+    </div>
+  </div>
+
+
+  <!-- BIBLIOTECA -->
+<div id="pg-biblioteca" class="page" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div style="font-family:'DM Serif Display',serif;font-size:22px">Biblioteca</div>
+    <button onclick="showAddLivro()" id="btn-add-livro" style="padding:7px 14px;border-radius:8px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--preto)">+ Adicionar</button>
+  </div>
+  <div id="add-livro-form" style="display:none;margin-bottom:12px">
+    <div class="card">
+      <div class="sec-label">Tipo</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="ob-chip on" data-val="livro" onclick="obSingle('livro-tipo',this)">📘 Livro</button>
+        <button class="ob-chip" data-val="curso" onclick="obSingle('livro-tipo',this)">🎓 Curso</button>
+        <button class="ob-chip" data-val="video" onclick="obSingle('livro-tipo',this)">▶️ Vídeo</button>
+        <button class="ob-chip" data-val="podcast" onclick="obSingle('livro-tipo',this)">🎙️ Podcast</button>
+        <button class="ob-chip" data-val="artigo" onclick="obSingle('livro-tipo',this)">📄 Artigo</button>
+      </div>
+      <div class="sec-label">Título</div>
+      <input id="livro-titulo" class="auth-input" type="text" placeholder="Nome do livro, curso ou recurso" style="margin-bottom:10px">
+      <div class="sec-label">O que você aprendeu? <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+      <textarea id="livro-nota" class="nota-area" placeholder="Resumo, insight principal, algo que vai aplicar..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="saveLivro()" class="save-btn" style="margin-top:0">Salvar</button>
+        <button onclick="document.getElementById('add-livro-form').style.display='none'" style="padding:12px 16px;border-radius:10px;border:1px solid var(--borda);background:transparent;font-size:14px;cursor:pointer;font-family:inherit;color:var(--cinza)">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="bib-stats" style="margin-bottom:10px"></div>
+  <div class="card" style="padding:0 18px"><div id="biblioteca-list"></div></div>
+</div>
+  <!-- MANUAL -->
+  <div id="pg-manual" class="page" style="display:none">
+    <div style="margin-bottom:22px"><div style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--roxo);margin-bottom:3px">Você S.A.</div><div style="font-size:13px;color:var(--cinza)">Manual do sistema · 12 meses · 4 pilares</div></div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:5px">01</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:14px">4 fases de execução</div>
+    <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--info-txt);flex-shrink:0"></div>Fase 1 — Instalar (semanas 1–4)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Sono primeiro:</strong> alarme 22h30, celular fora do quarto.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Idioma no deslocamento:</strong> BBC Learning English ou Huberman Lab.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Treino nos dias escolhidos:</strong> 45 min já basta no início.</li></ul></div>
+    <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--suc-txt);flex-shrink:0"></div>Fase 2 — Manter (semanas 5–12)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Regra dos 2 dias:</strong> nunca pule 2 dias seguidos. Versão reduzida conta.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Revisão toda sexta:</strong> dados reais, ajuste o que for necessário.</li></ul></div>
+    <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--warn-txt);flex-shrink:0"></div>Fase 3 — Revisar (fim de cada mês)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span>60 min no último domingo: corpo, mente, negócio, tempo. Proibido cancelar frequência mínima.</li></ul></div>
+    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--dan-txt);flex-shrink:0"></div>Fase 4 — Escalar (Q2 em diante)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span>Adicione 1 hábito por vez — só quando o anterior estiver no piloto automático há 4 semanas.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Nunca 2 hábitos novos na mesma semana.</strong></li></ul></div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:5px">02</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:14px">Roadmap</div>
+    <div class="tl">
+      <div class="tl-item"><div class="tl-dot" style="background:#378ADD"></div><div class="tl-per">Q1 · Fundação</div><div class="tl-foc">Instalar os hábitos base</div><div class="tl-desc">Sono, idioma, treino nos dias escolhidos. Mapear receita e definir meta anual.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--verde)"></div><div class="tl-per">Q2 · Aceleração</div><div class="tl-foc">Adicionar camadas sobre base sólida</div><div class="tl-desc">Novos idiomas, mais treinos, habilidades técnicas, crescimento no negócio.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--ambar)"></div><div class="tl-per">Q3 · Escala</div><div class="tl-foc">Sistema no piloto automático</div><div class="tl-desc">Hábitos sem força de vontade, processos documentados, inglês em uso real.</div></div>
+      <div class="tl-item"><div class="tl-dot" style="background:var(--coral)"></div><div class="tl-per">Q4 · Colheita</div><div class="tl-foc">Medir, celebrar e planejar ano 2</div><div class="tl-desc">Review anual completo. Você S.A. Ano 2.</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="g-toast" class="g-toast" role="alert" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/app.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>
