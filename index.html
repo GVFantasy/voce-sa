@@ -128,7 +128,7 @@
     <div class="ob-step" id="obs-4">
       <div style="text-align:center;padding:48px 0">
         <div style="font-size:44px;margin-bottom:18px">⚙️</div>
-        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px">Montando seu plano...</div>
+        <div class="title-section" style="margin-bottom:8px">Montando seu plano...</div>
         <div style="font-size:13px;color:var(--cinza)" id="ob-generating"></div>
       </div>
     </div>
@@ -136,7 +136,7 @@
 </div>
 
 <!-- APP -->
-  <div class="streak-boom" id="streak-boom" onclick="hideBoom()">
+<div class="streak-boom" id="streak-boom" onclick="hideBoom()">
   <div class="streak-boom-inner">
     <div class="streak-boom-num" id="streak-boom-num">🔥 0</div>
     <div class="streak-boom-label" id="streak-boom-label">dias seguidos!</div>
@@ -147,26 +147,26 @@
   <div class="plan-modal-inner" onclick="event.stopPropagation()">
     <div class="plan-modal-title">Seus planos</div>
     <div id="plan-list"></div>
-    <button onclick="addPlan()" style="width:100%;padding:12px;border-radius:10px;border:1px dashed var(--borda);background:transparent;font-size:14px;cursor:pointer;font-family:inherit;color:var(--cinza);margin-top:12px">+ Novo plano</button>
-    <button onclick="closePlanModal()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--preto);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px">Fechar</button>
+    <button onclick="addPlan()" class="btn-ghost" style="margin-top:12px">+ Novo plano</button>
+    <button onclick="closePlanModal()" class="btn-primary" style="margin-top:8px">Fechar</button>
   </div>
 </div>
 <div id="app" style="display:none">
- <nav class="main-nav">
-    <button class="nav-btn on" onclick="nav('checkin',this)">✓ Hoje</button>
-    <button class="nav-btn" onclick="nav('dashboard',this)">📊</button>
-    <button class="nav-btn" onclick="nav('okrs',this)">🎯</button>
-    <button class="nav-btn" onclick="nav('historico',this)">📋</button>
-    <button class="nav-btn" onclick="nav('conquistas',this)">🏆</button>
-    <button class="nav-btn" onclick="nav('biblioteca',this)">📚</button>
-    <button class="nav-btn" onclick="nav('pomodoro',this)">⏱</button>
-    <button class="nav-btn" onclick="nav('perfil',this)">⚙️</button>
-    <button class="nav-btn" onclick="nav('manual',this)">📖</button>
-  </nav>
+
+  <!-- HEADER COMPACTO -->
+  <header class="app-header-compact">
+    <div class="app-header-brand">Você S.A.</div>
+    <div class="app-header-right">
+      <span class="app-sync-dot" id="sync-dot"></span>
+      <button class="app-header-plan" id="plan-badge" onclick="openPlanModal()">⬡ Principal</button>
+      <span style="font-size:11px;color:var(--cinza)" id="user-info"></span>
+    </div>
+  </header>
+
+  <!-- SYNC BAR LEGADO (oculto via CSS, mantido para JS setSyncStatus) -->
   <div class="sync-bar">
-    <div><span class="sync-dot" id="sync-dot"></span><span id="sync-txt">Conectando...</span></div>
-<button class="plan-badge" id="plan-badge" onclick="openPlanModal()">⬡ Principal</button>
-<div style="font-size:11px;color:var(--cinza)" id="user-info"></div>  </div>
+    <div><span class="sync-dot" id="sync-dot-legacy"></span><span id="sync-txt">Conectando...</span></div>
+  </div>
 
   <!-- CHECK-IN -->
   <div id="pg-checkin" class="page on">
@@ -228,7 +228,11 @@
       <button class="ptab" onclick="setPeriod('total',this)">Total</button>
     </div>
     <div class="stat-grid" id="dash-stats"></div>
-    <div class="heatmap-wrap"><div class="heatmap-title">Consistência — últimos 84 dias</div><div class="heatmap-grid" id="heatmap"></div></div>
+    <div class="heatmap-wrap">
+      <div class="heatmap-title">Consistência — últimos 84 dias</div>
+      <div class="heatmap-months" id="heatmap-months"></div>
+      <div class="heatmap-grid" id="heatmap"></div>
+    </div>
     <div class="chart-wrap"><div class="chart-title">Hábitos por dia — últimos 7 dias</div><div class="bar-chart" id="bar-chart"></div></div>
     <div class="sec-label">Por hábito</div>
     <div id="dash-habits"></div>
@@ -263,7 +267,19 @@
   <div id="pg-pomodoro" class="page" style="display:none">
     <div class="sec-label">Modo foco</div>
     <div class="pomo-wrap">
-      <div class="pomo-circle" id="pomo-circle"><div><div class="pomo-time" id="pomo-time">25:00</div><div class="pomo-sub" id="pomo-label">Foco</div></div></div>
+      <!-- arc SVG de progresso -->
+      <div class="pomo-arc-wrap" id="pomo-arc-wrap">
+        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+          <circle class="pomo-arc-track" cx="80" cy="80" r="68"/>
+          <circle class="pomo-arc-progress" id="pomo-arc-progress" cx="80" cy="80" r="68"/>
+        </svg>
+        <div class="pomo-arc-center">
+          <div class="pomo-time" id="pomo-time">25:00</div>
+          <div class="pomo-sub" id="pomo-label">Foco</div>
+        </div>
+      </div>
+      <!-- legado: mantido no DOM para compatibilidade com JS que referencia pomo-circle -->
+      <div class="pomo-circle" id="pomo-circle"></div>
       <div class="pomo-btns">
         <button class="pomo-btn primary" id="pomo-start" onclick="pomodoroToggle()">Iniciar</button>
         <button class="pomo-btn" onclick="pomodoroReset()">Resetar</button>
@@ -300,12 +316,12 @@
       <div class="prof-section-title">Idiomas ativos</div>
       <div id="idiom-toggles"></div>
     </div>
-  <div class="prof-section">
-  <div class="prof-section-title">Lembrete diário</div>
-  <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
-  <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" onclick="toggleReminder(this)"></div></div>
-  <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
-</div>
+    <div class="prof-section">
+      <div class="prof-section-title">Lembrete diário</div>
+      <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
+      <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" onclick="toggleReminder(this)"></div></div>
+      <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
+    </div>
     <div class="prof-section">
       <div class="prof-section-title">Aparência</div>
       <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" onclick="toggleDark()"></div></div>
@@ -317,48 +333,51 @@
     </div>
   </div>
 
-
   <!-- BIBLIOTECA -->
-<div id="pg-biblioteca" class="page" style="display:none">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div style="font-family:'DM Serif Display',serif;font-size:22px">Biblioteca</div>
-    <button onclick="showAddLivro()" id="btn-add-livro" style="padding:7px 14px;border-radius:8px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--preto)">+ Adicionar</button>
-  </div>
-  <div id="add-livro-form" style="display:none;margin-bottom:12px">
-    <div class="card">
-      <div class="sec-label">Tipo</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-        <button class="ob-chip on" data-val="livro" onclick="obSingle('livro-tipo',this)">📘 Livro</button>
-        <button class="ob-chip" data-val="curso" onclick="obSingle('livro-tipo',this)">🎓 Curso</button>
-        <button class="ob-chip" data-val="video" onclick="obSingle('livro-tipo',this)">▶️ Vídeo</button>
-        <button class="ob-chip" data-val="podcast" onclick="obSingle('livro-tipo',this)">🎙️ Podcast</button>
-        <button class="ob-chip" data-val="artigo" onclick="obSingle('livro-tipo',this)">📄 Artigo</button>
-      </div>
-      <div class="sec-label">Título</div>
-      <input id="livro-titulo" class="auth-input" type="text" placeholder="Nome do livro, curso ou recurso" style="margin-bottom:10px">
-      <div class="sec-label">O que você aprendeu? <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
-      <textarea id="livro-nota" class="nota-area" placeholder="Resumo, insight principal, algo que vai aplicar..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button onclick="saveLivro()" class="save-btn" style="margin-top:0">Salvar</button>
-        <button onclick="document.getElementById('add-livro-form').style.display='none'" style="padding:12px 16px;border-radius:10px;border:1px solid var(--borda);background:transparent;font-size:14px;cursor:pointer;font-family:inherit;color:var(--cinza)">Cancelar</button>
+  <div id="pg-biblioteca" class="page" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="title-section" style="margin-bottom:0">Biblioteca</div>
+      <button onclick="showAddLivro()" id="btn-add-livro" style="padding:7px 14px;border-radius:8px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--preto)">+ Adicionar</button>
+    </div>
+    <div id="add-livro-form" style="display:none;margin-bottom:12px">
+      <div class="card">
+        <div class="sec-label">Tipo</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="ob-chip on" data-val="livro" onclick="obSingle('livro-tipo',this)">📘 Livro</button>
+          <button class="ob-chip" data-val="curso" onclick="obSingle('livro-tipo',this)">🎓 Curso</button>
+          <button class="ob-chip" data-val="video" onclick="obSingle('livro-tipo',this)">▶️ Vídeo</button>
+          <button class="ob-chip" data-val="podcast" onclick="obSingle('livro-tipo',this)">🎙️ Podcast</button>
+          <button class="ob-chip" data-val="artigo" onclick="obSingle('livro-tipo',this)">📄 Artigo</button>
+        </div>
+        <div class="sec-label">Título</div>
+        <input id="livro-titulo" class="auth-input" type="text" placeholder="Nome do livro, curso ou recurso" style="margin-bottom:10px">
+        <div class="sec-label">O que você aprendeu? <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+        <textarea id="livro-nota" class="nota-area" placeholder="Resumo, insight principal, algo que vai aplicar..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button onclick="saveLivro()" class="save-btn" style="margin-top:0">Salvar</button>
+          <button onclick="document.getElementById('add-livro-form').style.display='none'" class="btn-ghost" style="margin-top:0;width:auto;padding:12px 16px">Cancelar</button>
+        </div>
       </div>
     </div>
+    <div id="bib-stats" style="margin-bottom:10px"></div>
+    <div class="card" style="padding:0 18px"><div id="biblioteca-list"></div></div>
   </div>
-  <div id="bib-stats" style="margin-bottom:10px"></div>
-  <div class="card" style="padding:0 18px"><div id="biblioteca-list"></div></div>
-</div>
+
   <!-- MANUAL -->
   <div id="pg-manual" class="page" style="display:none">
-    <div style="margin-bottom:22px"><div style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--roxo);margin-bottom:3px">Você S.A.</div><div style="font-size:13px;color:var(--cinza)">Manual do sistema · 12 meses · 4 pilares</div></div>
+    <div style="margin-bottom:22px">
+      <div class="title-page">Você S.A.</div>
+      <div style="font-size:13px;color:var(--cinza)">Manual do sistema · 12 meses · 4 pilares</div>
+    </div>
     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:5px">01</div>
-    <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:14px">4 fases de execução</div>
+    <div class="title-section">4 fases de execução</div>
     <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--info-txt);flex-shrink:0"></div>Fase 1 — Instalar (semanas 1–4)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Sono primeiro:</strong> alarme 22h30, celular fora do quarto.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Idioma no deslocamento:</strong> BBC Learning English ou Huberman Lab.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Treino nos dias escolhidos:</strong> 45 min já basta no início.</li></ul></div>
     <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--suc-txt);flex-shrink:0"></div>Fase 2 — Manter (semanas 5–12)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Regra dos 2 dias:</strong> nunca pule 2 dias seguidos. Versão reduzida conta.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Revisão toda sexta:</strong> dados reais, ajuste o que for necessário.</li></ul></div>
     <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--warn-txt);flex-shrink:0"></div>Fase 3 — Revisar (fim de cada mês)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span>60 min no último domingo: corpo, mente, negócio, tempo. Proibido cancelar frequência mínima.</li></ul></div>
     <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--dan-txt);flex-shrink:0"></div>Fase 4 — Escalar (Q2 em diante)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span>Adicione 1 hábito por vez — só quando o anterior estiver no piloto automático há 4 semanas.</li><li style="font-size:13px;color:#444;padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Nunca 2 hábitos novos na mesma semana.</strong></li></ul></div>
     <div class="divider"></div>
     <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:5px">02</div>
-    <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:14px">Roadmap</div>
+    <div class="title-section">Roadmap</div>
     <div class="tl">
       <div class="tl-item"><div class="tl-dot" style="background:#378ADD"></div><div class="tl-per">Q1 · Fundação</div><div class="tl-foc">Instalar os hábitos base</div><div class="tl-desc">Sono, idioma, treino nos dias escolhidos. Mapear receita e definir meta anual.</div></div>
       <div class="tl-item"><div class="tl-dot" style="background:var(--verde)"></div><div class="tl-per">Q2 · Aceleração</div><div class="tl-foc">Adicionar camadas sobre base sólida</div><div class="tl-desc">Novos idiomas, mais treinos, habilidades técnicas, crescimento no negócio.</div></div>
@@ -366,6 +385,46 @@
       <div class="tl-item"><div class="tl-dot" style="background:var(--coral)"></div><div class="tl-per">Q4 · Colheita</div><div class="tl-foc">Medir, celebrar e planejar ano 2</div><div class="tl-desc">Review anual completo. Você S.A. Ano 2.</div></div>
     </div>
   </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="main-nav">
+    <button class="nav-btn on" onclick="nav('checkin',this)">
+      <span class="nav-btn-icon">✓</span>
+      <span class="nav-btn-label">Hoje</span>
+    </button>
+    <button class="nav-btn" onclick="nav('dashboard',this)">
+      <span class="nav-btn-icon">📊</span>
+      <span class="nav-btn-label">Dashboard</span>
+    </button>
+    <button class="nav-btn" onclick="nav('okrs',this)">
+      <span class="nav-btn-icon">🎯</span>
+      <span class="nav-btn-label">OKRs</span>
+    </button>
+    <button class="nav-btn" onclick="nav('historico',this)">
+      <span class="nav-btn-icon">📋</span>
+      <span class="nav-btn-label">Histórico</span>
+    </button>
+    <button class="nav-btn" onclick="nav('conquistas',this)">
+      <span class="nav-btn-icon">🏆</span>
+      <span class="nav-btn-label">Conquistas</span>
+    </button>
+    <button class="nav-btn" onclick="nav('biblioteca',this)">
+      <span class="nav-btn-icon">📚</span>
+      <span class="nav-btn-label">Biblioteca</span>
+    </button>
+    <button class="nav-btn" onclick="nav('pomodoro',this)">
+      <span class="nav-btn-icon">⏱</span>
+      <span class="nav-btn-label">Foco</span>
+    </button>
+    <button class="nav-btn" onclick="nav('perfil',this)">
+      <span class="nav-btn-icon">⚙️</span>
+      <span class="nav-btn-label">Perfil</span>
+    </button>
+    <button class="nav-btn" onclick="nav('manual',this)">
+      <span class="nav-btn-icon">📖</span>
+      <span class="nav-btn-label">Manual</span>
+    </button>
+  </nav>
 </div>
 
 <div id="g-toast" class="g-toast" role="alert" aria-live="polite"></div>
