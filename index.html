@@ -15,19 +15,32 @@
 </head>
 <body>
 
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-logo">VS</div>
+    <div class="splash-title">Você S.A.</div>
+    <div class="splash-slogan">Seu melhor projeto é você mesmo</div>
+  </div>
+</div>
+
 <!-- AUTH -->
 <div id="pg-auth">
-  <div class="auth-wrap">
-    <div class="auth-logo">Você S.A.</div>
-    <div class="auth-sub">Seu sistema de desenvolvimento pessoal.<br>Sincroniza em qualquer dispositivo.</div>
+  <div class="auth-hero">
+    <div class="auth-hero-logo">VS</div>
+    <div class="auth-hero-title">Você S.A.</div>
+    <div class="auth-hero-slogan">Seu melhor projeto é você mesmo</div>
+  </div>
+  <div class="auth-card">
     <div id="auth-err" class="auth-err"></div>
-    <label class="auth-label">Email</label>
+    <div class="auth-card-title" id="auth-card-title">Entrar</div>
+    <label class="auth-label" for="auth-email">Email</label>
     <input class="auth-input" id="auth-email" type="email" placeholder="seu@email.com" oninput="clearFieldErr('auth-email-err')">
     <div class="field-err" id="auth-email-err"></div>
-    <label class="auth-label">Senha</label>
+    <label class="auth-label" for="auth-pass">Senha</label>
     <input class="auth-input" id="auth-pass" type="password" placeholder="Mínimo 6 caracteres" oninput="clearFieldErr('auth-pass-err')">
     <div class="field-err" id="auth-pass-err"></div>
-    <button class="btn-primary" id="auth-btn" onclick="submitAuth()" style="margin-bottom:10px">Entrar</button>
+    <button class="btn-primary" id="auth-btn" onclick="submitAuth()" style="margin-bottom:12px">Entrar</button>
     <div class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Não tem conta? <span>Criar conta grátis</span></div>
   </div>
 </div>
@@ -155,7 +168,10 @@
 
   <!-- HEADER COMPACTO -->
   <header class="app-header-compact">
-    <div class="app-header-brand">Você S.A.</div>
+    <div class="app-header-brand">
+      <div class="app-header-avatar">VS</div>
+      Você S.A.
+    </div>
     <div class="app-header-right">
       <span class="app-sync-dot" id="sync-dot"></span>
       <button class="app-header-plan" id="plan-badge" onclick="openPlanModal()">⬡ Principal</button>
@@ -386,51 +402,65 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION -->
-  <nav class="main-nav">
-    <button class="nav-btn on" onclick="nav('checkin',this)">
-      <span class="nav-btn-icon">✓</span>
-      <span class="nav-btn-label">Hoje</span>
-    </button>
-    <button class="nav-btn" onclick="nav('dashboard',this)">
-      <span class="nav-btn-icon">📊</span>
-      <span class="nav-btn-label">Dashboard</span>
-    </button>
-    <button class="nav-btn" onclick="nav('okrs',this)">
-      <span class="nav-btn-icon">🎯</span>
-      <span class="nav-btn-label">OKRs</span>
-    </button>
-    <button class="nav-btn" onclick="nav('historico',this)">
-      <span class="nav-btn-icon">📋</span>
-      <span class="nav-btn-label">Histórico</span>
-    </button>
-    <button class="nav-btn" onclick="nav('conquistas',this)">
-      <span class="nav-btn-icon">🏆</span>
-      <span class="nav-btn-label">Conquistas</span>
-    </button>
-    <button class="nav-btn" onclick="nav('biblioteca',this)">
-      <span class="nav-btn-icon">📚</span>
-      <span class="nav-btn-label">Biblioteca</span>
-    </button>
-    <button class="nav-btn" onclick="nav('pomodoro',this)">
-      <span class="nav-btn-icon">⏱</span>
-      <span class="nav-btn-label">Foco</span>
-    </button>
-    <button class="nav-btn" onclick="nav('perfil',this)">
-      <span class="nav-btn-icon">⚙️</span>
-      <span class="nav-btn-label">Perfil</span>
-    </button>
-    <button class="nav-btn" onclick="nav('manual',this)">
-      <span class="nav-btn-icon">📖</span>
-      <span class="nav-btn-label">Manual</span>
-    </button>
-  </nav>
 </div>
+
+<!-- BOTTOM NAVIGATION (fora do #app para position:fixed funcionar em todos os browsers mobile) -->
+<nav class="main-nav">
+  <button class="nav-btn on" onclick="nav('checkin',this)">
+    <span class="nav-btn-icon">✓</span>
+    <span class="nav-btn-label">Hoje</span>
+  </button>
+  <button class="nav-btn" onclick="nav('dashboard',this)">
+    <span class="nav-btn-icon">📊</span>
+    <span class="nav-btn-label">Dashboard</span>
+  </button>
+  <button class="nav-btn" onclick="nav('okrs',this)">
+    <span class="nav-btn-icon">🎯</span>
+    <span class="nav-btn-label">OKRs</span>
+  </button>
+  <button class="nav-btn" onclick="nav('historico',this)">
+    <span class="nav-btn-icon">📋</span>
+    <span class="nav-btn-label">Histórico</span>
+  </button>
+  <button class="nav-btn" onclick="nav('conquistas',this)">
+    <span class="nav-btn-icon">🏆</span>
+    <span class="nav-btn-label">Conquistas</span>
+  </button>
+  <button class="nav-btn" onclick="nav('biblioteca',this)">
+    <span class="nav-btn-icon">📚</span>
+    <span class="nav-btn-label">Biblioteca</span>
+  </button>
+  <button class="nav-btn" onclick="nav('pomodoro',this)">
+    <span class="nav-btn-icon">⏱</span>
+    <span class="nav-btn-label">Foco</span>
+  </button>
+  <button class="nav-btn" onclick="nav('perfil',this)">
+    <span class="nav-btn-icon">⚙️</span>
+    <span class="nav-btn-label">Perfil</span>
+  </button>
+  <button class="nav-btn" onclick="nav('manual',this)">
+    <span class="nav-btn-icon">📖</span>
+    <span class="nav-btn-label">Manual</span>
+  </button>
+</nav>
 
 <div id="g-toast" class="g-toast" role="alert" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module" src="js/main.js"></script>
 <script src="js/pwa.js"></script>
+<script>
+(function(){
+  var splash = document.getElementById('splash');
+  if (!splash) return;
+  setTimeout(function(){
+    splash.classList.add('out');
+    splash.addEventListener('transitionend', function handler(){
+      splash.removeEventListener('transitionend', handler);
+      splash.style.display = 'none';
+    });
+  }, 2200);
+})();
+</script>
 </body>
 </html>

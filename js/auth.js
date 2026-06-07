@@ -10,6 +10,8 @@ export function toggleAuthMode() {
   document.getElementById('auth-toggle').innerHTML = isLogin
     ? 'Não tem conta? <span>Criar conta grátis</span>'
     : 'Já tem conta? <span>Entrar</span>';
+  const titleEl = document.getElementById('auth-card-title');
+  if (titleEl) titleEl.textContent = isLogin ? 'Entrar' : 'Criar conta';
   document.getElementById('auth-err').textContent = '';
 }
 

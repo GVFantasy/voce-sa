@@ -48,15 +48,36 @@ body.dark .stat{background:#1C1C1E}
    ======================================================== */
 .app-header-compact{
   display:flex;align-items:center;justify-content:space-between;
-  padding:10px 16px 8px;
-  padding-top:calc(10px + env(safe-area-inset-top));
+  padding:0 16px;
+  height:calc(52px + env(safe-area-inset-top));
+  padding-top:env(safe-area-inset-top);
   background:var(--card);
-  border-bottom:1px solid var(--borda);
-  position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 0 var(--borda);
+  position:sticky;top:0;z-index:50;
 }
-.app-header-brand{font-family:'DM Serif Display',serif;font-size:17px;color:var(--roxo);line-height:1}
+.app-header-brand{
+  font-family:'DM Serif Display',serif;
+  font-size:17px;color:var(--roxo);line-height:1;
+  display:flex;align-items:center;gap:8px;
+}
+.app-header-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--roxo);
+  color:#fff;
+  font-family:'DM Serif Display',serif;
+  font-size:11px;font-weight:400;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;letter-spacing:0;
+}
 .app-header-right{display:flex;align-items:center;gap:8px}
-.app-header-plan{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--roxo-bg);color:var(--roxo);cursor:pointer;white-space:nowrap;border:none;font-family:inherit}
+.app-header-plan{
+  font-size:11px;font-weight:600;
+  padding:5px 11px;
+  border-radius:20px;
+  background:var(--roxo-bg);color:var(--roxo);
+  cursor:pointer;white-space:nowrap;border:none;font-family:inherit;
+  letter-spacing:0.01em;
+}
 .app-sync-dot{width:7px;height:7px;border-radius:50%;background:var(--borda);display:inline-block;transition:background .3s;flex-shrink:0}
 .app-sync-dot.ok{background:var(--verde)}
 .app-sync-dot.syncing{background:var(--ambar);animation:pulse-sync .8s infinite alternate}
@@ -491,3 +512,109 @@ body{padding-bottom:0}
 .tl-per{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--cinza);margin-bottom:2px}
 .tl-foc{font-size:14px;font-weight:600;margin-bottom:4px}
 .tl-desc{font-size:12px;color:#555;line-height:1.6}
+
+/* ========================================================
+   SPLASH SCREEN
+   ======================================================== */
+#splash{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  z-index:9999;
+  background:var(--roxo);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 400ms ease;
+}
+#splash.out{opacity:0}
+.splash-inner{
+  display:flex;flex-direction:column;align-items:center;
+  gap:12px;
+  text-align:center;
+}
+.splash-logo{
+  width:72px;height:72px;border-radius:50%;
+  background:#fff;
+  color:var(--roxo);
+  font-family:'DM Serif Display',serif;
+  font-size:28px;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(12px);
+  animation:splashItem 500ms ease forwards 0s;
+}
+.splash-title{
+  font-family:'DM Serif Display',serif;
+  font-size:36px;color:#fff;
+  letter-spacing:-0.5px;line-height:1;
+  opacity:0;transform:translateY(12px);
+  animation:splashItem 500ms ease forwards 0.15s;
+}
+.splash-slogan{
+  font-size:14px;color:#fff;opacity:0;
+  letter-spacing:0.02em;line-height:1.5;
+  transform:translateY(12px);
+  animation:splashItem 500ms ease forwards 0.3s;
+}
+@keyframes splashItem{
+  to{opacity:0.7;transform:translateY(0)}
+}
+.splash-logo{animation-name:splashItemFull}
+.splash-title{animation-name:splashItemFull}
+@keyframes splashItemFull{
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ========================================================
+   AUTH REDESIGN
+   ======================================================== */
+#pg-auth{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  background:var(--fundo);
+}
+.auth-hero{
+  background:var(--roxo);
+  min-height:35vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:10px;
+  padding:48px 24px 40px;
+  padding-top:calc(48px + env(safe-area-inset-top));
+  text-align:center;
+}
+.auth-hero-logo{
+  width:60px;height:60px;border-radius:50%;
+  background:#fff;
+  color:var(--roxo);
+  font-family:'DM Serif Display',serif;
+  font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.auth-hero-title{
+  font-family:'DM Serif Display',serif;
+  font-size:32px;color:#fff;
+  letter-spacing:-0.3px;line-height:1;
+}
+.auth-hero-slogan{
+  font-size:13px;color:#fff;
+  opacity:0.8;
+  letter-spacing:0.02em;line-height:1.5;
+}
+.auth-card{
+  background:var(--card);
+  border-radius:24px 24px 0 0;
+  margin-top:-24px;
+  padding:28px 24px;
+  flex:1;
+  max-width:480px;
+  width:100%;
+  margin-left:auto;margin-right:auto;
+  align-self:stretch;
+}
+.auth-card-title{
+  font-size:20px;font-weight:700;
+  color:var(--preto);
+  margin-bottom:20px;
+}
+
+/* dark mode adjustments para auth */
+body.dark .auth-card{background:var(--card)}
+body.dark .auth-hero{background:var(--roxo)}
