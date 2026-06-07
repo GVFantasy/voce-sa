@@ -1,11 +1,11 @@
-const CACHE_NAME = "voce-sa-v2";
+const CACHE_NAME = "voce-sa-v3";
 const OFFLINE_URL = "./offline.html";
 const APP_SHELL = [
   "./",
   "./index.html",
   OFFLINE_URL,
   "./css/styles.css",
-  "./js/app.js",
+  "./js/main.js",
   "./js/pwa.js",
   "./manifest.json",
   "./icons/icon-192.png",
