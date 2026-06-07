@@ -49,30 +49,30 @@ body.dark .stat{background:#1C1C1E}
 .app-header-compact{
   display:flex;align-items:center;justify-content:space-between;
   padding:0 16px;
-  height:calc(52px + env(safe-area-inset-top));
+  height:calc(56px + env(safe-area-inset-top));
   padding-top:env(safe-area-inset-top);
   background:var(--card);
-  box-shadow:0 1px 0 var(--borda);
+  border-bottom:1px solid var(--borda);
   position:sticky;top:0;z-index:50;
 }
 .app-header-brand{
   font-family:'DM Serif Display',serif;
-  font-size:17px;color:var(--roxo);line-height:1;
-  display:flex;align-items:center;gap:8px;
+  font-size:19px;color:var(--preto);line-height:1;
+  display:flex;align-items:center;gap:10px;
 }
 .app-header-avatar{
-  width:28px;height:28px;border-radius:50%;
+  width:32px;height:32px;border-radius:10px;
   background:var(--roxo);
   color:#fff;
   font-family:'DM Serif Display',serif;
-  font-size:11px;font-weight:400;
+  font-size:12px;font-weight:400;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;letter-spacing:0;
+  flex-shrink:0;letter-spacing:-0.3px;
 }
-.app-header-right{display:flex;align-items:center;gap:8px}
+.app-header-right{display:flex;align-items:center;gap:10px}
 .app-header-plan{
-  font-size:11px;font-weight:600;
-  padding:5px 11px;
+  font-size:12px;font-weight:600;
+  padding:5px 12px;
   border-radius:20px;
   background:var(--roxo-bg);color:var(--roxo);
   cursor:pointer;white-space:nowrap;border:none;font-family:inherit;
@@ -523,7 +523,7 @@ body{padding-bottom:0}
   display:flex;align-items:center;justify-content:center;
   transition:opacity 400ms ease;
 }
-#splash.out{opacity:0}
+#splash.out{opacity:0;pointer-events:none}
 .splash-inner{
   display:flex;flex-direction:column;align-items:center;
   gap:12px;
@@ -567,54 +567,52 @@ body{padding-bottom:0}
 #pg-auth{
   min-height:100vh;
   display:flex;flex-direction:column;
-  background:var(--fundo);
+  background:var(--roxo);
 }
 .auth-hero{
-  background:var(--roxo);
-  min-height:35vh;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  gap:10px;
-  padding:48px 24px 40px;
-  padding-top:calc(48px + env(safe-area-inset-top));
+  gap:14px;
+  padding:56px 24px 48px;
+  padding-top:calc(56px + env(safe-area-inset-top));
   text-align:center;
+  flex-shrink:0;
 }
 .auth-hero-logo{
-  width:60px;height:60px;border-radius:50%;
-  background:#fff;
-  color:var(--roxo);
+  width:68px;height:68px;border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  border:2px solid rgba(255,255,255,0.3);
+  color:#fff;
   font-family:'DM Serif Display',serif;
-  font-size:22px;
+  font-size:24px;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
+  letter-spacing:-0.5px;
 }
 .auth-hero-title{
   font-family:'DM Serif Display',serif;
-  font-size:32px;color:#fff;
-  letter-spacing:-0.3px;line-height:1;
+  font-size:34px;color:#fff;
+  letter-spacing:-0.5px;line-height:1;
 }
 .auth-hero-slogan{
-  font-size:13px;color:#fff;
-  opacity:0.8;
-  letter-spacing:0.02em;line-height:1.5;
+  font-size:13px;color:rgba(255,255,255,0.75);
+  letter-spacing:0.01em;line-height:1.5;
+  max-width:240px;
 }
 .auth-card{
   background:var(--card);
-  border-radius:24px 24px 0 0;
-  margin-top:-24px;
-  padding:28px 24px;
+  border-radius:28px 28px 0 0;
+  padding:32px 24px 48px;
   flex:1;
-  max-width:480px;
-  width:100%;
-  margin-left:auto;margin-right:auto;
-  align-self:stretch;
+  box-shadow:0 -4px 40px rgba(0,0,0,0.18);
 }
 .auth-card-title{
-  font-size:20px;font-weight:700;
+  font-size:22px;font-weight:700;
   color:var(--preto);
-  margin-bottom:20px;
+  margin-bottom:24px;
+  letter-spacing:-0.3px;
 }
 
-/* dark mode adjustments para auth */
-body.dark .auth-card{background:var(--card)}
-body.dark .auth-hero{background:var(--roxo)}
+body.dark #pg-auth{background:var(--roxo)}
+body.dark .auth-card{background:#1C1C1E}
+body.dark .auth-card-title{color:var(--preto)}
