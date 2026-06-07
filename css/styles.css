@@ -45,6 +45,24 @@ body.dark .hi-note{color:var(--cinza)}
 body.dark .prof-section-title{color:var(--cinza)}
 body.dark .toggle-switch{background:#3A3A3C}
 body.dark .toggle-switch.on{background:var(--roxo)}
+/* dark: botões primários — --preto vira claro no dark, então override */
+body.dark .btn-primary,body.dark .save-btn,body.dark .ob-btn-next{background:#E5E5EA;color:#1a1a1a;border:none}
+body.dark .btn-primary.saved,body.dark .save-btn.saved{background:var(--verde);color:#fff}
+body.dark .btn-primary:disabled,body.dark .save-btn:disabled,body.dark .ob-btn-next:disabled{background:#3A3A3C;color:#666;opacity:1}
+/* dark: alerts */
+body.dark .alert-roxo{background:#1e1b3a;border-color:#534AB7;color:#9590eb}
+body.dark .alert-info{background:#0d1e2e;border-color:#2a7fd4;color:#60A5FA}
+body.dark .alert-warn{background:#251a05;border-color:#BA7517;color:#FBB040}
+body.dark .alert-suc{background:#071d12;border-color:#1D9E75;color:#34D399}
+body.dark .alert-dan{background:#240a0a;border-color:#A32D2D;color:#F87171}
+/* dark: conquistas — hardcoded creams/beiges */
+body.dark .achiev-card.unlocked{background:#1C2014;border-color:#5a7a30}
+body.dark .achiev-card.raro{background:#2A2005;border-color:#6B4F00}
+body.dark .achiev-card.raro.unlocked{background:#2A2005;border-color:#BA7517}
+body.dark .achiev-card.raro .achiev-badge{background:#3A2D00;color:#FBB040;border-color:#BA7517}
+body.dark .achiev-card.epico.unlocked{background:#1a1730;border-color:var(--roxo)}
+body.dark .achiev-card.unlocked .achiev-name{color:#F5F5F0}
+body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 .streak-boom{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
 .streak-boom.show{opacity:1;pointer-events:all}
 .streak-boom-inner{background:var(--roxo);color:#fff;border-radius:20px;padding:28px 40px;text-align:center;transform:scale(.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
