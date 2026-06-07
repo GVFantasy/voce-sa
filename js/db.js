@@ -51,6 +51,12 @@ export async function loadCfgRemote() {
 }
 
 export function setSyncStatus(s, msg) {
-  document.getElementById('sync-dot').className = 'sync-dot ' + s;
-  document.getElementById('sync-txt').textContent = msg;
+  // dot no header compacto (id="sync-dot")
+  const dot = document.getElementById('sync-dot');
+  if (dot) dot.className = 'app-sync-dot ' + s;
+  // legado: sync-bar oculto por CSS, mas mantemos o texto para compatibilidade
+  const legacyDot = document.getElementById('sync-dot-legacy');
+  const legacyTxt = document.getElementById('sync-txt');
+  if (legacyDot) legacyDot.className = 'sync-dot ' + s;
+  if (legacyTxt) legacyTxt.textContent = msg;
 }

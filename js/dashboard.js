@@ -125,12 +125,36 @@ export function renderDashboard() {
     <div class="stat"><div class="stat-label">Registros</div><div class="stat-val">${state.log.length}</div><div class="stat-sub">de 365</div></div>
     <div class="stat"><div class="stat-label">Energia</div><div class="stat-val">${avgE > 0 ? ENERGY[Math.round(avgE)] : '—'}</div><div class="stat-sub">${avgE > 0 ? avgE.toFixed(1) + '/3' : '—'}</div></div>`;
   const hDays = []; for (let i = 83; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); hDays.push(dateKey(d)); }
+
+  // labels de mês acima do heatmap
+  const monthsEl = document.getElementById('heatmap-months');
+  if (monthsEl) {
+    const MNAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const cellW = 16; // 13px célula + 3px gap
+    let lastMonth = -1;
+    const labels = [];
+    hDays.forEach((date, idx) => {
+      const m = new Date(date + 'T12:00:00').getMonth();
+      if (m !== lastMonth) {
+        labels.push({ month: m, idx });
+        lastMonth = m;
+      }
+    });
+    monthsEl.style.position = 'relative';
+    monthsEl.style.height = '16px';
+    monthsEl.innerHTML = labels.map(l =>
+      `<span class="hm-month-label" style="left:${l.idx * cellW}px">${MNAMES[l.month]}</span>`
+    ).join('');
+  }
+
   document.getElementById('heatmap').innerHTML = hDays.map(date => {
-    if (date > today) return `<div class="hm-cell hm-future"></div>`;
-    const entry = state.log.find(e => e.date === date); if (!entry) return `<div class="hm-cell hm-0"></div>`;
+    const isToday = date === today;
+    if (date > today) return `<div class="hm-cell hm-future${isToday ? ' hm-today' : ''}"></div>`;
+    const entry = state.log.find(e => e.date === date);
+    if (!entry) return `<div class="hm-cell hm-0${isToday ? ' hm-today' : ''}" title="${fmtDate(date)}"></div>`;
     const done = state.userHabits.filter(h => isExpected(h, date) && entry.habits[h.id]).length;
     const exp = state.userHabits.filter(h => isExpected(h, date)).length;
-    return `<div class="hm-cell hm-${exp === 0 ? 0 : Math.ceil(done / exp * 4)}" title="${fmtDate(date)}: ${done}/${exp}"></div>`;
+    return `<div class="hm-cell hm-${exp === 0 ? 0 : Math.ceil(done / exp * 4)}${isToday ? ' hm-today' : ''}" title="${fmtDate(date)}: ${done}/${exp}"></div>`;
   }).join('');
   const last7 = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); last7.push(dateKey(d)); }
   document.getElementById('bar-chart').innerHTML = last7.map(date => {
