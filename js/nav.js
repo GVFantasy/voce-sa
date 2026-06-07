@@ -64,7 +64,8 @@ export function openMaisDrawer() {
   const d = document.getElementById('mais-drawer');
   if (!d) return;
   d.style.display = 'flex';
-  requestAnimationFrame(() => d.classList.add('open'));
+  // double rAF garante que o browser pintou o estado inicial (translateY(100%)) antes de animar
+  requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add('open')));
 }
 
 export function closeMaisDrawer(e) {
