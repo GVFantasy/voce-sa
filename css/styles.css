@@ -329,6 +329,42 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 .idiom-sub{font-size:11px;color:var(--cinza)}
 .tactical-note{background:var(--warn-bg);border:1px solid #F0C070;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--warn-txt);line-height:1.5;margin-top:8px}
 
+/* DASHBOARD QUICK STATS */
+.dash-quick-stats{display:flex;align-items:center;justify-content:center;gap:0;background:var(--card);border:1px solid var(--borda);border-radius:12px;padding:10px 16px;margin-bottom:12px}
+.dqs-item{flex:1;text-align:center}
+.dqs-val{font-size:18px;font-weight:700;color:var(--preto);line-height:1.1}
+.dqs-label{font-size:10px;color:var(--cinza);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.dqs-sep{width:1px;height:32px;background:var(--borda);margin:0 8px;flex-shrink:0}
+.dash-divider{border:none;border-top:1px solid var(--borda);margin:12px 0 16px}
+
+/* PAGE TRANSITIONS */
+.page.fade-in{animation:pageFadeIn 150ms ease-out forwards}
+@keyframes pageFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* HABIT POP */
+@keyframes habitPop{0%{transform:scale(1)}40%{transform:scale(1.03)}100%{transform:scale(1)}}
+.habit-card.pop{animation:habitPop 200ms ease-out}
+
+/* SAVE BTN FEEDBACK */
+.save-btn{transition:background 300ms ease,opacity .15s}
+.save-btn.saved{background:var(--verde)}
+
+/* MOBILE-FIRST TOUCH TARGETS */
+.nav-btn{min-height:44px;min-width:44px}
+.ob-option{min-height:44px}
+.ob-chip{min-height:44px}
+.ob-day-btn{min-height:44px;min-width:44px}
+
+/* NAV SCROLLABLE */
+.main-nav{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* INPUTS: prevent iOS zoom */
+.auth-input{font-size:16px}
+.prof-input{font-size:16px}
+
+/* SAFE AREA */
+body{padding-bottom:env(safe-area-inset-bottom)}
+
 /* MANUAL */
 .tl{position:relative;padding-left:20px}
 .tl::before{content:'';position:absolute;left:5px;top:7px;bottom:7px;width:1px;background:var(--borda)}
