@@ -12,7 +12,7 @@ import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, e
 import { renderBiblioteca, showAddLivro, saveLivro } from './biblioteca.js';
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan } from './plans.js';
-import { nav, startApp, loadLog } from './nav.js';
+import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
 
 // Expõe ao window para os onclick inline no HTML
 window.clearFieldErr = clearFieldErr;
@@ -87,6 +87,9 @@ window.addPlan = addPlan;
 window.nav = nav;
 window.startApp = startApp;
 window.loadLog = loadLog;
+window.openMaisDrawer = openMaisDrawer;
+window.closeMaisDrawer = closeMaisDrawer;
+window.navFromMais = navFromMais;
 
 // Init
 async function init() {

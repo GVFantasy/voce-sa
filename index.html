@@ -404,12 +404,22 @@
 
 </div>
 
-<!-- BOTTOM NAVIGATION (fora do #app para position:fixed funcionar em todos os browsers mobile) -->
+<!-- MAIS DRAWER -->
+<div id="mais-drawer" class="mais-drawer" onclick="closeMaisDrawer(event)">
+  <div class="mais-drawer-inner">
+    <div class="mais-drawer-handle"></div>
+    <div class="mais-grid">
+      <button class="mais-item" onclick="navFromMais('historico')"><span class="mais-item-icon">📋</span><span class="mais-item-label">Histórico</span></button>
+      <button class="mais-item" onclick="navFromMais('biblioteca')"><span class="mais-item-icon">📚</span><span class="mais-item-label">Biblioteca</span></button>
+      <button class="mais-item" onclick="navFromMais('pomodoro')"><span class="mais-item-icon">⏱</span><span class="mais-item-label">Foco</span></button>
+      <button class="mais-item" onclick="navFromMais('perfil')"><span class="mais-item-icon">⚙️</span><span class="mais-item-label">Perfil</span></button>
+      <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon">📖</span><span class="mais-item-label">Manual</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
 <nav class="main-nav">
-  <button class="nav-btn on" onclick="nav('checkin',this)">
-    <span class="nav-btn-icon">✓</span>
-    <span class="nav-btn-label">Hoje</span>
-  </button>
   <button class="nav-btn" onclick="nav('dashboard',this)">
     <span class="nav-btn-icon">📊</span>
     <span class="nav-btn-label">Dashboard</span>
@@ -418,29 +428,21 @@
     <span class="nav-btn-icon">🎯</span>
     <span class="nav-btn-label">OKRs</span>
   </button>
-  <button class="nav-btn" onclick="nav('historico',this)">
-    <span class="nav-btn-icon">📋</span>
-    <span class="nav-btn-label">Histórico</span>
+  <button class="nav-btn nav-btn-fab on" onclick="nav('checkin',this)">
+    <div class="nav-fab-circle">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <span class="nav-btn-label">Hoje</span>
   </button>
   <button class="nav-btn" onclick="nav('conquistas',this)">
     <span class="nav-btn-icon">🏆</span>
     <span class="nav-btn-label">Conquistas</span>
   </button>
-  <button class="nav-btn" onclick="nav('biblioteca',this)">
-    <span class="nav-btn-icon">📚</span>
-    <span class="nav-btn-label">Biblioteca</span>
-  </button>
-  <button class="nav-btn" onclick="nav('pomodoro',this)">
-    <span class="nav-btn-icon">⏱</span>
-    <span class="nav-btn-label">Foco</span>
-  </button>
-  <button class="nav-btn" onclick="nav('perfil',this)">
-    <span class="nav-btn-icon">⚙️</span>
-    <span class="nav-btn-label">Perfil</span>
-  </button>
-  <button class="nav-btn" onclick="nav('manual',this)">
-    <span class="nav-btn-icon">📖</span>
-    <span class="nav-btn-label">Manual</span>
+  <button class="nav-btn" id="navbtn-mais" onclick="openMaisDrawer()">
+    <span class="nav-btn-icon">
+      <svg width="18" height="4" viewBox="0 0 18 4" fill="currentColor"><circle cx="2" cy="2" r="2"/><circle cx="9" cy="2" r="2"/><circle cx="16" cy="2" r="2"/></svg>
+    </span>
+    <span class="nav-btn-label">Mais</span>
   </button>
 </nav>
 

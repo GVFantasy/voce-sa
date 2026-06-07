@@ -37,6 +37,8 @@ export async function loadLog() {
   renderCheckin(); renderDashboard(); renderHistorico(); renderOKRs(); renderPerfil(); renderConquistas();
 }
 
+const MAIS_PAGES = ['historico', 'biblioteca', 'pomodoro', 'perfil', 'manual'];
+
 export function nav(id, el) {
   ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual'].forEach(p => {
     const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
@@ -56,4 +58,43 @@ export function nav(id, el) {
   if (id === 'perfil') renderPerfil();
   if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); }
   if (id === 'biblioteca') renderBiblioteca();
+}
+
+export function openMaisDrawer() {
+  const d = document.getElementById('mais-drawer');
+  if (!d) return;
+  d.style.display = 'flex';
+  requestAnimationFrame(() => d.classList.add('open'));
+}
+
+export function closeMaisDrawer(e) {
+  const d = document.getElementById('mais-drawer');
+  if (!d) return;
+  if (e && d.querySelector('.mais-drawer-inner').contains(e.target)) return;
+  d.classList.remove('open');
+  setTimeout(() => { d.style.display = 'none'; }, 300);
+}
+
+export function navFromMais(id) {
+  closeMaisDrawer(null);
+  setTimeout(() => {
+    ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual'].forEach(p => {
+      const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
+    });
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+    const target = document.getElementById('pg-' + id);
+    if (target) {
+      target.style.display = 'block';
+      target.classList.remove('fade-in');
+      void target.offsetWidth;
+      target.classList.add('fade-in');
+    }
+    const maisBtn = document.getElementById('navbtn-mais');
+    if (maisBtn) maisBtn.classList.add('on');
+    if (id === 'historico') renderHistorico();
+    if (id === 'conquistas') renderConquistas();
+    if (id === 'perfil') renderPerfil();
+    if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); }
+    if (id === 'biblioteca') renderBiblioteca();
+  }, 280);
 }
