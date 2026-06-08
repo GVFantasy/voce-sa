@@ -87,6 +87,9 @@ export async function toggleReminder(el) {
     }
   }
   state.userCfg.lembreteAtivo = !state.userCfg.lembreteAtivo;
+  if (state.userCfg.lembreteAtivo && !state.userCfg.lembreteHora) {
+    state.userCfg.lembreteHora = document.getElementById('pref-lembrete').value || '19:30';
+  }
   el.classList.toggle('on', state.userCfg.lembreteAtivo);
   await saveCfgAll(false);
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : 'Lembrete desativado';
