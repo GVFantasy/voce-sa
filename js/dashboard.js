@@ -91,7 +91,7 @@ export function renderDashboard() {
         <span>${insight.trimPct}% do trimestre</span>
       </div>
       <div class="trim-bar-bg"><div class="trim-bar-fill" style="width:${insight.trimPct}%"></div></div>
-      <div class="trim-days"><span>${insight.trimPassed} dias passados</span><span>${insight.trimTotal - insight.trimPassed} dias restantes</span></div>
+      <div class="trim-days"><span>${insight.trimPassed} ${insight.trimPassed === 1 ? 'dia passado' : 'dias passados'}</span><span>${insight.trimTotal - insight.trimPassed} ${insight.trimTotal - insight.trimPassed === 1 ? 'dia restante' : 'dias restantes'}</span></div>
     </div>`;
   const streak2 = calcStreak(state.log);
   const thisWeekQS = getPeriodDates('semana');

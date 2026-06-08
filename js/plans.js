@@ -28,11 +28,19 @@ export function closePlanModal(e) {
 
 export async function switchPlan(id) {
   if (!state.userCfg.planConfigs) state.userCfg.planConfigs = {};
-  state.userCfg.planConfigs[getActivePlanId()] = { ...state.userCfg };
-  const plans = getPlans(); const target = plans.find(p => p.id === id);
+  // Salvar config atual SEM planConfigs e SEM activePlan (evita referência circular)
+  const { planConfigs, activePlan, plans, ...cfgSnapshot } = state.userCfg;
+  state.userCfg.planConfigs[getActivePlanId()] = cfgSnapshot;
+  const allPlans = getPlans(); const target = allPlans.find(p => p.id === id);
   if (!target) return;
   const saved = state.userCfg.planConfigs[id];
-  if (saved) { Object.assign(state.userCfg, saved); }
+  if (saved) {
+    const currentPlanConfigs = state.userCfg.planConfigs;
+    const currentPlans = state.userCfg.plans;
+    Object.assign(state.userCfg, saved);
+    state.userCfg.planConfigs = currentPlanConfigs;
+    state.userCfg.plans = currentPlans;
+  }
   state.userCfg.activePlan = id;
   await saveCfgAll(false);
   document.getElementById('plan-badge').textContent = target.emoji + ' ' + target.name;

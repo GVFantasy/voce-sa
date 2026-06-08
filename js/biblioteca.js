@@ -6,10 +6,17 @@ export let newLivroTipo = 'livro';
 
 export function showAddLivro() {
   const f = document.getElementById('add-livro-form');
-  f.style.display = f.style.display === 'none' ? 'block' : 'none';
-  newLivroTipo = 'livro';
-  // Garante que o chip "Livro" começa marcado ao abrir o form
-  window._newLivroTipo = 'livro';
+  const isOpen = f.style.display !== 'none';
+  f.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Reset form ao abrir
+    document.getElementById('livro-titulo').value = '';
+    document.getElementById('livro-nota').value = '';
+    newLivroTipo = 'livro';
+    window._newLivroTipo = 'livro';
+    const chips = document.querySelectorAll('#livro-tipo-chips .ob-chip');
+    chips.forEach((c, i) => c.classList.toggle('on', i === 0));
+  }
 }
 
 export async function saveLivro() {

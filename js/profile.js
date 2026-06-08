@@ -105,7 +105,7 @@ export function scheduleReminder() {
     const today = todayKey();
     const checkedIn = state.log.some(e => e.date === today && Object.values(e.habits || {}).some(Boolean));
     if (!checkedIn && Notification.permission === 'granted') {
-      new Notification('Você S.A. 🔥', { body: 'Hora do seu check-in! Não deixe o streak quebrar.', icon: '/favicon.ico' });
+      new Notification('Você S.A. 🔥', { body: 'Hora do seu check-in! Não deixe o streak quebrar.', icon: 'icons/icon-192.png' });
     }
     scheduleReminder();
   }, ms);

@@ -2,7 +2,8 @@ import { state, IDIOMA_MAP, DLABELS } from './state.js';
 
 export function buildHabitsFromCfg() {
   state.userHabits = [];
-  state.userHabits.push({ id: 'sono', icon: '🌙', name: 'Sono 7h+', days: 'todo dia', allDays: true, hasDetail: false });
+  const sonoMeta = state.userCfg.sonoMeta || 7;
+  state.userHabits.push({ id: 'sono', icon: '🌙', name: `Sono ${sonoMeta}h+`, days: 'todo dia', allDays: true, hasDetail: false });
 
   const idiomasAtivos = state.userCfg.idiomasAtivos || ['ingles'];
   const idiomaDias = state.userCfg.idiomaDias || [0, 1, 2, 3, 4, 5, 6];
