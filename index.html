@@ -404,17 +404,18 @@
 
 </div>
 
-<!-- MAIS DRAWER -->
-<div id="mais-drawer" class="mais-drawer" onclick="closeMaisDrawer(event)">
-  <div class="mais-drawer-inner">
-    <div class="mais-drawer-handle"></div>
-    <div class="mais-grid">
-      <button class="mais-item" onclick="navFromMais('historico')"><span class="mais-item-icon">📋</span><span class="mais-item-label">Histórico</span></button>
-      <button class="mais-item" onclick="navFromMais('biblioteca')"><span class="mais-item-icon">📚</span><span class="mais-item-label">Biblioteca</span></button>
-      <button class="mais-item" onclick="navFromMais('pomodoro')"><span class="mais-item-icon">⏱</span><span class="mais-item-label">Foco</span></button>
-      <button class="mais-item" onclick="navFromMais('perfil')"><span class="mais-item-icon">⚙️</span><span class="mais-item-label">Perfil</span></button>
-      <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon">📖</span><span class="mais-item-label">Manual</span></button>
-    </div>
+<!-- MAIS BACKDROP (overlay separado — display:none quando fechado) -->
+<div id="mais-backdrop" onclick="closeMaisDrawer()"></div>
+
+<!-- MAIS DRAWER (só o painel, sempre posicionado, sem cobrir a tela toda) -->
+<div id="mais-drawer" class="mais-drawer">
+  <div class="mais-drawer-handle"></div>
+  <div class="mais-grid">
+    <button class="mais-item" onclick="navFromMais('historico')"><span class="mais-item-icon">📋</span><span class="mais-item-label">Histórico</span></button>
+    <button class="mais-item" onclick="navFromMais('biblioteca')"><span class="mais-item-icon">📚</span><span class="mais-item-label">Biblioteca</span></button>
+    <button class="mais-item" onclick="navFromMais('pomodoro')"><span class="mais-item-icon">⏱</span><span class="mais-item-label">Foco</span></button>
+    <button class="mais-item" onclick="navFromMais('perfil')"><span class="mais-item-icon">⚙️</span><span class="mais-item-label">Perfil</span></button>
+    <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon">📖</span><span class="mais-item-label">Manual</span></button>
   </div>
 </div>
 

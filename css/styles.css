@@ -27,7 +27,7 @@ body.dark .tl-desc{color:var(--cinza)}
 body.dark .dash-hero{background:#1C1C1E}
 body.dark .dqs-sep{background:#3A3A3C}
 /* dark: mais drawer */
-body.dark .mais-drawer-inner{background:#1C1C1E}
+body.dark .mais-drawer{background:#1C1C1E}
 body.dark .mais-item{background:#2C2C2E;color:var(--preto)}
 body.dark .mais-item-label{color:var(--cinza)}
 /* dark: plan modal e outros */
@@ -192,34 +192,30 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 .nav-btn-fab.on .nav-btn-label{opacity:1}
 .nav-btn-fab.on .nav-fab-circle{background:var(--roxo)}
 
-/* MAIS DRAWER */
-.mais-drawer{
+/* MAIS BACKDROP */
+#mais-backdrop{
+  display:none;
   position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,0);
-  z-index:600;
-  display:flex;
-  align-items:flex-end;
-  visibility:hidden;
-  pointer-events:none;
-  transition:background .25s,visibility .25s;
-}
-.mais-drawer.open{
   background:rgba(0,0,0,0.45);
-  visibility:visible;
-  pointer-events:all;
-  transition:background .25s;
+  z-index:599;
 }
-.mais-drawer-inner{
+#mais-backdrop.open{display:block}
+
+/* MAIS DRAWER — só o painel, nunca cobre a tela toda */
+.mais-drawer{
+  position:fixed;bottom:0;left:0;right:0;
   background:var(--card);
   border-radius:20px 20px 0 0;
-  width:100%;
   padding:12px 20px calc(20px + env(safe-area-inset-bottom));
+  z-index:600;
   transform:translateY(100%);
   transition:transform .35s cubic-bezier(.32,.72,0,1);
   will-change:transform;
+  pointer-events:none;
 }
-.mais-drawer.open .mais-drawer-inner{
+.mais-drawer.open{
   transform:translateY(0);
+  pointer-events:all;
 }
 .mais-drawer-handle{width:36px;height:4px;border-radius:2px;background:var(--borda);margin:0 auto 20px}
 .mais-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}

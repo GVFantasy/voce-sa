@@ -61,15 +61,13 @@ export function nav(id, el) {
 }
 
 export function openMaisDrawer() {
-  const d = document.getElementById('mais-drawer');
-  if (d) d.classList.add('open');
+  document.getElementById('mais-drawer')?.classList.add('open');
+  document.getElementById('mais-backdrop')?.classList.add('open');
 }
 
-export function closeMaisDrawer(e) {
-  const d = document.getElementById('mais-drawer');
-  if (!d) return;
-  if (e && d.querySelector('.mais-drawer-inner')?.contains(e.target)) return;
-  d.classList.remove('open');
+export function closeMaisDrawer() {
+  document.getElementById('mais-drawer')?.classList.remove('open');
+  document.getElementById('mais-backdrop')?.classList.remove('open');
 }
 
 export function navFromMais(id) {
