@@ -62,18 +62,14 @@ export function nav(id, el) {
 
 export function openMaisDrawer() {
   const d = document.getElementById('mais-drawer');
-  if (!d) return;
-  d.style.display = 'flex';
-  // double rAF garante que o browser pintou o estado inicial (translateY(100%)) antes de animar
-  requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add('open')));
+  if (d) d.classList.add('open');
 }
 
 export function closeMaisDrawer(e) {
   const d = document.getElementById('mais-drawer');
   if (!d) return;
-  if (e && d.querySelector('.mais-drawer-inner').contains(e.target)) return;
+  if (e && d.querySelector('.mais-drawer-inner')?.contains(e.target)) return;
   d.classList.remove('open');
-  setTimeout(() => { d.style.display = 'none'; }, 300);
 }
 
 export function navFromMais(id) {
