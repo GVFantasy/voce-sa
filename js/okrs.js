@@ -29,8 +29,6 @@ export function renderOKRs() {
       }).join('')}</div>
     </div>`;
   }).join('');
-}
-
   // Notificação de hábitos ausentes nos OKRs
   const habitIds = new Set(state.userHabits.map(h => h.id));
   const missing = [];
