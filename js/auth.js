@@ -61,21 +61,26 @@ export async function signOut() {
 }
 
 export async function afterLogin() {
-  // Import lazily to avoid circular: nav/startApp depends on auth, auth needs startApp
   const { startApp, loadLog } = await import('./nav.js');
   const { startOnboarding } = await import('./onboarding.js');
 
-  state.userCfg = getCfg();
-  if (!state.userCfg.name || !state.userCfg.startDate) {
-    const found = await loadCfgRemote();
-    if (found) {
-      document.getElementById('pg-auth').style.display = 'none';
-      buildHabitsFromCfg(); startApp(); return;
-    }
-    document.getElementById('pg-auth').style.display = 'none';
+  document.getElementById('pg-auth').style.display = 'none';
+
+  const result = await loadCfgRemote();
+
+  if (result === 'found') {
+    // Supabase tem config válida — fonte da verdade
+    buildHabitsFromCfg(); startApp();
+  } else if (result === 'not_found') {
+    // Online, mas sem config → usuário novo ou conta zerada
     startOnboarding();
   } else {
-    document.getElementById('pg-auth').style.display = 'none';
-    buildHabitsFromCfg(); startApp();
+    // Offline — localStorage como fallback para não perder o usuário
+    state.userCfg = getCfg();
+    if (state.userCfg.name && state.userCfg.startDate) {
+      buildHabitsFromCfg(); startApp();
+    } else {
+      startOnboarding();
+    }
   }
 }

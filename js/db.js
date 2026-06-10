@@ -40,14 +40,20 @@ export async function saveCfgAll(showFeedback) {
 
 export async function loadCfgRemote() {
   try {
-    const { data } = await sb.from('user_config').select('config').eq('user_id', state.currentUser.id).single();
+    const { data, error } = await sb.from('user_config').select('config').eq('user_id', state.currentUser.id).single();
+    if (error) {
+      if (error.code === 'PGRST116') return 'not_found'; // linha não existe
+      throw error;
+    }
     if (data?.config && data.config.name) {
       state.userCfg = data.config;
       saveCfgLocal();
-      return true;
+      return 'found';
     }
-  } catch (e) {}
-  return false;
+    return 'not_found';
+  } catch (e) {
+    return 'offline';
+  }
 }
 
 export function setSyncStatus(s, msg) {
