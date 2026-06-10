@@ -52,7 +52,9 @@ export function nav(id, el) {
     target.classList.add('fade-in');
   }
   if (el) el.classList.add('on');
+  if (id === 'checkin') renderCheckin();
   if (id === 'dashboard') renderDashboard();
+  if (id === 'okrs') renderOKRs();
   if (id === 'historico') renderHistorico();
   if (id === 'conquistas') renderConquistas();
   if (id === 'perfil') renderPerfil();

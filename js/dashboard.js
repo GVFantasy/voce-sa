@@ -3,10 +3,11 @@ import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getP
 
 export function generateDashboardInsight() {
   const today = todayKey(); const streak = calcStreak(state.log);
+  const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   const dates7 = getPeriodDates('semana');
   let done7 = 0, possible7 = 0;
   dates7.forEach(date => {
-    const entry = state.log.find(e => e.date === date);
+    const entry = logMap[date];
     state.userHabits.forEach(h => {
       if (isExpected(h, date)) { possible7++; if (entry && entry.habits[h.id]) done7++; }
     });
@@ -24,7 +25,7 @@ export function generateDashboardInsight() {
   state.userHabits.forEach(h => {
     let hd = 0, hp = 0;
     dates7.forEach(date => {
-      if (isExpected(h, date)) { hp++; const e = state.log.find(x => x.date === date); if (e && e.habits[h.id]) hd++; }
+      if (isExpected(h, date)) { hp++; const e = logMap[date]; if (e && e.habits[h.id]) hd++; }
     });
     const p = hp > 0 ? Math.round(hd / hp * 100) : 0;
     if (hp > 0 && p < worstPct) { worstPct = p; worstHabit = h; }

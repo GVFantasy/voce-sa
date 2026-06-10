@@ -39,7 +39,7 @@ export function buildHabitsFromCfg() {
     });
   }
 
-  if (areas.includes('mente') && (state.userCfg.aprender || []).length) {
+  if (areas.includes('mente')) {
     const estudoDias = state.userCfg.estudoDias || [0, 1, 3];
     const daysLabel = estudoDias.map(d => DLABELS[d]).join(', ');
     state.userHabits.push({

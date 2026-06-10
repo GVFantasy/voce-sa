@@ -99,6 +99,7 @@ export async function saveDay() {
     const { error } = await sb.from('checkins').upsert({
       user_id: state.currentUser.id, date: todayKey(),
       habits: state.ts.habits, energy: state.ts.energy, nota: state.ts.nota,
+      idiomDetails: state.ts.idiomDetails,
       plan_id: getActivePlanId(),
     }, { onConflict: 'user_id,date' });
     btn.disabled = false; btn.textContent = 'Salvar check-in';
@@ -116,7 +117,7 @@ export async function saveDay() {
     setSyncStatus('err', 'Sem conexão');
     showToast('Check-in salvo localmente. Sem conexão com o servidor.', 'info');
   }
-  if (newStreak > 0 && newStreak >= prevStreak) showBoom(newStreak);
+  if (newStreak > prevStreak) showBoom(newStreak);
   const { renderDashboard } = await import('./dashboard.js');
   const { renderHistorico } = await import('./historico.js');
   const { renderConquistas } = await import('./conquistas.js');
@@ -125,12 +126,13 @@ export async function saveDay() {
 
 export function renderWeeklyReview() {
   const dates = getPeriodDates('semana'); let html = '';
+  const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   state.userHabits.forEach(h => {
     let done = 0, possible = 0;
     dates.forEach(date => {
       if (isExpected(h, date)) {
         possible++;
-        const e = state.log.find(x => x.date === date);
+        const e = logMap[date];
         if (e && e.habits[h.id]) done++;
       }
     });

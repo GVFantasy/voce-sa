@@ -44,7 +44,7 @@ body.dark .habit-extra-tag{background:#7A4A00}
 /* dark: nota, reflexão */
 body.dark .reflection-q{color:var(--cinza)}
 /* dark: histórico */
-body.dark .hi-note{color:var(--cinza)}
+body.dark .hi-meta{color:var(--cinza)}
 /* dark: perfil */
 body.dark .prof-section-title{color:var(--cinza)}
 body.dark .toggle-switch{background:#3A3A3C}
