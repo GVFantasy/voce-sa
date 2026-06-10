@@ -50,12 +50,12 @@
   <div class="ob-wrap">
     <div class="ob-progress" id="ob-progress"></div>
 
-    <!-- Step 1: Boas-vindas + Situação -->
+    <!-- Step 1: Situação -->
     <div class="ob-step on" id="obs-1">
       <div style="text-align:center;padding:20px 0 16px">
         <div style="font-size:44px;margin-bottom:12px">🚀</div>
         <div class="ob-question" style="text-align:center">Bem-vindo ao Você S.A.</div>
-        <div class="ob-hint" style="text-align:center">Seu sistema de desenvolvimento pessoal de 12 meses. Vamos montar seu plano em menos de 2 minutos.</div>
+        <div class="ob-hint" style="text-align:center">Seu sistema de desenvolvimento pessoal de 12 meses. Vamos montar seu plano em menos de 3 minutos.</div>
       </div>
       <div class="ob-question" style="font-size:18px;margin-bottom:5px">Como está sua vida hoje?</div>
       <div class="ob-hint">Escolha o que mais se encaixa agora.</div>
@@ -76,7 +76,6 @@
       <div class="ob-options" id="ob-areas">
         <button class="ob-option" data-val="corpo" onclick="obToggleArea(this)"><span class="ob-option-icon">🏃</span><div><div style="font-weight:600">Corpo</div><div style="font-size:11px;color:var(--cinza)">Saúde, energia, exercício</div></div></button>
         <button class="ob-option" data-val="mente" onclick="obToggleArea(this)"><span class="ob-option-icon">🧠</span><div><div style="font-weight:600">Mente</div><div style="font-size:11px;color:var(--cinza)">Estudo, idiomas, leitura</div></div></button>
-        <button class="ob-option" data-val="negocio" onclick="obToggleArea(this)"><span class="ob-option-icon">💼</span><div><div style="font-weight:600">Negócio</div><div style="font-size:11px;color:var(--cinza)">Empreendedorismo, carreira</div></div></button>
         <button class="ob-option" data-val="financas" onclick="obToggleArea(this)"><span class="ob-option-icon">💰</span><div><div style="font-weight:600">Finanças</div><div style="font-size:11px;color:var(--cinza)">Investimentos, controle</div></div></button>
         <button class="ob-option" data-val="tempo" onclick="obToggleArea(this)"><span class="ob-option-icon">⏱</span><div><div style="font-weight:600">Tempo</div><div style="font-size:11px;color:var(--cinza)">Rotina, produtividade</div></div></button>
         <button class="ob-option" data-val="relacoes" onclick="obToggleArea(this)"><span class="ob-option-icon">❤️</span><div><div style="font-weight:600">Relações</div><div style="font-size:11px;color:var(--cinza)">Família, social, amor</div></div></button>
@@ -86,7 +85,6 @@
       <div class="ob-options" id="ob-metas" style="grid-template-columns:1fr">
         <button class="ob-option ob-option-full" data-val="corpo" onclick="obSingleMeta(this)"><span class="ob-option-icon">💪</span><div><div style="font-weight:600">Ter um corpo saudável e com energia</div></div></button>
         <button class="ob-option ob-option-full" data-val="idioma" onclick="obSingleMeta(this)"><span class="ob-option-icon">🗣️</span><div><div style="font-weight:600">Falar um novo idioma com confiança</div></div></button>
-        <button class="ob-option ob-option-full" data-val="negocio" onclick="obSingleMeta(this)"><span class="ob-option-icon">📈</span><div><div style="font-weight:600">Crescer meu negócio ou carreira</div></div></button>
         <button class="ob-option ob-option-full" data-val="rotina" onclick="obSingleMeta(this)"><span class="ob-option-icon">⏱</span><div><div style="font-weight:600">Ter uma rotina organizada e consistente</div></div></button>
         <button class="ob-option ob-option-full" data-val="conhecimento" onclick="obSingleMeta(this)"><span class="ob-option-icon">🧠</span><div><div style="font-weight:600">Aprender habilidades que me diferenciam</div></div></button>
         <button class="ob-option ob-option-full" data-val="equilibrio" onclick="obSingleMeta(this)"><span class="ob-option-icon">⚖️</span><div><div style="font-weight:600">Ter mais equilíbrio e qualidade de vida</div></div></button>
@@ -94,57 +92,112 @@
       <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(2)">←</button><button class="ob-btn-next" id="ob-next-2" onclick="obNext(2)" disabled>Continuar →</button></div>
     </div>
 
-    <!-- Step 3: Rotina básica -->
+    <!-- Step 3: Idiomas -->
     <div class="ob-step" id="obs-3">
-      <div class="ob-question">Quando você vai praticar?</div>
-      <div class="ob-hint">Configure os dias para cada hábito.</div>
-      <div id="ob-treino-section" style="display:none">
-        <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px">Dias de treino</div>
-        <div class="ob-days-grid" id="ob-treino-dias">
+      <div class="ob-question">Qual idioma você quer aprender?</div>
+      <div class="ob-hint">Escolha um para começar. Você pode adicionar mais em Perfil depois.</div>
+      <div class="ob-options" id="ob-idioma-opts">
+        <button class="ob-option" data-val="ingles" onclick="obToggleIdioma(this)"><span class="ob-option-icon">🇬🇧</span><div><div style="font-weight:600">Inglês</div></div></button>
+        <button class="ob-option" data-val="espanhol" onclick="obToggleIdioma(this)"><span class="ob-option-icon">🇪🇸</span><div><div style="font-weight:600">Espanhol</div></div></button>
+        <button class="ob-option" data-val="alemao" onclick="obToggleIdioma(this)"><span class="ob-option-icon">🇩🇪</span><div><div style="font-weight:600">Alemão</div></div></button>
+        <button class="ob-option" data-val="frances" onclick="obToggleIdioma(this)"><span class="ob-option-icon">🇫🇷</span><div><div style="font-weight:600">Francês</div></div></button>
+        <button class="ob-option" data-val="italiano" onclick="obToggleIdioma(this)"><span class="ob-option-icon">🇮🇹</span><div><div style="font-weight:600">Italiano</div></div></button>
+        <button class="ob-option" data-val="japones" onclick="obToggleIdioma(this)"><span class="ob-option-icon">🇯🇵</span><div><div style="font-weight:600">Japonês</div></div></button>
+      </div>
+      <div class="ob-question" style="font-size:17px;margin-top:16px;margin-bottom:5px">Quantos dias por semana?</div>
+      <div class="ob-hint">Consistência diária funciona melhor para idiomas.</div>
+      <div class="ob-days-grid" id="ob-idioma-dias-3">
+        <button class="ob-day-btn on" data-val="0" onclick="obToggleDay('idioma',this)">Dom</button>
+        <button class="ob-day-btn on" data-val="1" onclick="obToggleDay('idioma',this)">Seg</button>
+        <button class="ob-day-btn on" data-val="2" onclick="obToggleDay('idioma',this)">Ter</button>
+        <button class="ob-day-btn on" data-val="3" onclick="obToggleDay('idioma',this)">Qua</button>
+        <button class="ob-day-btn on" data-val="4" onclick="obToggleDay('idioma',this)">Qui</button>
+        <button class="ob-day-btn on" data-val="5" onclick="obToggleDay('idioma',this)">Sex</button>
+        <button class="ob-day-btn on" data-val="6" onclick="obToggleDay('idioma',this)">Sáb</button>
+      </div>
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(3)">←</button><button class="ob-btn-next" id="ob-next-3" onclick="obNext(3)" disabled>Continuar →</button></div>
+    </div>
+
+    <!-- Step 4: Rotina base -->
+    <div class="ob-step" id="obs-4">
+      <div class="ob-question">Sua rotina base</div>
+      <div class="ob-hint">Essas metas guiam seu plano — ajuste quando quiser em Perfil.</div>
+
+      <div style="font-size:13px;font-weight:600;color:var(--preto);margin:16px 0 8px">🌙 Meta de sono por noite</div>
+      <div class="ob-chips" id="ob-sono-chips">
+        <button class="ob-chip" data-val="6" onclick="obSonoMeta(this)">6h</button>
+        <button class="ob-chip on" data-val="7" onclick="obSonoMeta(this)">7h</button>
+        <button class="ob-chip" data-val="8" onclick="obSonoMeta(this)">8h</button>
+        <button class="ob-chip" data-val="9" onclick="obSonoMeta(this)">9h</button>
+      </div>
+
+      <div id="ob-treino-section-4" style="display:none">
+        <div style="font-size:13px;font-weight:600;color:var(--preto);margin:16px 0 8px">🏋️ Dias de treino</div>
+        <div class="ob-days-grid" id="ob-treino-dias-4">
           <button class="ob-day-btn" data-val="0" onclick="obToggleDay('treino',this)">Dom</button>
           <button class="ob-day-btn" data-val="1" onclick="obToggleDay('treino',this)">Seg</button>
-          <button class="ob-day-btn" data-val="2" onclick="obToggleDay('treino',this)">Ter</button>
+          <button class="ob-day-btn on" data-val="2" onclick="obToggleDay('treino',this)">Ter</button>
           <button class="ob-day-btn" data-val="3" onclick="obToggleDay('treino',this)">Qua</button>
-          <button class="ob-day-btn" data-val="4" onclick="obToggleDay('treino',this)">Qui</button>
+          <button class="ob-day-btn on" data-val="4" onclick="obToggleDay('treino',this)">Qui</button>
           <button class="ob-day-btn" data-val="5" onclick="obToggleDay('treino',this)">Sex</button>
-          <button class="ob-day-btn" data-val="6" onclick="obToggleDay('treino',this)">Sáb</button>
+          <button class="ob-day-btn on" data-val="6" onclick="obToggleDay('treino',this)">Sáb</button>
         </div>
       </div>
-      <div id="ob-estudo-section" style="display:none">
-        <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px">Dias de estudo</div>
-        <div class="ob-days-grid" id="ob-estudo-dias">
+
+      <div id="ob-estudo-section-4" style="display:none">
+        <div style="font-size:13px;font-weight:600;color:var(--preto);margin:16px 0 8px">📚 Meta diária de estudo</div>
+        <div class="ob-chips" id="ob-estudo-meta-chips">
+          <button class="ob-chip" data-val="15" onclick="obEstudoMeta(this)">15min</button>
+          <button class="ob-chip on" data-val="30" onclick="obEstudoMeta(this)">30min</button>
+          <button class="ob-chip" data-val="45" onclick="obEstudoMeta(this)">45min</button>
+          <button class="ob-chip" data-val="60" onclick="obEstudoMeta(this)">1h</button>
+          <button class="ob-chip" data-val="90" onclick="obEstudoMeta(this)">1h30</button>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--cinza);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em">Dias de estudo</div>
+        <div class="ob-days-grid" id="ob-estudo-dias-4">
           <button class="ob-day-btn" data-val="0" onclick="obToggleDay('estudo',this)">Dom</button>
-          <button class="ob-day-btn" data-val="1" onclick="obToggleDay('estudo',this)">Seg</button>
+          <button class="ob-day-btn on" data-val="1" onclick="obToggleDay('estudo',this)">Seg</button>
           <button class="ob-day-btn" data-val="2" onclick="obToggleDay('estudo',this)">Ter</button>
-          <button class="ob-day-btn" data-val="3" onclick="obToggleDay('estudo',this)">Qua</button>
+          <button class="ob-day-btn on" data-val="3" onclick="obToggleDay('estudo',this)">Qua</button>
           <button class="ob-day-btn" data-val="4" onclick="obToggleDay('estudo',this)">Qui</button>
-          <button class="ob-day-btn" data-val="5" onclick="obToggleDay('estudo',this)">Sex</button>
+          <button class="ob-day-btn on" data-val="5" onclick="obToggleDay('estudo',this)">Sex</button>
           <button class="ob-day-btn" data-val="6" onclick="obToggleDay('estudo',this)">Sáb</button>
         </div>
       </div>
-      <div>
-        <div style="font-size:12px;font-weight:600;color:var(--preto);margin-bottom:8px">Dias de idioma</div>
-        <div class="ob-days-grid" id="ob-idioma-dias">
-          <button class="ob-day-btn on" data-val="0" onclick="obToggleDay('idioma',this)">Dom</button>
-          <button class="ob-day-btn on" data-val="1" onclick="obToggleDay('idioma',this)">Seg</button>
-          <button class="ob-day-btn on" data-val="2" onclick="obToggleDay('idioma',this)">Ter</button>
-          <button class="ob-day-btn on" data-val="3" onclick="obToggleDay('idioma',this)">Qua</button>
-          <button class="ob-day-btn on" data-val="4" onclick="obToggleDay('idioma',this)">Qui</button>
-          <button class="ob-day-btn on" data-val="5" onclick="obToggleDay('idioma',this)">Sex</button>
-          <button class="ob-day-btn on" data-val="6" onclick="obToggleDay('idioma',this)">Sáb</button>
-        </div>
-      </div>
-      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(3)">←</button><button class="ob-btn-next" onclick="obNext(3)">Criar meu plano →</button></div>
+
+      <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(4)">←</button><button class="ob-btn-next" onclick="obNext(4)">Criar meu plano →</button></div>
     </div>
 
-    <!-- Loading -->
-    <div class="ob-step" id="obs-4">
+    <!-- Step 5: Loading -->
+    <div class="ob-step" id="obs-5">
       <div style="text-align:center;padding:48px 0">
         <div style="font-size:44px;margin-bottom:18px">⚙️</div>
         <div class="title-section" style="margin-bottom:8px">Montando seu plano...</div>
         <div style="font-size:13px;color:var(--cinza)" id="ob-generating"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- KICKOFF -->
+<div id="pg-kickoff" style="display:none;position:fixed;inset:0;background:var(--roxo);z-index:1000;overflow-y:auto;flex-direction:column">
+  <div style="padding:calc(48px + env(safe-area-inset-top)) 24px calc(48px + env(safe-area-inset-bottom))">
+    <div style="font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px">Você S.A. · Plano de 12 meses</div>
+    <div id="kickoff-title" style="font-family:'DM Serif Display',serif;font-size:28px;color:#fff;line-height:1.25;margin-bottom:10px"></div>
+    <div id="kickoff-sub" style="font-size:14px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:20px"></div>
+    <div id="kickoff-areas" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px"></div>
+    <div style="background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+      <div style="font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Q1 — Primeiros 3 meses</div>
+      <div id="kickoff-q1" style="font-size:13px;color:rgba(255,255,255,.88);line-height:1.8"></div>
+    </div>
+    <div style="background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;margin-bottom:28px">
+      <div style="font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Seus hábitos base</div>
+      <div id="kickoff-habits"></div>
+    </div>
+    <button onclick="startFromKickoff()" style="width:100%;padding:16px;border-radius:14px;border:none;background:#fff;color:var(--roxo);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.2px">
+      Começar minha jornada →
+    </button>
+    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.45);margin-top:12px">Ajuste qualquer detalhe em Perfil → Ajustes táticos</div>
   </div>
 </div>
 
@@ -215,6 +268,7 @@
         <button class="btn-primary" style="margin-top:12px" onclick="saveWeeklyReview()">Salvar revisão</button>
       </div>
     </div>
+    <div id="okr-focus-strip"></div>
     <div class="sec-label">Hábitos de hoje</div>
     <div id="habit-list"></div>
     <div class="sec-label">Energia</div>
@@ -234,6 +288,7 @@
   <div id="pg-dashboard" class="page" style="display:none">
     <div id="dash-hero-wrap"></div>
     <div id="dash-quick-stats" class="dash-quick-stats"></div>
+    <div id="dash-okr-wrap"></div>
     <div id="dash-trim-wrap"></div>
     <div id="dash-focus-wrap"></div>
     <hr class="dash-divider">
@@ -258,6 +313,7 @@
   <!-- OKRs -->
   <div id="pg-okrs" class="page" style="display:none">
     <div id="q-badge"></div>
+  <div id="okr-habit-notif"></div>
     <div id="user-mission" style="font-size:13px;color:var(--cinza);margin-bottom:14px;font-style:italic;line-height:1.5"></div>
     <div id="pillar-list"></div>
   </div>

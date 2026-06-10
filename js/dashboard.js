@@ -67,7 +67,7 @@ export function generateDashboardInsight() {
   return { msg, sub, color, label, streak, pct7, worstHabit, worstPct, trimPct, trimPassed, trimTotal, aq, ql };
 }
 
-export function renderDashboard() {
+export async function renderDashboard() {
   const today = todayKey();
   const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   const insight = generateDashboardInsight();
@@ -86,6 +86,18 @@ export function renderDashboard() {
   } else {
     document.getElementById('dash-focus-wrap').innerHTML = '';
   }
+  // OKR do trimestre ativo
+  const { getActiveObjective } = await import('./okrs.js');
+  const obj = getActiveObjective();
+  const dashOkrEl = document.getElementById('dash-okr-wrap');
+  if (dashOkrEl && obj) {
+    dashOkrEl.innerHTML = `<div class="dash-okr-card" onclick="nav('okrs',null)">
+      <div class="dash-okr-top">Q${obj.aq} · ${obj.areaName} · Foco do trimestre</div>
+      <div class="dash-okr-label">${obj.label}</div>
+      <div class="dash-okr-krs">${obj.krs.map(k => `<span>→ ${k}</span>`).join('  ')}</div>
+    </div>`;
+  }
+
   document.getElementById('dash-trim-wrap').innerHTML = `
     <div class="trim-bar-wrap">
       <div class="trim-label">
@@ -121,11 +133,6 @@ export function renderDashboard() {
   const streak = calcStreak(state.log); const best = getBestStreak(state.log);
   const eVals = state.log.filter(e => e.energy > 0).map(e => e.energy);
   const avgE = eVals.length ? Math.round(eVals.reduce((a, b) => a + b, 0) / eVals.length * 10) / 10 : 0;
-  document.getElementById('dash-stats').innerHTML = `
-    <div class="stat"><div class="stat-label">Conclusão</div><div class="stat-val">${pct}%</div><div class="stat-sub">${td}/${tp} hábitos</div></div>
-    <div class="stat"><div class="stat-label">Streak</div><div class="stat-val">${streak}d</div><div class="stat-sub">melhor: ${best}d</div></div>
-    <div class="stat"><div class="stat-label">Registros</div><div class="stat-val">${state.log.length}</div><div class="stat-sub">de 365</div></div>
-    <div class="stat"><div class="stat-label">Energia</div><div class="stat-val">${avgE > 0 ? ENERGY[Math.round(avgE)] : '—'}</div><div class="stat-sub">${avgE > 0 ? avgE.toFixed(1) + '/3' : '—'}</div></div>`;
   const hDays = []; for (let i = 83; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); hDays.push(dateKey(d)); }
 
   // labels de mês acima do heatmap
@@ -168,7 +175,6 @@ export function renderDashboard() {
     const dow = new Date(date + 'T12:00:00').getDay();
     return `<div class="bc-col"><div class="bc-val">${entry ? done : ''}</div><div class="bc-bar" style="height:${Math.max(done / (state.userHabits.length || 1) * 68, 2)}px;background:${color}"></div><div class="bc-label">${DLABELS[dow]}</div></div>`;
   }).join('');
-  renderEnergyChart();
   const showDots = state.period === 'semana';
   document.getElementById('dash-habits').innerHTML = state.userHabits.map(h => {
     let hd = 0, hp = 0, extras = 0;

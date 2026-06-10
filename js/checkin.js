@@ -1,4 +1,5 @@
 import { state, ENERGY, ECLASS, REFLECTIONS } from './state.js';
+import { getActiveObjective } from './okrs.js';
 import { sb, setSyncStatus } from './db.js';
 import { todayKey, isExpected, showToast, calcStreak, getPeriodDates } from './utils.js';
 import { getActivePlanId } from './plans.js';
@@ -15,6 +16,20 @@ export function renderCheckin() {
   document.getElementById('sub-date').textContent =
     new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   document.getElementById('streak-val').textContent = calcStreak(state.log) + 'd';
+
+  // OKR focus strip
+  const okrFocusEl = document.getElementById('okr-focus-strip');
+  if (okrFocusEl) {
+    const obj = getActiveObjective();
+    okrFocusEl.innerHTML = obj
+      ? `<div class="okr-focus-strip">
+          <div class="okr-focus-top">Q${obj.aq} · ${obj.areaName}</div>
+          <div class="okr-focus-label">${obj.label}</div>
+          <div class="okr-focus-krs">${obj.krs.map(k => `<span>→ ${k}</span>`).join('')}</div>
+        </div>`
+      : '';
+  }
+
   document.getElementById('reflection-q').textContent = REFLECTIONS[new Date().getDay() % REFLECTIONS.length];
   if (new Date().getDay() === 5) {
     document.getElementById('weekly-review-banner').style.display = 'block';

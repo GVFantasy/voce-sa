@@ -850,3 +850,62 @@ body.dark .mais-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
   65%{transform:scale(.98)}
   100%{transform:scale(1)}
 }
+
+/* ========================================================
+   KICKOFF SCREEN
+   ======================================================== */
+.kickoff-area-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;
+  background:rgba(255,255,255,.18);
+  font-size:12px;font-weight:600;color:#fff;
+}
+.kickoff-q1-item{margin-bottom:4px}
+.kickoff-habit-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);
+  font-size:13px;color:#fff;
+}
+.kickoff-habit-row:last-child{border-bottom:none}
+.kickoff-habit-days{margin-left:auto;font-size:11px;color:rgba(255,255,255,.55)}
+
+/* ========================================================
+   OKR FOCUS STRIP (check-in)
+   ======================================================== */
+.okr-focus-strip{
+  background:var(--roxo-bg);border:1px solid #B8B3F4;
+  border-radius:var(--radius-card);padding:12px 14px;
+  margin-bottom:12px;cursor:pointer;
+}
+.okr-focus-top{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--roxo);margin-bottom:4px;
+}
+.okr-focus-label{
+  font-size:14px;font-weight:600;color:var(--preto);margin-bottom:5px;
+}
+.okr-focus-krs{
+  display:flex;flex-direction:column;gap:2px;
+}
+.okr-focus-krs span{font-size:11px;color:var(--cinza)}
+body.dark .okr-focus-strip{background:#1e1b3a;border-color:#534AB7}
+body.dark .okr-focus-label{color:var(--preto)}
+
+/* ========================================================
+   OKR CARD (dashboard)
+   ======================================================== */
+.dash-okr-card{
+  background:var(--roxo-bg);border:1px solid #B8B3F4;
+  border-radius:var(--radius-card);padding:13px 16px;
+  margin-bottom:12px;cursor:pointer;
+}
+.dash-okr-top{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--roxo);margin-bottom:4px;
+}
+.dash-okr-label{
+  font-size:14px;font-weight:600;color:var(--preto);margin-bottom:5px;
+}
+.dash-okr-krs{font-size:11px;color:var(--cinza)}
+body.dark .dash-okr-card{background:#1e1b3a;border-color:#534AB7}
+body.dark .dash-okr-label{color:var(--preto)}

@@ -28,7 +28,7 @@ export function buildHabitsFromCfg() {
     const treinoDias = state.userCfg.treinoDias || [2, 4, 6];
     const daysLabel = treinoDias.map(d => ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][d]).join(', ');
     state.userHabits.push({
-      id: 'treino', icon: '🥊', name: 'Treino', days: daysLabel,
+      id: 'treino', icon: '🏋️', name: 'Treino', days: daysLabel,
       allDays: false, weekdays: treinoDias, hasDetail: true,
       detailOptions: {
         time: ['30min', '45min', '60min', '90min'],
@@ -52,10 +52,4 @@ export function buildHabitsFromCfg() {
     });
   }
 
-  if (areas.includes('negocio')) {
-    state.userHabits.push({
-      id: 'negocio', icon: '💼', name: 'Foco no negócio',
-      days: 'seg a sex', allDays: false, weekdays: [1, 2, 3, 4, 5], hasDetail: false,
-    });
-  }
 }

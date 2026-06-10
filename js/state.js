@@ -31,7 +31,7 @@ export const ACHIEVEMENTS = [
   { id: 'semana1',  icon: '🔥', name: '7 dias',           desc: '7 dias consecutivos',         check: (l, s) => s >= 7 },
   { id: 'mes1',     icon: '⚡', name: '30 dias',          desc: '30 dias consecutivos',        check: (l, s) => s >= 30 },
   { id: 'mes3',     icon: '💎', name: '90 dias',          desc: '90 dias consecutivos',        check: (l, s) => s >= 90 },
-  { id: 'treino10', icon: '🥊', name: '10 treinos',       desc: '10 treinos feitos',           check: (l, s) => l.filter(e => e.habits && e.habits.treino).length >= 10 },
+  { id: 'treino10', icon: '🏋️', name: '10 treinos',       desc: '10 treinos feitos',           check: (l, s) => l.filter(e => e.habits && e.habits.treino).length >= 10 },
   { id: 'check30',  icon: '📅', name: '30 registros',     desc: '30 check-ins totais',         check: (l, s) => l.length >= 30 },
   { id: 'check100', icon: '🏆', name: '100 registros',    desc: '100 check-ins totais',        check: (l, s) => l.length >= 100 },
   { id: 'perfeito', icon: '✨', name: 'Semana perfeita',  desc: 'Todos os hábitos numa semana', check: (l, s) => {
@@ -56,9 +56,9 @@ export const state = {
   ts: { habits: {}, energy: 0, nota: '', idiomDetails: {} },
   obData: {
     areas: [], exercicios: [], idiomas: [], idiomasAtivos: [], aprender: [],
-    horario: '', tempoLivre: '', corpoNivel: '', treinoDias: [],
-    idiomaDias: [0, 1, 2, 3, 4, 5, 6], estudoDias: [],
-    situation: '', meta: '', metas: [],
+    horario: '', tempoLivre: '', corpoNivel: '', treinoDias: [2, 4, 6],
+    idiomaDias: [0, 1, 2, 3, 4, 5, 6], estudoDias: [1, 3, 5],
+    situation: '', meta: '', metas: [], sonoMeta: 7, estudoMeta: 30,
   },
   pomodoro: { timer: null, seconds: 25 * 60, isRunning: false, isBreak: false, sessions: 0, subject: '' },
   reviewData: { feel: '', adjust: [] },

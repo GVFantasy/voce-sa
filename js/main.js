@@ -2,10 +2,10 @@ import { state } from './state.js';
 import { sb } from './db.js';
 import { clearFieldErr } from './utils.js';
 import { toggleAuthMode, submitAuth, signOut, afterLogin } from './auth.js';
-import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleOpt, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan } from './onboarding.js';
+import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleOpt, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
 import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
-import { renderOKRs, togglePillar } from './okrs.js';
+import { renderOKRs, togglePillar, getActiveObjective } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder } from './profile.js';
@@ -33,6 +33,11 @@ window.obSingle = obSingle;
 window.obSingleMeta = obSingleMeta;
 window.checkObStep2 = checkObStep2;
 window.generatePlan = generatePlan;
+window.obToggleIdioma = obToggleIdioma;
+window.obSonoMeta = obSonoMeta;
+window.obEstudoMeta = obEstudoMeta;
+window.showKickoff = showKickoff;
+window.startFromKickoff = startFromKickoff;
 
 window.renderCheckin = renderCheckin;
 window.toggleHabit = toggleHabit;
@@ -53,6 +58,7 @@ window.renderEnergyChart = renderEnergyChart;
 
 window.renderOKRs = renderOKRs;
 window.togglePillar = togglePillar;
+window.getActiveObjective = getActiveObjective;
 
 window.renderHistorico = renderHistorico;
 window.loadMoreHistorico = loadMoreHistorico;
