@@ -12,6 +12,8 @@ import { renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
 
 export function startApp() {
   document.getElementById('app').style.display = 'block';
+  const mainNav = document.querySelector('.main-nav');
+  if (mainNav) mainNav.style.display = '';
   document.getElementById('user-info').textContent = state.currentUser?.email?.split('@')[0] || '';
   applyDarkIfSaved(); initReminder(); loadLog();
 }
