@@ -1,8 +1,129 @@
 import { state, ENERGY, ECLASS, REFLECTIONS } from './state.js';
 import { getActiveObjective } from './okrs.js';
-import { sb, setSyncStatus } from './db.js';
-import { todayKey, isExpected, showToast, calcStreak, getPeriodDates } from './utils.js';
+import { sb, setSyncStatus, saveCfgLocal, saveCfgRemote } from './db.js';
+import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, getActiveQ } from './utils.js';
 import { getActivePlanId } from './plans.js';
+
+const QUARTERLY_TASKS = {
+  corpo: {
+    1: [
+      { id: 'corpo_q1_a', text: 'Definir horário fixo de treino na semana', hint: 'Trate como compromisso — bloqueie na agenda' },
+      { id: 'corpo_q1_b', text: 'Remover telas 30 min antes de dormir', hint: 'Configure modo foco automático no celular' },
+      { id: 'corpo_q1_c', text: 'Preparar roupa e material de treino na véspera', hint: 'Remove a fricção do dia seguinte' },
+    ],
+    2: [
+      { id: 'corpo_q2_a', text: 'Medir evolução: fotos, medidas ou performance', hint: 'Compare com o início do plano' },
+      { id: 'corpo_q2_b', text: 'Adicionar mais 1 dia de treino à semana', hint: 'Se já está no ritmo, hora de elevar' },
+    ],
+    3: [
+      { id: 'corpo_q3_a', text: 'Participar de evento esportivo ou desafio', hint: 'Corrida, campeonato, desafio de 30 dias' },
+      { id: 'corpo_q3_b', text: 'Revisar protocolo de recuperação', hint: 'Sono, hidratação, alimentação — o básico sustenta o avanço' },
+    ],
+    4: [
+      { id: 'corpo_q4_a', text: 'Registrar evolução física do ano', hint: 'Compare hoje com o início — a diferença vai te surpreender' },
+    ],
+  },
+  mente: {
+    1: [
+      { id: 'mente_q1_a', text: 'Configurar app de idioma com meta diária', hint: 'Duolingo, Anki, ou similar — 10 min já conta' },
+      { id: 'mente_q1_b', text: 'Escolher e comprar o próximo livro', hint: 'Tenha sempre um na fila' },
+      { id: 'mente_q1_c', text: 'Alcançar 30 dias seguidos de estudo', hint: 'O streak importa mais que a duração' },
+    ],
+    2: [
+      { id: 'mente_q2_a', text: 'Ter uma conversa básica no idioma escolhido', hint: 'App, sala de prática ou com nativo' },
+      { id: 'mente_q2_b', text: 'Consumir 30 min de conteúdo no idioma sem parar', hint: 'Série, podcast ou livro' },
+    ],
+    3: [
+      { id: 'mente_q3_a', text: 'Usar o idioma em situação real', hint: 'Email, reunião, viagem ou trabalho' },
+    ],
+    4: [
+      { id: 'mente_q4_a', text: 'Avaliar evolução no idioma — o que mudou?', hint: 'Reflita e ajuste para o próximo ano' },
+    ],
+  },
+  financas: {
+    1: [
+      { id: 'fin_q1_a', text: 'Mapear todas as despesas do mês atual', hint: 'Planilha, Notion ou app de finanças — qualquer um' },
+      { id: 'fin_q1_b', text: 'Definir % fixo do salário para guardar', hint: 'Comece com 10% — o hábito importa mais que o valor' },
+      { id: 'fin_q1_c', text: 'Abrir conta de investimento se ainda não tem', hint: 'Nubank, XP, NuInvest, Rico — todos gratuitos' },
+    ],
+    2: [
+      { id: 'fin_q2_a', text: 'Cortar ou renegociar 1 gasto desnecessário', hint: 'Assinatura esquecida? Serviço que não usa?' },
+      { id: 'fin_q2_b', text: 'Estudar um produto financeiro novo', hint: 'CDB, Tesouro, FII ou ações — entender o que é' },
+    ],
+    3: [
+      { id: 'fin_q3_a', text: 'Calcular patrimônio acumulado até agora', hint: 'Saldo + investimentos + ativos' },
+    ],
+    4: [
+      { id: 'fin_q4_a', text: 'Balanço financeiro do ano — meta atingida?', hint: 'Compare com janeiro e planeje o próximo ano' },
+    ],
+  },
+  tempo: {
+    1: [
+      { id: 'tempo_q1_a', text: 'Criar blocos fixos de foco na agenda', hint: 'Mínimo: 90 min de deep work pela manhã' },
+      { id: 'tempo_q1_b', text: 'Agendar revisão semanal toda sexta', hint: '30 min para planejar a semana seguinte' },
+      { id: 'tempo_q1_c', text: 'Eliminar 1 atividade que não gera retorno', hint: 'O que você faz por hábito sem resultado real?' },
+    ],
+    2: [
+      { id: 'tempo_q2_a', text: 'Experimentar a técnica Pomodoro por 2 semanas', hint: 'Use o timer do app — 25 min foco, 5 min pausa' },
+      { id: 'tempo_q2_b', text: 'Delegar ou terceirizar 1 tarefa operacional', hint: 'Seu tempo é para o que só você pode fazer' },
+    ],
+    3: [
+      { id: 'tempo_q3_a', text: 'Tirar 3–5 dias de férias reais sem trabalho', hint: 'Descanso intencional é produtividade a longo prazo' },
+    ],
+    4: [
+      { id: 'tempo_q4_a', text: 'Auditar onde foi o seu tempo este ano', hint: 'O que ganhou espaço? O que você abre mão para o próximo?' },
+    ],
+  },
+  relacoes: {
+    1: [
+      { id: 'rel_q1_a', text: 'Listar 3 pessoas que quer cultivar este trimestre', hint: 'Família, amigos próximos, mentores' },
+      { id: 'rel_q1_b', text: 'Agendar 1 encontro com cada uma delas', hint: 'Uma data marcada vale mais que boa intenção' },
+      { id: 'rel_q1_c', text: 'Reduzir scroll passivo em redes sociais em 30%', hint: 'Mais presença real, menos consumo automático' },
+    ],
+    2: [
+      { id: 'rel_q2_a', text: 'Entrar em grupo ou comunidade com propósito', hint: 'Esporte, estudo, trabalho voluntário' },
+      { id: 'rel_q2_b', text: 'Ter 1 conversa difícil que está adiando', hint: 'Resolver o que está travado libera energia' },
+    ],
+    3: [
+      { id: 'rel_q3_a', text: 'Retomar contato com alguém que se distanciou', hint: 'Uma mensagem simples já muda o suficiente' },
+    ],
+    4: [
+      { id: 'rel_q4_a', text: 'Celebrar o ano com as pessoas certas', hint: 'Compartilhe sua evolução com quem importa' },
+    ],
+  },
+};
+
+function renderQuarterlyTasks() {
+  const el = document.getElementById('quarterly-tasks-list');
+  if (!el) return;
+  const aq = getActiveQ(state.userCfg.startDate);
+  const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
+  const doneTasks = state.userCfg.tasksDone || {};
+  const tasks = areas.flatMap(area => (QUARTERLY_TASKS[area]?.[aq] || []).map(t => ({ ...t, area })));
+  if (!tasks.length) { el.innerHTML = ''; return; }
+  const doneCount = tasks.filter(t => doneTasks[t.id]).length;
+  el.innerHTML = `<div class="qtask-section">
+    <div class="qtask-header"><span>Ações do trimestre · Q${aq}</span><span class="qtask-count">${doneCount}/${tasks.length}</span></div>
+    ${tasks.map(t => {
+      const isDone = !!doneTasks[t.id];
+      return `<div class="qtask ${isDone ? 'done' : ''}" onclick="toggleQTask('${t.id}')">
+        <div class="qtask-check-box">${isDone ? '✓' : ''}</div>
+        <div class="qtask-body">
+          <div class="qtask-text">${t.text}</div>
+          ${t.hint ? `<div class="qtask-hint">${t.hint}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+export async function toggleQTask(taskId) {
+  if (!state.userCfg.tasksDone) state.userCfg.tasksDone = {};
+  state.userCfg.tasksDone[taskId] = !state.userCfg.tasksDone[taskId];
+  saveCfgLocal();
+  saveCfgRemote();
+  renderQuarterlyTasks();
+}
 
 export function renderCheckin() {
   const today = todayKey();
@@ -30,6 +151,7 @@ export function renderCheckin() {
       : '';
   }
 
+  renderQuarterlyTasks();
   document.getElementById('reflection-q').textContent = REFLECTIONS[new Date().getDay() % REFLECTIONS.length];
   if (new Date().getDay() === 5) {
     document.getElementById('weekly-review-banner').style.display = 'block';

@@ -909,3 +909,26 @@ body.dark .okr-focus-label{color:var(--preto)}
 .dash-okr-krs{font-size:11px;color:var(--cinza)}
 body.dark .dash-okr-card{background:#1e1b3a;border-color:#534AB7}
 body.dark .dash-okr-label{color:var(--preto)}
+
+/* ========================================================
+   DARK MODE — dash-focus
+   ======================================================== */
+body.dark .dash-focus{background:#1e1b3a;border-color:#534AB7}
+body.dark .dash-focus-text{color:var(--preto)}
+
+/* ========================================================
+   TAREFAS DO TRIMESTRE (check-in)
+   ======================================================== */
+.qtask-section{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:12px 14px;margin-bottom:16px}
+.qtask-header{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--cinza);margin-bottom:10px}
+.qtask-count{font-size:11px;font-weight:600;color:var(--roxo);background:var(--roxo-bg);padding:2px 8px;border-radius:10px;text-transform:none;letter-spacing:0}
+.qtask{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--borda);cursor:pointer;transition:opacity .15s}
+.qtask:last-child{border-bottom:none;padding-bottom:2px}
+.qtask.done{opacity:.5}
+.qtask-check-box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--borda);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--roxo);margin-top:2px;transition:all .15s}
+.qtask.done .qtask-check-box{background:var(--roxo);border-color:var(--roxo);color:#fff}
+.qtask-text{font-size:13px;font-weight:500;color:var(--preto);line-height:1.4}
+.qtask.done .qtask-text{text-decoration:line-through;color:var(--cinza)}
+.qtask-hint{font-size:11px;color:var(--cinza);margin-top:2px;line-height:1.4}
+body.dark .qtask-check-box{border-color:#3A3A3C}
+body.dark .qtask.done .qtask-check-box{background:var(--roxo);border-color:var(--roxo)}

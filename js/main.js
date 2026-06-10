@@ -3,7 +3,7 @@ import { sb } from './db.js';
 import { clearFieldErr } from './utils.js';
 import { toggleAuthMode, submitAuth, signOut, afterLogin } from './auth.js';
 import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleOpt, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
-import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom } from './checkin.js';
+import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, toggleQTask } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar, getActiveObjective } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay } from './historico.js';
@@ -50,6 +50,7 @@ window.toggleReviewAdjust = toggleReviewAdjust;
 window.saveWeeklyReview = saveWeeklyReview;
 window.showBoom = showBoom;
 window.hideBoom = hideBoom;
+window.toggleQTask = toggleQTask;
 
 window.renderDashboard = renderDashboard;
 window.setPeriod = setPeriod;
