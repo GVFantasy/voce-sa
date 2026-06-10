@@ -15,6 +15,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--fundo);color:va
 body.dark{--fundo:#111112;--card:#1C1C1E;--borda:#2C2C2E;--preto:#F5F5F0;--cinza:#8E8E93;background:#111112;color:#F5F5F0;color-scheme:dark}
 body.dark .auth-input,body.dark .ob-input,body.dark .ob-textarea,body.dark .nota-area,body.dark .prof-input{background:#2C2C2E;border-color:#3A3A3C;color:#F5F5F0}
 body.dark .e-btn,body.dark .ob-option,body.dark .ob-chip,body.dark .hd-chip,body.dark .review-opt,body.dark .pomo-btn{background:#2C2C2E;border-color:#3A3A3C;color:#F5F5F0}
+body.dark .e-btn.on-low{background:#4a1212;border-color:#E24B4A;color:#ff8080}
+body.dark .e-btn.on-ok{background:#3a2e00;border-color:var(--ambar);color:#ffc040}
+body.dark .e-btn.on-high{background:#0d2218;border-color:var(--verde);color:#5ecc8a}
 body.dark .stat{background:#2C2C2E;border-color:#3A3A3C}
 /* dark: habit card */
 body.dark .habit-card.done .habit-main{background:#0d2218}
