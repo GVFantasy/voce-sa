@@ -723,3 +723,34 @@ body{padding-bottom:0}
 body.dark #pg-auth{background:var(--roxo)}
 body.dark .auth-card{background:#1C1C1E}
 body.dark .auth-card-title{color:var(--preto)}
+
+/* Conquistas — progresso */
+.achiev-prog{height:4px;background:var(--borda);border-radius:2px;margin:6px 0 2px;overflow:hidden}
+.achiev-prog-bar{height:100%;background:var(--roxo);border-radius:2px;transition:width .3s}
+.achiev-prog-txt{font-size:10px;color:var(--cinza);font-weight:500}
+
+/* Stats perfil */
+.prof-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.prof-stat{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-inner);padding:10px 6px;text-align:center}
+.prof-stat-val{font-size:16px;font-weight:700;color:var(--preto)}
+.prof-stat-label{font-size:10px;color:var(--cinza);font-weight:500;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Calendário Histórico */
+.cal-wrap{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:14px;margin-bottom:12px}
+.cal-title{font-size:13px;font-weight:600;color:var(--preto);margin-bottom:10px;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-head{font-size:10px;font-weight:600;color:var(--cinza);text-align:center;padding:2px 0}
+.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border-radius:6px;cursor:default;color:var(--cinza)}
+.cal-cell.empty{background:transparent}
+.cal-cell.cal-future{color:var(--borda)}
+.cal-cell.cal-miss{color:var(--cinza);background:var(--fundo)}
+.cal-cell.cal-ok{background:var(--suc-bg);color:var(--suc-txt);font-weight:700;cursor:pointer}
+.cal-cell.cal-warn{background:var(--warn-bg);color:var(--warn-txt);font-weight:600;cursor:pointer}
+.cal-cell.cal-low{background:#fff0f0;color:#A32D2D;cursor:pointer}
+.cal-cell.cal-today{outline:2px solid var(--roxo);outline-offset:-1px}
+.hi-day-detail{margin-top:10px}
+.hi-detail-card{background:var(--fundo);border-radius:var(--radius-inner);padding:10px 12px}
+.hi-detail-date{font-size:12px;font-weight:600;color:var(--preto);margin-bottom:6px}
+.hi-nota{font-size:12px;color:var(--cinza);font-style:italic;margin-top:6px}
+body.dark .cal-cell.cal-low{background:#4a1212;color:#ff8080}
+body.dark .cal-cell.cal-miss{background:var(--borda)}

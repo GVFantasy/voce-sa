@@ -74,16 +74,18 @@ export function getPeriodDates(p) {
 }
 
 export function calcStreak(lg) {
+  const set = new Set(lg.filter(e => Object.values(e.habits || {}).some(Boolean)).map(e => e.date));
   let s = 0; let d = new Date(); d.setDate(d.getDate() - 1);
   while (s < 365) {
-    const k = dateKey(d);
-    const e = lg.find(x => x.date === k);
-    if (!e || !Object.values(e.habits || {}).some(Boolean)) break;
+    if (!set.has(dateKey(d))) break;
     s++; d.setDate(d.getDate() - 1);
   }
-  const te = lg.find(x => x.date === todayKey());
-  if (te && Object.values(te.habits || {}).some(Boolean)) s++;
+  if (set.has(todayKey())) s++;
   return s;
+}
+
+export function sanitize(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 export function getBestStreak(lg) {

@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { sb, setSyncStatus } from './db.js';
-import { showToast, fmtDate, todayKey } from './utils.js';
+import { showToast, fmtDate, todayKey, sanitize } from './utils.js';
 
 export let newLivroTipo = 'livro';
 
@@ -63,9 +63,9 @@ export async function renderBiblioteca() {
     ).join('')}</div>`;
   }
   list.innerHTML = data.map(i => `<div class="bib-item">
-    <div class="bib-tipo">${tipoIcons[i.tipo] || '📄'} ${tipoNomes[i.tipo] || i.tipo}</div>
-    <div class="bib-titulo">${i.titulo}</div>
-    ${i.nota ? `<div class="bib-nota">${i.nota}</div>` : ''}
+    <div class="bib-tipo">${tipoIcons[i.tipo] || '📄'} ${sanitize(tipoNomes[i.tipo] || i.tipo)}</div>
+    <div class="bib-titulo">${sanitize(i.titulo)}</div>
+    ${i.nota ? `<div class="bib-nota">${sanitize(i.nota)}</div>` : ''}
     <div class="bib-date">${fmtDate(i.created_at?.slice(0, 10) || todayKey())}</div>
   </div>`).join('');
 }

@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP, ENERGY } from './state.js';
 import { saveCfgAll } from './db.js';
-import { showToast, getActiveQ, todayKey } from './utils.js';
+import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 
@@ -26,6 +26,28 @@ export function renderPerfil() {
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : '';
   const activePlan = getPlans().find(p => p.id === getActivePlanId());
   if (activePlan) document.getElementById('plan-badge').textContent = activePlan.emoji + ' ' + activePlan.name;
+
+  // Stats block
+  const totalCheckins = state.log.length;
+  const bestStreakVal = getBestStreak(state.log);
+  const currentStreakVal = calcStreak(state.log);
+  let bestHabit = null, bestHabitPct = 0;
+  if (state.log.length >= 5) {
+    state.userHabits.forEach(h => {
+      const expected = state.log.filter(e => isExpected(h, e.date));
+      const done = expected.filter(e => e.habits && e.habits[h.id]).length;
+      const pct = expected.length > 0 ? Math.round(done / expected.length * 100) : 0;
+      if (pct > bestHabitPct) { bestHabitPct = pct; bestHabit = h; }
+    });
+  }
+  const statsEl = document.getElementById('prof-stats');
+  if (statsEl) statsEl.innerHTML = `
+    <div class="prof-stat-grid">
+      <div class="prof-stat"><div class="prof-stat-val">${totalCheckins}</div><div class="prof-stat-label">check-ins</div></div>
+      <div class="prof-stat"><div class="prof-stat-val">${currentStreakVal}d</div><div class="prof-stat-label">streak atual</div></div>
+      <div class="prof-stat"><div class="prof-stat-val">${bestStreakVal}d</div><div class="prof-stat-label">melhor streak</div></div>
+      <div class="prof-stat"><div class="prof-stat-val">${bestHabit ? bestHabitPct + '%' : '—'}</div><div class="prof-stat-label">${bestHabit ? sanitize(bestHabit.icon + ' ' + bestHabit.name) : 'hábito top'}</div></div>
+    </div>`;
 }
 
 export async function savePerfil() {

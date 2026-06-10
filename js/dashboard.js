@@ -1,5 +1,5 @@
 import { state, ENERGY, DLABELS } from './state.js';
-import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ } from './utils.js';
+import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize } from './utils.js';
 
 export function generateDashboardInsight() {
   const today = todayKey(); const streak = calcStreak(state.log);
@@ -68,6 +68,7 @@ export function generateDashboardInsight() {
 
 export function renderDashboard() {
   const today = todayKey();
+  const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   const insight = generateDashboardInsight();
   document.getElementById('dash-hero-wrap').innerHTML = `
     <div class="dash-hero ${insight.color}">
@@ -79,7 +80,7 @@ export function renderDashboard() {
     document.getElementById('dash-focus-wrap').innerHTML = `
       <div class="dash-focus">
         <div class="dash-focus-label">Foco desta semana</div>
-        <div class="dash-focus-text">${insight.worstHabit.icon} ${insight.worstHabit.name} — ${insight.worstPct}% concluído. Está abaixo da meta.</div>
+        <div class="dash-focus-text">${sanitize(insight.worstHabit.icon)} ${sanitize(insight.worstHabit.name)} — ${insight.worstPct}% concluído. Está abaixo da meta.</div>
       </div>`;
   } else {
     document.getElementById('dash-focus-wrap').innerHTML = '';
@@ -97,7 +98,7 @@ export function renderDashboard() {
   const thisWeekQS = getPeriodDates('semana');
   let qsDone = 0, qsPoss = 0;
   thisWeekQS.forEach(date => {
-    const entry = state.log.find(e => e.date === date);
+    const entry = logMap[date];
     state.userHabits.forEach(h => {
       if (isExpected(h, date)) { qsPoss++; if (entry && entry.habits[h.id]) qsDone++; }
     });
@@ -112,7 +113,7 @@ export function renderDashboard() {
     <div class="dqs-item"><div class="dqs-val">${state.log.length}</div><div class="dqs-label">registros</div></div>`;
   const dates = getPeriodDates(state.period); let td = 0, tp = 0;
   dates.forEach(date => {
-    const entry = state.log.find(e => e.date === date);
+    const entry = logMap[date];
     state.userHabits.forEach(h => { if (isExpected(h, date)) { tp++; if (entry && entry.habits[h.id]) td++; } });
   });
   const pct = tp > 0 ? Math.round(td / tp * 100) : 0;
@@ -150,7 +151,7 @@ export function renderDashboard() {
   document.getElementById('heatmap').innerHTML = hDays.map(date => {
     const isToday = date === today;
     if (date > today) return `<div class="hm-cell hm-future${isToday ? ' hm-today' : ''}"></div>`;
-    const entry = state.log.find(e => e.date === date);
+    const entry = logMap[date];
     if (!entry) return `<div class="hm-cell hm-0${isToday ? ' hm-today' : ''}" title="${fmtDate(date)}"></div>`;
     const done = state.userHabits.filter(h => isExpected(h, date) && entry.habits[h.id]).length;
     const exp = state.userHabits.filter(h => isExpected(h, date)).length;
@@ -158,7 +159,7 @@ export function renderDashboard() {
   }).join('');
   const last7 = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); last7.push(dateKey(d)); }
   document.getElementById('bar-chart').innerHTML = last7.map(date => {
-    const entry = state.log.find(e => e.date === date);
+    const entry = logMap[date];
     const exp = state.userHabits.filter(h => isExpected(h, date)).length;
     const done = entry ? state.userHabits.filter(h => isExpected(h, date) && entry.habits[h.id]).length : 0;
     const p2 = exp > 0 ? done / exp : 0;
@@ -171,7 +172,7 @@ export function renderDashboard() {
   document.getElementById('dash-habits').innerHTML = state.userHabits.map(h => {
     let hd = 0, hp = 0, extras = 0;
     dates.forEach(date => {
-      const entry = state.log.find(e => e.date === date); const exp = isExpected(h, date);
+      const entry = logMap[date]; const exp = isExpected(h, date);
       if (exp) { hp++; if (entry && entry.habits[h.id]) hd++; }
       else if (entry && entry.habits[h.id]) extras++;
     });
@@ -179,14 +180,14 @@ export function renderDashboard() {
     const color = p2 >= 80 ? 'var(--verde)' : p2 >= 50 ? 'var(--ambar)' : '#E24B4A';
     const dots = showDots ? ('<div class="week-dots">' + dates.map(date => {
       const dow = new Date(date + 'T12:00:00').getDay();
-      const entry = state.log.find(e => e.date === date);
+      const entry = logMap[date];
       const done = entry && entry.habits[h.id]; const isT = date === today; const exp = isExpected(h, date);
       const cls = (done && exp ? 'done ' : []) + (done && !exp ? 'extra ' : []) + (isT && !done ? 'today ' : []) + ((!exp && !done) ? 'skip' : '');
       return '<div class="wd ' + cls + '">' + DLABELS[dow] + '</div>';
     }).join('') + '</div>') : '';
     return `<div class="card" style="padding:12px 14px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <div style="font-size:13px;font-weight:500">${h.icon} ${h.name}${extras > 0 ? ` <span style="font-size:10px;color:var(--ambar);font-weight:600">+${extras} extra</span>` : ''}</div>
+        <div style="font-size:13px;font-weight:500">${sanitize(h.icon)} ${sanitize(h.name)}${extras > 0 ? ` <span style="font-size:10px;color:var(--ambar);font-weight:600">+${extras} extra</span>` : ''}</div>
         <div style="font-size:11px;color:var(--cinza)">${hd}/${hp} · ${p2}%</div>
       </div>
       <div class="bar-bg"><div class="bar-fill" style="width:${p2}%;background:${color}"></div></div>${dots}
@@ -206,8 +207,9 @@ export function renderEnergyChart() {
   const colors = ['', '#E24B4A', '#BA7517', '#1D9E75'];
   const chart = document.getElementById('energy-chart');
   if (!chart) return;
+  const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   chart.innerHTML = days.map(date => {
-    const entry = state.log.find(e => e.date === date);
+    const entry = logMap[date];
     const e = entry ? entry.energy || 0 : 0;
     const h = e > 0 ? [0, 18, 34, 52][e] : 4;
     const dow = new Date(date + 'T12:00:00').getDay();

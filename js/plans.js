@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { saveCfgAll } from './db.js';
-import { showToast, todayKey } from './utils.js';
+import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
 export function getPlans() {
@@ -15,7 +15,7 @@ export function openPlanModal() {
   const plans = getPlans(); const active = getActivePlanId();
   document.getElementById('plan-list').innerHTML = plans.map(p => `
     <div class="plan-row ${p.id === active ? 'active' : ''}" onclick="switchPlan('${p.id}')">
-      <div class="plan-row-left"><span style="font-size:18px">${p.emoji}</span> ${p.name}</div>
+      <div class="plan-row-left"><span style="font-size:18px">${sanitize(p.emoji)}</span> ${sanitize(p.name)}</div>
       ${p.id === active ? '<span style="font-size:11px;color:var(--roxo);font-weight:600">ativo</span>' : '<span style="font-size:11px;color:var(--cinza)">trocar</span>'}
     </div>`).join('');
   document.getElementById('plan-modal').style.display = 'flex';

@@ -6,7 +6,7 @@ import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggle
 import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar } from './okrs.js';
-import { renderHistorico } from './historico.js';
+import { renderHistorico, loadMoreHistorico, showHiDay } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder } from './profile.js';
 import { renderBiblioteca, showAddLivro, saveLivro } from './biblioteca.js';
@@ -55,6 +55,8 @@ window.renderOKRs = renderOKRs;
 window.togglePillar = togglePillar;
 
 window.renderHistorico = renderHistorico;
+window.loadMoreHistorico = loadMoreHistorico;
+window.showHiDay = showHiDay;
 window.renderConquistas = renderConquistas;
 
 window.renderPerfil = renderPerfil;
