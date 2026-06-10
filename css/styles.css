@@ -153,6 +153,7 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 }
 .nav-btn{
   flex:1;
+  position:relative;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
   gap:3px;
   padding:0 4px 10px;
@@ -247,9 +248,9 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 .page{display:none;max-width:720px;margin:0 auto;padding:18px 14px 90px;overflow-x:hidden;width:100%}
 .page.on{display:block}
 .serif{font-family:'DM Serif Display',serif}
-.sec-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin:18px 0 8px}
+.sec-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin:18px 0 8px;display:flex;align-items:center;gap:6px}
 .sec-label:first-child{margin-top:0}
-.card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .stat{background:var(--fundo);border:1px solid var(--borda);border-radius:var(--radius-inner);padding:12px}
 .stat-label{font-size:11px;color:var(--cinza);margin-bottom:3px}
@@ -336,7 +337,7 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 .greeting{font-size:19px;font-weight:600}
 .sub-date{font-size:11px;color:var(--cinza);margin-top:2px}
 .streak-pill{background:var(--roxo-bg);color:var(--roxo);font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer}
-.habit-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);margin-bottom:8px;overflow:hidden;transition:border-color .15s}
+.habit-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);margin-bottom:8px;overflow:hidden;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .habit-card.done{border-color:var(--verde)}
 .habit-card.skip{opacity:.35}
 .habit-main{padding:13px 15px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
@@ -402,7 +403,7 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 @keyframes pulse-sync{from{opacity:1}to{opacity:.4}}
 
 /* DASHBOARD */
-.dash-hero{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:18px 20px;margin-bottom:12px;position:relative;overflow:hidden}
+.dash-hero{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:18px 20px;margin-bottom:12px;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .dash-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
 .dash-hero.verde::before{background:var(--verde)}
 .dash-hero.ambar::before{background:var(--ambar)}
@@ -757,3 +758,95 @@ body.dark .auth-card-title{color:var(--preto)}
 .hi-nota{font-size:12px;color:var(--cinza);font-style:italic;margin-top:6px}
 body.dark .cal-cell.cal-low{background:#4a1212;color:#ff8080}
 body.dark .cal-cell.cal-miss{background:var(--borda)}
+body.dark .cal-cell.cal-ok{background:#0d2218;color:#34D399}
+body.dark .cal-cell.cal-warn{background:#251a05;color:#FBB040}
+
+/* ========================================================
+   REFINAMENTOS VISUAIS
+   ======================================================== */
+
+/* --- SOMBRAS REMOVIDAS NO DARK --- */
+body.dark .card,body.dark .habit-card,body.dark .dash-hero,
+body.dark .heatmap-wrap,body.dark .chart-wrap,body.dark .energy-chart-wrap,
+body.dark .cal-wrap,body.dark .trim-bar-wrap,body.dark .review-card,
+body.dark .pillar-card{box-shadow:none}
+
+/* --- SOMBRAS ADICIONAIS EM ELEMENTOS CARD-LIKE --- */
+.heatmap-wrap,.chart-wrap,.energy-chart-wrap,.cal-wrap,.trim-bar-wrap,.review-card{box-shadow:0 1px 3px rgba(0,0,0,.05)}
+
+/* --- HEADER: SOMBRA SUTIL --- */
+.app-header-compact{box-shadow:0 1px 8px rgba(0,0,0,.05)}
+body.dark .app-header-compact{box-shadow:none}
+
+/* --- MAIS DRAWER: SOMBRA --- */
+.mais-drawer{box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+body.dark .mais-drawer{box-shadow:0 -4px 24px rgba(0,0,0,.3)}
+
+/* --- PLAN MODAL: SOMBRA --- */
+.plan-modal-inner{box-shadow:0 -8px 40px rgba(0,0,0,.15)}
+
+/* --- NAV INDICATOR: LINHA NO TOPO --- */
+.nav-btn::before{
+  content:'';position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:20px;height:3px;
+  border-radius:0 0 3px 3px;
+  background:transparent;
+  transition:background .15s;
+}
+.nav-btn.on::before{background:var(--roxo)}
+.nav-btn-fab::before{display:none!important}
+
+/* --- SEC-LABEL: ACENTO ROXO --- */
+.sec-label::before{
+  content:'';
+  width:3px;height:11px;
+  border-radius:2px;
+  background:var(--roxo);
+  flex-shrink:0;
+}
+
+/* --- FOCUS RING --- */
+.auth-input:focus,.ob-input:focus,.nota-area:focus,.ob-textarea:focus{
+  box-shadow:0 0 0 3px rgba(83,74,183,.12);
+}
+body.dark .auth-input:focus,body.dark .ob-input:focus,
+body.dark .nota-area:focus,body.dark .ob-textarea:focus{
+  box-shadow:0 0 0 3px rgba(83,74,183,.28);
+}
+
+/* --- NÚMEROS DE DESTAQUE EM SERIF --- */
+.stat-val{font-family:'DM Serif Display',serif;font-weight:400}
+.dqs-val{font-family:'DM Serif Display',serif;font-weight:400;font-size:20px}
+
+/* --- HOVER INTERATIVO --- */
+.achiev-card{transition:transform .15s,box-shadow .15s,border-color .15s}
+.achiev-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+body.dark .achiev-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
+
+.pillar-card{transition:border-color .15s,box-shadow .15s}
+.pillar-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+body.dark .pillar-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.25)}
+
+.mais-item{transition:background .15s,transform .15s,box-shadow .15s}
+.mais-item:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+body.dark .mais-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
+
+/* --- BUTTON FEEDBACK --- */
+.btn-primary:not(:disabled):active,.save-btn:not(:disabled):active{
+  transform:scale(.99);opacity:.85;
+}
+
+/* --- TOAST COM BLUR --- */
+.g-toast{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.g-toast.suc{background:rgba(26,61,46,.92)}
+.g-toast.err{background:rgba(61,26,26,.92)}
+.g-toast.info{background:rgba(26,42,61,.92)}
+
+/* --- HABIT POP APRIMORADO --- */
+@keyframes habitPop{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.03)}
+  65%{transform:scale(.98)}
+  100%{transform:scale(1)}
+}
