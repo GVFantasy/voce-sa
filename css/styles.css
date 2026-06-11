@@ -592,6 +592,8 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 .idiom-name{font-size:13px;font-weight:500}
 .idiom-sub{font-size:11px;color:var(--cinza)}
 .tactical-note{background:var(--warn-bg);border:1px solid #F0C070;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--warn-txt);line-height:1.5;margin-top:8px}
+.prof-pref-label{font-size:12px;font-weight:500;color:var(--cinza);margin-bottom:6px;margin-top:14px}
+.prof-pref-label:first-of-type{margin-top:2px}
 
 /* DASHBOARD QUICK STATS */
 .dash-quick-stats{display:flex;align-items:center;justify-content:center;gap:0;background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:10px 16px;margin-bottom:12px}

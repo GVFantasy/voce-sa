@@ -12,14 +12,42 @@ export function renderPerfil() {
   document.getElementById('prof-inicio').textContent = state.userCfg.startDate
     ? new Date(state.userCfg.startDate + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
   document.getElementById('prof-trimestre').textContent = `Q${aq} — ${ql[aq]}`;
-  if (state.userCfg.sonoMeta) document.getElementById('pref-sono').value = state.userCfg.sonoMeta;
-  if (state.userCfg.inglesMeta) document.getElementById('pref-ingles').value = state.userCfg.inglesMeta;
+
+  const sonoMeta = state.userCfg.sonoMeta || 7;
+  document.querySelectorAll('#sono-chips .ob-chip').forEach(btn => {
+    btn.classList.toggle('on', parseInt(btn.dataset.val) === sonoMeta);
+  });
+
+  const areas = state.userCfg.areas || [];
+  const treWrap = document.getElementById('treino-dias-wrap');
+  if (treWrap) {
+    treWrap.style.display = areas.includes('corpo') ? '' : 'none';
+    if (areas.includes('corpo')) {
+      const treinoDias = state.userCfg.treinoDias || [2, 4, 6];
+      document.querySelectorAll('#treino-dias-btns .ob-day-btn').forEach((btn, i) => {
+        btn.classList.toggle('on', treinoDias.includes(i));
+      });
+    }
+  }
+
+  const estWrap = document.getElementById('estudo-dias-wrap');
+  if (estWrap) {
+    estWrap.style.display = areas.includes('mente') ? '' : 'none';
+    if (areas.includes('mente')) {
+      const estudoDias = state.userCfg.estudoDias || [1, 3, 5];
+      document.querySelectorAll('#estudo-dias-btns .ob-day-btn').forEach((btn, i) => {
+        btn.classList.toggle('on', estudoDias.includes(i));
+      });
+    }
+  }
+
   const allIdiomas = Object.entries(IDIOMA_MAP).map(([id, v]) => ({ id, ...v }));
   const ativos = state.userCfg.idiomasAtivos || ['ingles'];
   document.getElementById('idiom-toggles').innerHTML = allIdiomas.map(id => {
     const on = ativos.includes(id.id);
     return `<div class="idiom-row"><div class="idiom-info"><div style="font-size:18px">${id.icon}</div><div><div class="idiom-name">${id.name}</div></div></div><div class="toggle-switch ${on ? 'on' : ''}" onclick="toggleIdioma('${id.id}',this)"></div></div>`;
   }).join('');
+
   document.getElementById('dark-toggle').classList.toggle('on', localStorage.getItem('voce_sa_dark') === '1');
   if (state.userCfg.lembreteHora) document.getElementById('pref-lembrete').value = state.userCfg.lembreteHora;
   document.getElementById('lembrete-toggle').classList.toggle('on', !!state.userCfg.lembreteAtivo);
@@ -27,7 +55,6 @@ export function renderPerfil() {
   const activePlan = getPlans().find(p => p.id === getActivePlanId());
   if (activePlan) document.getElementById('plan-badge').textContent = activePlan.emoji + ' ' + activePlan.name;
 
-  // Stats block
   const totalCheckins = state.log.length;
   const bestStreakVal = getBestStreak(state.log);
   const currentStreakVal = calcStreak(state.log);
@@ -51,9 +78,48 @@ export function renderPerfil() {
 }
 
 export async function savePerfil() {
-  state.userCfg.sonoMeta = parseInt(document.getElementById('pref-sono').value) || 7;
-  state.userCfg.inglesMeta = parseInt(document.getElementById('pref-ingles').value) || 20;
   await saveCfgAll(true);
+}
+
+export async function toggleSonoMeta(h) {
+  state.userCfg.sonoMeta = h;
+  document.querySelectorAll('#sono-chips .ob-chip').forEach(btn => {
+    btn.classList.toggle('on', parseInt(btn.dataset.val) === h);
+  });
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
+}
+
+export async function toggleTreinoDia(d) {
+  const dias = [...(state.userCfg.treinoDias || [2, 4, 6])];
+  const idx = dias.indexOf(d);
+  if (idx >= 0 && dias.length > 1) dias.splice(idx, 1);
+  else if (idx < 0) dias.push(d);
+  state.userCfg.treinoDias = dias;
+  document.querySelectorAll('#treino-dias-btns .ob-day-btn').forEach((btn, i) => {
+    btn.classList.toggle('on', dias.includes(i));
+  });
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
+}
+
+export async function toggleEstudoDia(d) {
+  const dias = [...(state.userCfg.estudoDias || [1, 3, 5])];
+  const idx = dias.indexOf(d);
+  if (idx >= 0 && dias.length > 1) dias.splice(idx, 1);
+  else if (idx < 0) dias.push(d);
+  state.userCfg.estudoDias = dias;
+  document.querySelectorAll('#estudo-dias-btns .ob-day-btn').forEach((btn, i) => {
+    btn.classList.toggle('on', dias.includes(i));
+  });
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
 }
 
 export async function toggleIdioma(id, el) {
@@ -63,8 +129,9 @@ export async function toggleIdioma(id, el) {
   if (idx >= 0 && ativos.length > 1) ativos.splice(idx, 1); else if (idx < 0) ativos.push(id);
   state.userCfg.idiomasAtivos = ativos;
   await saveCfgAll(false);
+  buildHabitsFromCfg();
   const { renderCheckin } = await import('./checkin.js');
-  buildHabitsFromCfg(); renderCheckin();
+  renderCheckin();
 }
 
 export function toggleDark() {

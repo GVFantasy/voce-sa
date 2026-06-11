@@ -382,9 +382,38 @@
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Ajustes táticos</div>
-      <div class="prof-row"><div class="prof-label">Meta sono (horas)</div><input class="prof-input" id="pref-sono" type="number" min="5" max="10" value="7" onchange="savePerfil()"></div>
-      <div class="prof-row"><div class="prof-label">Meta idioma (min/dia)</div><input class="prof-input" id="pref-ingles" type="number" min="10" max="120" value="20" onchange="savePerfil()"></div>
-      <div class="tactical-note">⚠️ Ajustes táticos não alteram seu plano de 12 meses. O destino continua o mesmo.</div>
+      <div class="prof-pref-label">Meta de sono</div>
+      <div class="ob-chips" id="sono-chips">
+        <button class="ob-chip" data-val="6" onclick="toggleSonoMeta(6)">6h</button>
+        <button class="ob-chip" data-val="7" onclick="toggleSonoMeta(7)">7h</button>
+        <button class="ob-chip" data-val="8" onclick="toggleSonoMeta(8)">8h</button>
+        <button class="ob-chip" data-val="9" onclick="toggleSonoMeta(9)">9h</button>
+      </div>
+      <div id="treino-dias-wrap" style="display:none">
+        <div class="prof-pref-label">Dias de treino</div>
+        <div class="ob-days-grid" id="treino-dias-btns">
+          <button class="ob-day-btn" onclick="toggleTreinoDia(0)">D</button>
+          <button class="ob-day-btn" onclick="toggleTreinoDia(1)">S</button>
+          <button class="ob-day-btn" onclick="toggleTreinoDia(2)">T</button>
+          <button class="ob-day-btn" onclick="toggleTreinoDia(3)">Q</button>
+          <button class="ob-day-btn" onclick="toggleTreinoDia(4)">Q</button>
+          <button class="ob-day-btn" onclick="toggleTreinoDia(5)">S</button>
+          <button class="ob-day-btn" onclick="toggleTreinoDia(6)">S</button>
+        </div>
+      </div>
+      <div id="estudo-dias-wrap" style="display:none">
+        <div class="prof-pref-label">Dias de estudo</div>
+        <div class="ob-days-grid" id="estudo-dias-btns">
+          <button class="ob-day-btn" onclick="toggleEstudoDia(0)">D</button>
+          <button class="ob-day-btn" onclick="toggleEstudoDia(1)">S</button>
+          <button class="ob-day-btn" onclick="toggleEstudoDia(2)">T</button>
+          <button class="ob-day-btn" onclick="toggleEstudoDia(3)">Q</button>
+          <button class="ob-day-btn" onclick="toggleEstudoDia(4)">Q</button>
+          <button class="ob-day-btn" onclick="toggleEstudoDia(5)">S</button>
+          <button class="ob-day-btn" onclick="toggleEstudoDia(6)">S</button>
+        </div>
+      </div>
+      <div class="tactical-note">Ajustes táticos não alteram seu plano de 12 meses. O destino continua o mesmo.</div>
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Idiomas ativos</div>

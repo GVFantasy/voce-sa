@@ -8,7 +8,7 @@ import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart
 import { renderOKRs, togglePillar, getActiveObjective } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay } from './historico.js';
 import { renderConquistas } from './conquistas.js';
-import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder } from './profile.js';
+import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia } from './profile.js';
 import { renderBiblioteca, showAddLivro, saveLivro } from './biblioteca.js';
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan } from './plans.js';
@@ -76,6 +76,9 @@ window.saveReminder = saveReminder;
 window.toggleReminder = toggleReminder;
 window.scheduleReminder = scheduleReminder;
 window.initReminder = initReminder;
+window.toggleSonoMeta = toggleSonoMeta;
+window.toggleTreinoDia = toggleTreinoDia;
+window.toggleEstudoDia = toggleEstudoDia;
 
 window.renderBiblioteca = renderBiblioteca;
 window.showAddLivro = showAddLivro;
