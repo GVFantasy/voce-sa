@@ -235,8 +235,8 @@ export async function saveDay() {
   try {
     const { error } = await sb.from('checkins').upsert({
       user_id: state.currentUser.id, date: todayKey(),
-      habits: state.ts.habits, energy: state.ts.energy, nota: state.ts.nota,
-      idiomDetails: state.ts.idiomDetails,
+      habits: { ...state.ts.habits, _d: state.ts.idiomDetails },
+      energy: state.ts.energy, nota: state.ts.nota,
       plan_id: getActivePlanId(),
     }, { onConflict: 'user_id,date' });
     btn.disabled = false; btn.textContent = 'Salvar check-in';

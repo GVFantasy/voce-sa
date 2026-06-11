@@ -32,9 +32,11 @@ export async function loadLog() {
     renderCheckin(); renderDashboard(); renderHistorico(); renderOKRs(); renderPerfil(); renderConquistas();
     return;
   }
-  state.log = data.map(r => ({
-    date: r.date, habits: r.habits || {}, energy: r.energy || 0, nota: r.nota || '', idiomDetails: r.idiomDetails || {},
-  }));
+  state.log = data.map(r => {
+    const raw = r.habits || {};
+    const { _d: idiomDetails = {}, ...habits } = raw;
+    return { date: r.date, habits, energy: r.energy || 0, nota: r.nota || '', idiomDetails };
+  });
   setSyncStatus('ok', 'Sincronizado');
   renderCheckin(); renderDashboard(); renderHistorico(); renderOKRs(); renderPerfil(); renderConquistas();
 }
