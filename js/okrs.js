@@ -22,12 +22,6 @@ const defaultOKR = {
     { q: 3, label: 'Fluência progressiva', krs: ['Usar o idioma em situação real', '3 livros lidos no trimestre'] },
     { q: 4, label: 'Fluência consolidada', krs: ['Idioma integrado à rotina', 'Avaliar e documentar evolução anual'] },
   ],
-  financas: [
-    { q: 1, label: 'Controle e diagnóstico', krs: ['Mapear todas as despesas do mês', 'Definir % fixo para guardar', 'Abrir conta de investimento'] },
-    { q: 2, label: 'Hábito de investimento', krs: ['Investir % fixo todo mês', 'Cortar ou renegociar 1 gasto'] },
-    { q: 3, label: 'Crescimento patrimonial', krs: ['Calcular patrimônio acumulado', 'Estudar diversificação da carteira'] },
-    { q: 4, label: 'Balanço e próximo nível', krs: ['Fechar balanço financeiro do ano', 'Definir meta para o próximo ano'] },
-  ],
   tempo: [
     { q: 1, label: 'Estruturar semana', krs: ['Criar blocos fixos de foco', 'Revisão semanal toda sexta', 'Eliminar 1 atividade improdutiva'] },
     { q: 2, label: 'Proteção do tempo', krs: ['Deep work diário de 90 min', 'Delegar 1 tarefa operacional'] },
@@ -42,14 +36,115 @@ const defaultOKR = {
   ],
 };
 
+const finOKR = {
+  iniciante: [
+    { q: 1, label: 'Instalar controle financeiro', krs: ['Mapear todas as despesas do mês', 'Definir % fixo do salário para guardar', 'Abrir conta de investimento gratuita'] },
+    { q: 2, label: 'Hábito de poupar', krs: ['Guardar % fixo todo mês sem falhar', 'Eliminar ou renegociar 1 gasto desnecessário', 'Primeiro investimento em renda fixa'] },
+    { q: 3, label: 'Primeiros investimentos', krs: ['Reserva de emergência completa (3× despesas)', 'Investir em Tesouro Selic ou CDB', 'Entender a diferença entre guardar e investir'] },
+    { q: 4, label: 'Avaliar e crescer', krs: ['Calcular patrimônio acumulado no ano', 'Aumentar % de economia para o próximo ano', 'Definir meta financeira para os próximos 12 meses'] },
+  ],
+  transicao: [
+    { q: 1, label: 'Organizar e automatizar', krs: ['Automatizar aporte mensal no dia do salário', 'Revisar e cortar 2+ gastos desnecessários', 'Criar planilha ou usar app de orçamento'] },
+    { q: 2, label: 'Diversificar carteira', krs: ['Iniciar em renda variável (FII ou ETF)', 'Estudar tributação de cada tipo de investimento', 'Rebalancear alocação por perfil de risco'] },
+    { q: 3, label: 'Crescer patrimônio', krs: ['Aumentar % investido em 5+ pontos', 'Calcular taxa de poupança atual', 'Comparar retorno da carteira com o CDI'] },
+    { q: 4, label: 'Otimizar e planejar', krs: ['Rebalancear carteira ao fim do ano', 'Calcular retorno real dos investimentos', 'Definir meta de patrimônio para os próximos 5 anos'] },
+  ],
+  investidor: [
+    { q: 1, label: 'Revisar estratégia', krs: ['Rebalancear alocação da carteira', 'Revisar tese de cada posição ativa', 'Calcular retorno vs benchmark (CDI / IBOV)'] },
+    { q: 2, label: 'Escalar aportes', krs: ['Aumentar aporte vs trimestre anterior', 'Explorar nova classe de ativo ou mercado', 'Otimizar carga tributária dos investimentos'] },
+    { q: 3, label: 'Renda passiva', krs: ['Calcular renda passiva mensal gerada', 'Medir % das despesas cobertas por investimentos', 'Avaliar oportunidades de diversificação internacional'] },
+    { q: 4, label: 'Planejar próximo nível', krs: ['Calcular FI Number (independência financeira)', 'Revisar plano de 5 anos', 'Definir estratégia de alocação para o próximo ano'] },
+  ],
+};
+
+const finDicas = {
+  iniciante: 'Comece guardando qualquer valor. O hábito de poupar importa mais que o montante inicial.',
+  transicao: 'Automatize: configure transferência automática para investimento no dia que cai o salário.',
+  investidor: 'Revise sua alocação trimestralmente e compare o retorno real com benchmarks (CDI, IBOV).',
+};
+
 function getQData(area, q) {
   const custom = state.userCfg.okrCustom?.[`${area}_q${q}`];
   if (custom) return custom;
+  if (area === 'financas') {
+    const perfil = state.userCfg.finPerfil || 'iniciante';
+    const map = finOKR[perfil] || finOKR.iniciante;
+    return map.find(x => x.q === q) || map[map.length - 1];
+  }
   return defaultOKR[area]?.find(x => x.q === q) || defaultOKR[area]?.[defaultOKR[area].length - 1];
+}
+
+function getDefaultMap(area) {
+  if (area === 'financas') {
+    const perfil = state.userCfg.finPerfil || 'iniciante';
+    return finOKR[perfil] || finOKR.iniciante;
+  }
+  return defaultOKR[area] || [];
 }
 
 function esc(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function fmtBRL(val) {
+  return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function renderFinTracker() {
+  const el = document.getElementById('fin-tracker');
+  if (!el) return;
+  const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
+  if (!areas.includes('financas')) { el.innerHTML = ''; return; }
+
+  const meta = state.userCfg.finMeta || 0;
+  const perfil = state.userCfg.finPerfil || 'iniciante';
+  const now = new Date();
+  const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const finLog = [...(state.userCfg.finLog || [])].sort((a, b) => b.mes.localeCompare(a.mes));
+  const mesData = finLog.find(x => x.mes === mesAtual) || { guardado: 0, investido: 0 };
+  const total = (mesData.guardado || 0) + (mesData.investido || 0);
+  const pct = meta > 0 ? Math.min(100, Math.round(total / meta * 100)) : 0;
+  const mesNome = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+  const perfilLabels = { iniciante: 'Iniciante', transicao: 'Em transição', investidor: 'Investidor' };
+
+  const history = finLog.filter(m => m.mes !== mesAtual).slice(0, 3).map(m => {
+    const [y, mo] = m.mes.split('-');
+    const nome = new Date(parseInt(y), parseInt(mo) - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+    const tot = (m.guardado || 0) + (m.investido || 0);
+    const mpct = meta > 0 ? Math.min(100, Math.round(tot / meta * 100)) : 0;
+    return `<div class="fin-hist-row">
+      <span class="fin-hist-mes">${nome}</span>
+      <div class="fin-hist-bar-bg"><div class="fin-hist-bar-fill" style="width:${mpct}%"></div></div>
+      <span class="fin-hist-val">R$ ${fmtBRL(tot)}</span>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="fin-tracker-card">
+    <div class="fin-tracker-hdr">
+      <span class="fin-tracker-title">Tracker financeiro</span>
+      <span class="fin-perfil-badge">${perfilLabels[perfil]}</span>
+    </div>
+    <div class="fin-tracker-mes">${mesNome}</div>
+    ${meta > 0 ? `<div class="fin-meta-label">Meta: R$ ${fmtBRL(meta)}/mês</div>` : '<div class="fin-meta-label" style="color:var(--ambar)">Defina sua meta em Perfil → Finanças</div>'}
+    <div class="fin-inputs-row">
+      <div class="fin-field">
+        <div class="fin-field-label">Guardado 🏦</div>
+        <div class="fin-input-wrap"><span>R$</span><input type="number" id="fin-guardado" class="fin-input" value="${mesData.guardado || ''}" placeholder="0" min="0"></div>
+      </div>
+      <div class="fin-field">
+        <div class="fin-field-label">Investido 📈</div>
+        <div class="fin-input-wrap"><span>R$</span><input type="number" id="fin-investido" class="fin-input" value="${mesData.investido || ''}" placeholder="0" min="0"></div>
+      </div>
+    </div>
+    <button class="save-btn" style="margin-top:10px" onclick="saveFinMes()">Registrar mês</button>
+    ${meta > 0 ? `<div class="okr-progress-wrap" style="margin-top:12px">
+      <div class="okr-progress-bg"><div class="okr-progress-fill fin-fill" style="width:${pct}%"></div></div>
+      <span class="okr-progress-label">R$ ${fmtBRL(total)} / R$ ${fmtBRL(meta)} · ${pct}%</span>
+    </div>` : ''}
+    ${history ? `<div class="fin-history"><div class="fin-history-title">Meses anteriores</div>${history}</div>` : ''}
+    <div class="fin-dica">${finDicas[perfil]}</div>
+  </div>`;
 }
 
 export function renderOKRs() {
@@ -64,7 +159,8 @@ export function renderOKRs() {
   if (state.userCfg.meta) document.getElementById('user-mission').textContent = '"' + state.userCfg.meta + '"';
 
   document.getElementById('pillar-list').innerHTML = areas.map(area => {
-    if (!defaultOKR[area]) return '';
+    const defMap = getDefaultMap(area);
+    if (!defMap.length) return '';
     const qData = getQData(area, aq);
     if (!qData) return '';
     const totalCnt = qData.krs.length;
@@ -83,16 +179,17 @@ export function renderOKRs() {
       `<input class="ob-input" id="okr-kr-${area}-${aq}-${i}" value="${esc(kr)}" placeholder="Key result ${i + 1}" style="margin-bottom:6px">`
     ).join('');
 
-    const otherQs = defaultOKR[area]
+    const otherQs = defMap
       .filter(x => x.q !== aq)
       .map(x => {
         const isPast = x.q < aq;
-        const doneOther = x.krs.filter((_, i) => progress[`${area}_q${x.q}_${i}`]).length;
         const lbl = custom[`${area}_q${x.q}`]?.label || x.label;
+        const doneOther = (custom[`${area}_q${x.q}`]?.krs || x.krs).filter((_, i) => progress[`${area}_q${x.q}_${i}`]).length;
+        const totOther = (custom[`${area}_q${x.q}`]?.krs || x.krs).length;
         return `<div class="okr-tl-item ${isPast ? 'past' : 'future'}">
           <span class="qbadge ${qColors[x.q] || 'q3b'}">Q${x.q}</span>
           <span class="tl-lbl">${esc(lbl)}</span>
-          ${isPast && doneOther > 0 ? `<span class="tl-done">${doneOther}/${x.krs.length}</span>` : ''}
+          ${isPast && doneOther > 0 ? `<span class="tl-done">${doneOther}/${totOther}</span>` : ''}
         </div>`;
       }).join('');
 
@@ -131,6 +228,8 @@ export function renderOKRs() {
       </div>
     </div>`;
   }).join('');
+
+  renderFinTracker();
 
   const habitIds = new Set(state.userHabits.map(h => h.id));
   const missing = [];
@@ -218,12 +317,32 @@ export async function toggleKR(area, q, krIdx) {
   renderDashboard();
 }
 
+export async function saveFinMes() {
+  const guardado = parseFloat(document.getElementById('fin-guardado')?.value || '0') || 0;
+  const investido = parseFloat(document.getElementById('fin-investido')?.value || '0') || 0;
+  const now = new Date();
+  const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (!state.userCfg.finLog) state.userCfg.finLog = [];
+  const idx = state.userCfg.finLog.findIndex(x => x.mes === mesAtual);
+  const entry = { mes: mesAtual, guardado, investido };
+  if (idx >= 0) state.userCfg.finLog[idx] = entry;
+  else state.userCfg.finLog.unshift(entry);
+  state.userCfg.finLog = state.userCfg.finLog.slice(0, 24); // keep 2 years
+  saveCfgLocal();
+  saveCfgRemote();
+  renderFinTracker();
+  const { renderDashboard } = await import('./dashboard.js');
+  renderDashboard();
+}
+
 export function getActiveObjective() {
   if (!state.userCfg.startDate) return null;
   const aq = getActiveQ(state.userCfg.startDate);
   const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
   const primaryArea = areas[0];
-  if (!primaryArea || !defaultOKR[primaryArea]) return null;
+  if (!primaryArea) return null;
+  const defMap = getDefaultMap(primaryArea);
+  if (!defMap.length) return null;
   const qData = getQData(primaryArea, aq);
   if (!qData) return null;
   const progress = state.userCfg.okrProgress || {};

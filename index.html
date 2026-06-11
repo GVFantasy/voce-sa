@@ -317,6 +317,7 @@
   <div id="okr-habit-notif"></div>
     <div id="user-mission" style="font-size:13px;color:var(--cinza);margin-bottom:14px;font-style:italic;line-height:1.5"></div>
     <div id="pillar-list"></div>
+    <div id="fin-tracker"></div>
   </div>
 
   <!-- HISTÓRICO -->
@@ -414,6 +415,19 @@
         </div>
       </div>
       <div class="tactical-note">Ajustes táticos não alteram seu plano de 12 meses. O destino continua o mesmo.</div>
+    </div>
+    <div id="fin-pref-section" style="display:none">
+      <div class="prof-section">
+        <div class="prof-section-title">Finanças</div>
+        <div class="prof-pref-label">Perfil financeiro</div>
+        <div class="ob-chips" id="fin-perfil-chips">
+          <button class="ob-chip" data-val="iniciante" onclick="toggleFinPerfil('iniciante')">Iniciante</button>
+          <button class="ob-chip" data-val="transicao" onclick="toggleFinPerfil('transicao')">Em transição</button>
+          <button class="ob-chip" data-val="investidor" onclick="toggleFinPerfil('investidor')">Investidor</button>
+        </div>
+        <div class="prof-pref-label">Meta mensal de economia</div>
+        <div class="fin-input-wrap" style="margin-top:4px"><span>R$</span><input class="fin-input" id="pref-fin-meta" type="number" min="0" step="50" placeholder="500" onchange="saveFinMeta()"></div>
+      </div>
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Idiomas ativos</div>

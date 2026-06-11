@@ -41,6 +41,20 @@ export function renderPerfil() {
     }
   }
 
+  const finSection = document.getElementById('fin-pref-section');
+  if (finSection) {
+    const hasFinancas = (state.userCfg.areas || []).includes('financas');
+    finSection.style.display = hasFinancas ? '' : 'none';
+    if (hasFinancas) {
+      const finPerfil = state.userCfg.finPerfil || 'iniciante';
+      document.querySelectorAll('#fin-perfil-chips .ob-chip').forEach(btn => {
+        btn.classList.toggle('on', btn.dataset.val === finPerfil);
+      });
+      const metaEl = document.getElementById('pref-fin-meta');
+      if (metaEl && state.userCfg.finMeta) metaEl.value = state.userCfg.finMeta;
+    }
+  }
+
   const allIdiomas = Object.entries(IDIOMA_MAP).map(([id, v]) => ({ id, ...v }));
   const ativos = state.userCfg.idiomasAtivos || ['ingles'];
   document.getElementById('idiom-toggles').innerHTML = allIdiomas.map(id => {
@@ -105,6 +119,20 @@ export async function toggleTreinoDia(d) {
   buildHabitsFromCfg();
   const { renderCheckin } = await import('./checkin.js');
   renderCheckin();
+}
+
+export async function toggleFinPerfil(perfil) {
+  state.userCfg.finPerfil = perfil;
+  document.querySelectorAll('#fin-perfil-chips .ob-chip').forEach(btn => {
+    btn.classList.toggle('on', btn.dataset.val === perfil);
+  });
+  await saveCfgAll(false);
+}
+
+export async function saveFinMeta() {
+  const val = parseFloat(document.getElementById('pref-fin-meta')?.value || '0') || 0;
+  state.userCfg.finMeta = val;
+  await saveCfgAll(false);
 }
 
 export async function toggleEstudoDia(d) {

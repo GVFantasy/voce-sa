@@ -520,6 +520,34 @@ body.dark .okr-kr-check{border-color:#3A3A3C}
 body.dark .okr-edit-form{background:#2C2C2E;border-color:#3A3A3C}
 body.dark .okr-progress-bg{background:#3A3A3C}
 
+/* TRACKER FINANCEIRO */
+.fin-tracker-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:16px;margin-top:12px}
+.fin-tracker-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.fin-tracker-title{font-size:13px;font-weight:600;color:var(--preto)}
+.fin-perfil-badge{font-size:11px;padding:2px 9px;border-radius:20px;background:var(--roxo-bg);color:var(--roxo);font-weight:500}
+.fin-tracker-mes{font-size:12px;color:var(--cinza);margin-bottom:4px}
+.fin-meta-label{font-size:12px;color:var(--cinza);margin-bottom:10px}
+.fin-inputs-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fin-field-label{font-size:11px;font-weight:500;color:var(--cinza);margin-bottom:5px}
+.fin-input-wrap{display:flex;align-items:center;gap:6px;border:1px solid var(--borda);border-radius:8px;padding:8px 10px;background:var(--fundo)}
+.fin-input-wrap span{font-size:13px;font-weight:500;color:var(--cinza);flex-shrink:0}
+.fin-input{border:none;background:transparent;font-size:14px;font-weight:500;color:var(--preto);font-family:inherit;width:100%;outline:none}
+.fin-input::placeholder{color:var(--borda)}
+.fin-fill{background:var(--verde) !important}
+.fin-history{margin-top:12px;padding-top:10px;border-top:1px solid var(--borda)}
+.fin-history-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--cinza);margin-bottom:8px}
+.fin-hist-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.fin-hist-mes{font-size:11px;color:var(--cinza);width:36px;flex-shrink:0}
+.fin-hist-bar-bg{flex:1;height:4px;background:var(--borda);border-radius:2px;overflow:hidden}
+.fin-hist-bar-fill{height:100%;background:var(--verde);border-radius:2px}
+.fin-hist-val{font-size:11px;color:var(--preto);font-weight:500;white-space:nowrap}
+.fin-dica{font-size:11px;color:var(--cinza);line-height:1.5;margin-top:12px;padding-top:10px;border-top:1px solid var(--borda);font-style:italic}
+body.dark .fin-tracker-card{background:var(--card);border-color:var(--borda)}
+body.dark .fin-input-wrap{background:#2C2C2E;border-color:#3A3A3C}
+body.dark .fin-input{color:var(--preto)}
+body.dark .fin-hist-bar-bg{background:#3A3A3C}
+body.dark .fin-perfil-badge{background:#2A2660}
+
 /* HISTÓRICO */
 .hi-item{padding:11px 0;border-bottom:1px solid var(--borda)}
 .hi-item:last-child{border-bottom:none}
