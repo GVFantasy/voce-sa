@@ -91,11 +91,18 @@ export async function renderDashboard() {
   const obj = getActiveObjective();
   const dashOkrEl = document.getElementById('dash-okr-wrap');
   if (dashOkrEl && obj) {
+    const pct = obj.totalCnt > 0 ? Math.round(obj.doneCnt / obj.totalCnt * 100) : 0;
     dashOkrEl.innerHTML = `<div class="dash-okr-card" onclick="nav('okrs',null)">
       <div class="dash-okr-top">Q${obj.aq} · ${obj.areaName} · Foco do trimestre</div>
       <div class="dash-okr-label">${obj.label}</div>
-      <div class="dash-okr-krs">${obj.krs.map(k => `<span>→ ${k}</span>`).join('  ')}</div>
+      <div class="okr-progress-wrap" style="margin:6px 0 8px">
+        <div class="okr-progress-bg"><div class="okr-progress-fill" style="width:${pct}%"></div></div>
+        <span class="okr-progress-label">${obj.doneCnt}/${obj.totalCnt} KRs</span>
+      </div>
+      <div class="dash-okr-krs">${obj.krs.map((k, i) => `<span>${obj.krsProgress[i] ? '✓' : '→'} ${k}</span>`).join('')}</div>
     </div>`;
+  } else if (dashOkrEl) {
+    dashOkrEl.innerHTML = '';
   }
 
   document.getElementById('dash-trim-wrap').innerHTML = `

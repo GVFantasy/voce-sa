@@ -491,6 +491,35 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 .q1b{background:var(--info-bg);color:var(--info-txt)}.q2b{background:var(--suc-bg);color:var(--suc-txt)}
 .q3b{background:var(--warn-bg);color:var(--warn-txt)}.q4b{background:var(--dan-bg);color:var(--dan-txt)}
 
+/* OKRs — active section & KR checkboxes */
+.okr-active-section{padding:10px 0 4px}
+.okr-active-hdr{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.okr-active-lbl{font-size:13px;font-weight:600;flex:1;color:var(--preto);min-width:0}
+.okr-edit-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;opacity:.45;line-height:1;border-radius:4px}
+.okr-edit-btn:hover{opacity:1;background:var(--borda)}
+.okr-edit-form{margin-bottom:10px;padding:10px;background:var(--fundo);border-radius:8px;border:1px solid var(--borda)}
+.okr-kr-item{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--borda);cursor:pointer;transition:opacity .15s}
+.okr-kr-item:last-child{border-bottom:none}
+.okr-kr-item:active{opacity:.6}
+.okr-kr-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--borda);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;transition:all .15s;margin-top:1px}
+.okr-kr-item.done .okr-kr-check{background:var(--verde);border-color:var(--verde)}
+.okr-kr-text{font-size:12px;color:var(--preto);line-height:1.5;flex:1}
+.okr-kr-item.done .okr-kr-text{text-decoration:line-through;color:var(--cinza)}
+.okr-progress-wrap{display:flex;align-items:center;gap:8px;padding:10px 0 2px}
+.okr-progress-bg{flex:1;height:5px;background:var(--borda);border-radius:3px;overflow:hidden}
+.okr-progress-fill{height:100%;background:var(--roxo);border-radius:3px;transition:width .3s ease}
+.okr-progress-label{font-size:11px;color:var(--cinza);white-space:nowrap;font-weight:500}
+.okr-mini-prog{font-size:11px;color:var(--cinza);font-weight:500}
+.okr-timeline{padding:10px 0 2px;border-top:1px solid var(--borda);margin-top:8px;display:flex;flex-direction:column;gap:7px}
+.okr-tl-item{display:flex;align-items:center;gap:8px}
+.tl-lbl{font-size:12px;color:var(--cinza);flex:1}
+.tl-done{font-size:11px;color:var(--verde);font-weight:600}
+.okr-tl-item.past .tl-lbl{opacity:.6}
+/* dark mode */
+body.dark .okr-kr-check{border-color:#3A3A3C}
+body.dark .okr-edit-form{background:#2C2C2E;border-color:#3A3A3C}
+body.dark .okr-progress-bg{background:#3A3A3C}
+
 /* HISTÓRICO */
 .hi-item{padding:11px 0;border-bottom:1px solid var(--borda)}
 .hi-item:last-child{border-bottom:none}
