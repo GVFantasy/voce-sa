@@ -6,7 +6,8 @@ Aplicativo web de desenvolvimento pessoal com check-in diario, dashboard, OKRs, 
 
 - `index.html`: estrutura da interface.
 - `css/styles.css`: estilos visuais do app.
-- `js/app.js`: regra principal do produto.
+- `js/main.js`: ponto de entrada, expoe as funcoes usadas pelo HTML via `window.*`.
+- `js/*.js`: modulos ES por dominio (checkin, okrs, dashboard, historico, profile, onboarding, pomodoro, biblioteca, conquistas, habits, plans, auth, db, state, nav, utils).
 - `js/pwa.js`: registro e atualizacao do PWA.
 - `service-worker.js`: cache offline basico.
 - `manifest.json`: configuracao de instalacao do PWA.

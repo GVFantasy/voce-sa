@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { saveCfgAll } from './db.js';
+import { saveCfgAll, clearTsLocal } from './db.js';
 import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
@@ -14,8 +14,10 @@ export function getActivePlanId() {
 export function openPlanModal() {
   const addForm = document.getElementById('plan-add-form');
   const addInput = document.getElementById('plan-add-input');
+  const addBtn = document.getElementById('plan-add-btn-confirm');
   if (addForm) addForm.style.display = 'none';
   if (addInput) addInput.value = '';
+  if (addBtn) addBtn.disabled = false;
   const plans = getPlans(); const active = getActivePlanId();
   document.getElementById('plan-list').innerHTML = plans.map(p => `
     <div class="plan-row ${p.id === active ? 'active' : ''}" onclick="switchPlan('${p.id}')">
@@ -31,12 +33,12 @@ export function closePlanModal(e) {
 }
 
 export async function switchPlan(id) {
+  const allPlans = getPlans(); const target = allPlans.find(p => p.id === id);
+  if (!target) return;
   if (!state.userCfg.planConfigs) state.userCfg.planConfigs = {};
   // Salvar config atual SEM planConfigs e SEM activePlan (evita referência circular)
   const { planConfigs, activePlan, plans, ...cfgSnapshot } = state.userCfg;
   state.userCfg.planConfigs[getActivePlanId()] = cfgSnapshot;
-  const allPlans = getPlans(); const target = allPlans.find(p => p.id === id);
-  if (!target) return;
   const saved = state.userCfg.planConfigs[id];
   if (saved) {
     const currentPlanConfigs = state.userCfg.planConfigs;
@@ -49,6 +51,9 @@ export async function switchPlan(id) {
   await saveCfgAll(false);
   document.getElementById('plan-badge').textContent = target.emoji + ' ' + target.name;
   document.getElementById('plan-modal').style.display = 'none';
+  // Descarta rascunho não salvo do check-in de hoje — pertencia ao contexto do plano anterior
+  // (habits/energy/nota daquele plano não fazem sentido misturados com o novo).
+  clearTsLocal(todayKey());
   const { renderCheckin } = await import('./checkin.js');
   const { renderDashboard } = await import('./dashboard.js');
   const { renderOKRs } = await import('./okrs.js');
@@ -59,6 +64,8 @@ export async function addPlan() {
   const input = document.getElementById('plan-add-input');
   const name = input ? input.value.trim() : '';
   if (!name) { if (input) input.focus(); return; }
+  const btn = document.getElementById('plan-add-btn-confirm');
+  if (btn) { if (btn.disabled) return; btn.disabled = true; }
   const emojis = ['🌟', '💡', '🎯', '🏋️', '💼', '🧘', '🚀', '🌱'];
   const emoji = emojis[Math.floor(Math.random() * emojis.length)];
   const id = 'plan_' + Date.now();
@@ -70,6 +77,7 @@ export async function addPlan() {
     areas: ['corpo', 'mente'], idiomasAtivos: ['ingles'],
     idiomaDias: [0, 1, 2, 3, 4, 5, 6], treinoDias: [2, 4, 6],
     estudoDias: [0, 1, 3], sonoMeta: 7, inglesMeta: 20,
+    seenStreakRecalcNotice: true,
   };
   await saveCfgAll(false);
   const addForm = document.getElementById('plan-add-form');

@@ -2,8 +2,8 @@ import { state } from './state.js';
 import { sb } from './db.js';
 import { clearFieldErr } from './utils.js';
 import { toggleAuthMode, submitAuth, signOut, afterLogin } from './auth.js';
-import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleOpt, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
-import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, toggleQTask } from './checkin.js';
+import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
+import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, toggleQTask, onNotaInput } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar, getActiveObjective, toggleKR, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay } from './historico.js';
@@ -25,7 +25,6 @@ window.renderObProgress = renderObProgress;
 window.showObStep = showObStep;
 window.obNext = obNext;
 window.obBack = obBack;
-window.obToggleOpt = obToggleOpt;
 window.obToggleArea = obToggleArea;
 window.obToggleChip = obToggleChip;
 window.obToggleDay = obToggleDay;
@@ -51,6 +50,7 @@ window.saveWeeklyReview = saveWeeklyReview;
 window.showBoom = showBoom;
 window.hideBoom = hideBoom;
 window.toggleQTask = toggleQTask;
+window.onNotaInput = onNotaInput;
 
 window.renderDashboard = renderDashboard;
 window.setPeriod = setPeriod;
@@ -120,6 +120,7 @@ async function init() {
       state.currentUser = session.user; await afterLogin();
     }
   });
+  window.addEventListener('online', () => { if (state.currentUser) loadLog(); });
 }
 
 init();

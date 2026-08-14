@@ -116,14 +116,6 @@ export function obToggleChip(group, btn) {
   else { arr.push(val); btn.classList.add('on'); }
 }
 
-export function obToggleOpt(group, btn) {
-  btn.classList.toggle('on');
-  const val = btn.dataset.val;
-  if (!state.obData.metas) state.obData.metas = [];
-  const idx = state.obData.metas.indexOf(val);
-  if (idx >= 0) state.obData.metas.splice(idx, 1); else state.obData.metas.push(val);
-}
-
 export function obToggleDay(group, btn) {
   const val = parseInt(btn.dataset.val);
   let arr = group === 'treino' ? state.obData.treinoDias
@@ -164,7 +156,7 @@ export async function generatePlan() {
     exercicios: ['Academia', 'Corrida', 'Ciclismo', 'HIIT'],
     idiomasAtivos,
     idiomasPlano: state.obData.idiomas.length ? state.obData.idiomas : ['ingles'],
-    aprender: [],
+    aprender: state.obData.aprender || [],
     horario: 'comercial',
     tempoLivre: '1h',
     corpoNivel: 'irregular',
@@ -173,6 +165,7 @@ export async function generatePlan() {
     estudoDias: state.obData.estudoDias.length ? state.obData.estudoDias : [1, 3, 5],
     sonoMeta: state.obData.sonoMeta || 7,
     inglesMeta: state.obData.estudoMeta || 30,
+    seenStreakRecalcNotice: true,
   };
   setTimeout(async () => {
     clearInterval(iv);

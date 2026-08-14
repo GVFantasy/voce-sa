@@ -1,6 +1,6 @@
 import { state, ENERGY, ECLASS, REFLECTIONS } from './state.js';
 import { getActiveObjective } from './okrs.js';
-import { sb, setSyncStatus, saveCfgLocal, saveCfgRemote } from './db.js';
+import { sb, setSyncStatus, saveCfgLocal, saveCfgRemote, saveCfgAll, saveTsLocal, loadTsLocal, clearTsLocal, queuePendingCheckin, clearPendingCheckin, refreshPendingCheckinIfQueued } from './db.js';
 import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, getActiveQ } from './utils.js';
 import { getActivePlanId } from './plans.js';
 
@@ -121,16 +121,33 @@ export async function toggleQTask(taskId) {
   if (!state.userCfg.tasksDone) state.userCfg.tasksDone = {};
   state.userCfg.tasksDone[taskId] = !state.userCfg.tasksDone[taskId];
   saveCfgLocal();
-  saveCfgRemote();
   renderQuarterlyTasks();
+  await saveCfgRemote();
+}
+
+// Persiste o rascunho não salvo do check-in de hoje, para não perder alterações ao trocar de aba.
+// Se já existe uma entrada na fila de sincronização pendente (salvamento anterior que falhou
+// offline), atualiza-a também — sem isso, o flush reenviaria valores desatualizados.
+function persistTsDraft() {
+  const today = todayKey();
+  saveTsLocal(today, state.ts);
+  refreshPendingCheckinIfQueued(today, {
+    habits: { ...state.ts.habits, _d: state.ts.idiomDetails },
+    energy: state.ts.energy, nota: state.ts.nota,
+  });
 }
 
 export function renderCheckin() {
   const today = todayKey();
-  const ex = state.log.find(e => e.date === today);
-  state.ts = ex
-    ? { habits: { ...ex.habits }, energy: ex.energy || 0, nota: ex.nota || '', idiomDetails: { ...ex.idiomDetails || {} } }
-    : { habits: {}, energy: 0, nota: '', idiomDetails: {} };
+  const draft = loadTsLocal(today);
+  if (draft) {
+    state.ts = draft;
+  } else {
+    const ex = state.log.find(e => e.date === today);
+    state.ts = ex
+      ? { habits: { ...ex.habits }, energy: ex.energy || 0, nota: ex.nota || '', idiomDetails: { ...ex.idiomDetails || {} } }
+      : { habits: {}, energy: 0, nota: '', idiomDetails: {} };
+  }
   const h = new Date().getHours();
   document.getElementById('greeting').textContent =
     (h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite') + ', ' + state.userCfg.name;
@@ -153,7 +170,7 @@ export function renderCheckin() {
 
   renderQuarterlyTasks();
   document.getElementById('reflection-q').textContent = REFLECTIONS[new Date().getDay() % REFLECTIONS.length];
-  if (new Date().getDay() === 5) {
+  if (new Date().getDay() === 5 && state.userCfg.lastReviewedWeek !== today) {
     document.getElementById('weekly-review-banner').style.display = 'block';
     renderWeeklyReview();
   } else {
@@ -200,6 +217,7 @@ export function toggleHabit(id) {
   if (nameEl && h) nameEl.innerHTML = h.name + (isExtra ? '<span class="habit-extra-tag">extra</span>' : '');
   const detail = document.getElementById('hdetail-' + id); if (detail) detail.classList.toggle('open', done);
   if (done) { card.classList.add('pop'); setTimeout(() => card.classList.remove('pop'), 200); }
+  persistTsDraft();
 }
 
 export function setHabitDetail(habitId, key, val) {
@@ -211,6 +229,7 @@ export function setHabitDetail(habitId, key, val) {
     const gKey = gi === 0 ? 'time' : 'method';
     if (gKey === key) { group.querySelectorAll('.hd-chip').forEach(chip => { chip.classList.toggle('on', chip.textContent === val); }); }
   });
+  persistTsDraft();
 }
 
 export function setEnergy(val) {
@@ -219,6 +238,15 @@ export function setEnergy(val) {
     const b = document.getElementById('e' + i);
     if (b) b.className = 'e-btn' + (i === val ? ' ' + ECLASS[i] : '');
   });
+  persistTsDraft();
+}
+
+let _notaDebounce = null;
+export function onNotaInput() {
+  const na = document.getElementById('nota-area');
+  state.ts.nota = na ? na.value : '';
+  clearTimeout(_notaDebounce);
+  _notaDebounce = setTimeout(persistTsDraft, 400);
 }
 
 export async function saveDay() {
@@ -232,15 +260,18 @@ export async function saveDay() {
   const newStreak = calcStreak(state.log);
   document.getElementById('streak-val').textContent = newStreak + 'd';
   setSyncStatus('syncing', 'Salvando...');
+  const remoteEntry = {
+    user_id: state.currentUser.id, date: todayKey(),
+    habits: { ...state.ts.habits, _d: state.ts.idiomDetails },
+    energy: state.ts.energy, nota: state.ts.nota,
+    plan_id: getActivePlanId(),
+  };
   try {
-    const { error } = await sb.from('checkins').upsert({
-      user_id: state.currentUser.id, date: todayKey(),
-      habits: { ...state.ts.habits, _d: state.ts.idiomDetails },
-      energy: state.ts.energy, nota: state.ts.nota,
-      plan_id: getActivePlanId(),
-    }, { onConflict: 'user_id,date' });
+    const { error } = await sb.from('checkins').upsert(remoteEntry, { onConflict: 'user_id,date' });
     btn.disabled = false; btn.textContent = 'Salvar check-in';
     if (error) {
+      // Erro retornado pelo servidor (ex: violação de RLS/constraint) — não é falha de rede,
+      // então NÃO entra na fila de retry (reenviar o mesmo payload rejeitado não vai resolver).
       setSyncStatus('err', 'Erro ao salvar');
       showToast('Erro ao salvar: ' + error.message, 'err');
     } else {
@@ -248,11 +279,14 @@ export async function saveDay() {
       const t = document.getElementById('toast'); if (t) t.textContent = '';
       showToast('Check-in salvo com sucesso!');
       btn.classList.add('saved'); setTimeout(() => btn.classList.remove('saved'), 1200);
+      clearTsLocal(todayKey());
+      clearPendingCheckin(todayKey());
     }
   } catch (e) {
     btn.disabled = false; btn.textContent = 'Salvar check-in';
     setSyncStatus('err', 'Sem conexão');
-    showToast('Check-in salvo localmente. Sem conexão com o servidor.', 'info');
+    queuePendingCheckin(remoteEntry);
+    showToast('Sem conexão. Check-in ficou na fila e será sincronizado automaticamente.', 'info');
   }
   if (newStreak > prevStreak) showBoom(newStreak);
   const { renderDashboard } = await import('./dashboard.js');
@@ -299,11 +333,16 @@ export function toggleReviewAdjust(val, btn) {
   if (idx >= 0) state.reviewData.adjust.splice(idx, 1); else state.reviewData.adjust.push(val);
 }
 
-export function saveWeeklyReview() {
+export async function saveWeeklyReview() {
+  const today = todayKey();
+  if (!state.userCfg.weeklyReviews) state.userCfg.weeklyReviews = {};
+  state.userCfg.weeklyReviews[today] = { date: today, feel: state.reviewData.feel, adjust: [...state.reviewData.adjust] };
+  state.userCfg.lastReviewedWeek = today;
   document.getElementById('weekly-review-banner').style.display = 'none';
-  const t = document.getElementById('toast'); t.textContent = '✓ Revisão salva!';
-  setTimeout(() => { t.textContent = ''; }, 2000);
+  const t = document.getElementById('toast'); if (t) { t.textContent = '✓ Revisão salva!'; setTimeout(() => { t.textContent = ''; }, 2000); }
   showToast('Revisão da semana salva!');
+  state.reviewData = { feel: '', adjust: [] };
+  await saveCfgAll(false);
 }
 
 export function showBoom(streak) {

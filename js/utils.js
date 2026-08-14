@@ -46,8 +46,13 @@ export function clearFieldErr(errId) {
 
 export function getActiveQ(s) {
   if (!s) return 1;
-  const m = Math.floor((new Date() - new Date(s)) / 86400000 / 30);
-  return m < 3 ? 1 : m < 6 ? 2 : m < 9 ? 3 : 4;
+  const start = new Date(s);
+  const today = new Date();
+  let months = (today.getFullYear() - start.getFullYear()) * 12 + (today.getMonth() - start.getMonth());
+  if (today.getDate() < start.getDate()) months--;
+  if (months < 0) months = 0;
+  const q = Math.floor(months / 3) + 1;
+  return Math.min(4, Math.max(1, q));
 }
 
 export function getPeriodDates(p) {
@@ -73,14 +78,33 @@ export function getPeriodDates(p) {
   return days;
 }
 
+// Data a partir da qual o critério estrito (todos os hábitos esperados) vale. Antes disso,
+// usa o critério antigo — evita que hábitos novos (ex: financas/tempo/relacoes, adicionados
+// nesta versão) sejam exigidos retroativamente em dias que nem existiam na UI do usuário,
+// o que zeraria streaks antigas do dia para a noite.
+const STRICT_CRITERIA_SINCE = '2026-08-14';
+
+// Um dia conta para a streak se todo hábito esperado (isExpected) naquele dia foi concluído.
+// Dias sem nenhum hábito esperado não quebram a streak. Sem userHabits carregado, ou para
+// datas anteriores ao cutover acima, usa o critério antigo de "algum hábito marcado".
+export function dayFulfilled(entry, date) {
+  const habits = state.userHabits || [];
+  const doneMap = (entry && entry.habits) || {};
+  if (!habits.length || date < STRICT_CRITERIA_SINCE) return Object.values(doneMap).some(Boolean);
+  const expected = habits.filter(h => isExpected(h, date));
+  if (!expected.length) return true;
+  return expected.every(h => !!doneMap[h.id]);
+}
+
 export function calcStreak(lg) {
-  const set = new Set(lg.filter(e => Object.values(e.habits || {}).some(Boolean)).map(e => e.date));
+  const map = Object.fromEntries(lg.map(e => [e.date, e]));
   let s = 0; let d = new Date(); d.setDate(d.getDate() - 1);
   while (s < 365) {
-    if (!set.has(dateKey(d))) break;
+    const k = dateKey(d);
+    if (!dayFulfilled(map[k], k)) break;
     s++; d.setDate(d.getDate() - 1);
   }
-  if (set.has(todayKey())) s++;
+  if (dayFulfilled(map[todayKey()], todayKey())) s++;
   return s;
 }
 
@@ -89,16 +113,16 @@ export function sanitize(str) {
 }
 
 export function getBestStreak(lg) {
+  if (!lg.length) return 0;
+  const map = Object.fromEntries(lg.map(e => [e.date, e]));
+  const firstDate = [...lg].map(e => e.date).sort()[0];
+  let d = new Date(firstDate + 'T12:00:00');
+  const end = new Date();
   let best = 0, cur = 0;
-  const sorted = [...lg].sort((a, b) => a.date.localeCompare(b.date));
-  sorted.forEach((e, i) => {
-    if (Object.values(e.habits || {}).some(Boolean)) {
-      if (i === 0) { cur = 1; } else {
-        const diff = (new Date(e.date + 'T12:00:00') - new Date(sorted[i - 1].date + 'T12:00:00')) / 86400000;
-        cur = diff === 1 ? cur + 1 : 1;
-      }
-      if (cur > best) best = cur;
-    }
-  });
+  while (d <= end) {
+    const k = dateKey(d);
+    if (dayFulfilled(map[k], k)) { cur++; if (cur > best) best = cur; } else { cur = 0; }
+    d.setDate(d.getDate() + 1);
+  }
   return best;
 }

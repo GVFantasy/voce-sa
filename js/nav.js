@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { sb, setSyncStatus } from './db.js';
+import { sb, setSyncStatus, saveCfgAll, flushPendingCheckins } from './db.js';
 import { showToast } from './utils.js';
 import { applyDarkIfSaved, initReminder, renderPerfil } from './profile.js';
 import { renderCheckin } from './checkin.js';
@@ -8,19 +8,27 @@ import { renderHistorico } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderOKRs } from './okrs.js';
 import { renderBiblioteca } from './biblioteca.js';
-import { renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
+import { renderPomodoroTime, renderPomodoroSessions, restorePomodoro } from './pomodoro.js';
 
 export function startApp() {
   document.getElementById('app').style.display = 'block';
   const mainNav = document.querySelector('.main-nav');
   if (mainNav) mainNav.style.display = '';
   document.getElementById('user-info').textContent = state.currentUser?.email?.split('@')[0] || '';
-  applyDarkIfSaved(); initReminder(); loadLog();
+  applyDarkIfSaved(); initReminder(); restorePomodoro(); loadLog();
+}
+
+async function notifyStreakRecalcOnce() {
+  if (state.userCfg.seenStreakRecalcNotice) return;
+  state.userCfg.seenStreakRecalcNotice = true;
+  await saveCfgAll(false);
+  showToast('Recalculamos sua sequência (streak) com um critério mais preciso, baseado nos hábitos esperados em cada dia.', 'info', 6000);
 }
 
 export async function loadLog() {
   if (!state.currentUser) return;
   setSyncStatus('syncing', 'Sincronizando...');
+  await flushPendingCheckins();
   const { data, error } = await sb.from('checkins')
     .select('*')
     .eq('user_id', state.currentUser.id)
@@ -39,6 +47,7 @@ export async function loadLog() {
   });
   setSyncStatus('ok', 'Sincronizado');
   renderCheckin(); renderDashboard(); renderHistorico(); renderOKRs(); renderPerfil(); renderConquistas();
+  notifyStreakRecalcOnce();
 }
 
 const MAIS_PAGES = ['historico', 'biblioteca', 'pomodoro', 'perfil', 'manual'];

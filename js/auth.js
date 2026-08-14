@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { sb, getCfg, loadCfgRemote } from './db.js';
+import { sb, getCfg, loadCfgRemote, flushPendingCheckins } from './db.js';
 import { showToast, showFieldErr, clearFieldErr } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
@@ -54,8 +54,17 @@ export async function submitAuth() {
 }
 
 export async function signOut() {
+  // Tenta sincronizar check-ins pendentes antes de invalidar a sessão — evita perder dados
+  // que ainda não foram confirmados no servidor (ver js/db.js queuePendingCheckin).
+  try { await flushPendingCheckins(); } catch (e) {}
   await sb.auth.signOut();
+  clearInterval(state.pomodoro.timer);
+  state.pomodoro = { timer: null, seconds: 25 * 60, isRunning: false, isBreak: false, sessions: 0, subject: '' };
   state.currentUser = null; state.log = []; state.userCfg = {}; state.userHabits = [];
+  document.body.classList.remove('dark');
+  // 'voce_sa_dark' não é isolado por usuário (ao contrário de cfg/ts/pomo) — limpa para não
+  // vazar o tema de uma conta para a próxima num dispositivo compartilhado.
+  localStorage.removeItem('voce_sa_dark');
   document.getElementById('app').style.display = 'none';
   document.getElementById('pg-auth').style.display = 'block';
 }

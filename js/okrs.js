@@ -103,7 +103,7 @@ function renderFinTracker() {
   const finLog = [...(state.userCfg.finLog || [])].sort((a, b) => b.mes.localeCompare(a.mes));
   const mesData = finLog.find(x => x.mes === mesAtual) || { guardado: 0, investido: 0 };
   const total = (mesData.guardado || 0) + (mesData.investido || 0);
-  const pct = meta > 0 ? Math.min(100, Math.round(total / meta * 100)) : 0;
+  const pct = meta > 0 ? Math.max(0, Math.min(100, Math.round(total / meta * 100))) : 0;
   const mesNome = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   const perfilLabels = { iniciante: 'Iniciante', transicao: 'Em transição', investidor: 'Investidor' };
@@ -112,7 +112,7 @@ function renderFinTracker() {
     const [y, mo] = m.mes.split('-');
     const nome = new Date(parseInt(y), parseInt(mo) - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
     const tot = (m.guardado || 0) + (m.investido || 0);
-    const mpct = meta > 0 ? Math.min(100, Math.round(tot / meta * 100)) : 0;
+    const mpct = meta > 0 ? Math.max(0, Math.min(100, Math.round(tot / meta * 100))) : 0;
     return `<div class="fin-hist-row">
       <span class="fin-hist-mes">${nome}</span>
       <div class="fin-hist-bar-bg"><div class="fin-hist-bar-fill" style="width:${mpct}%"></div></div>
@@ -278,8 +278,8 @@ export async function saveOKREdit(area, q, krCount) {
   if (!state.userCfg.okrCustom) state.userCfg.okrCustom = {};
   state.userCfg.okrCustom[`${area}_q${q}`] = { label, krs };
   saveCfgLocal();
-  saveCfgRemote();
   renderOKRs();
+  await saveCfgRemote();
 }
 
 export async function toggleKR(area, q, krIdx) {
@@ -311,15 +311,15 @@ export async function toggleKR(area, q, krIdx) {
   }
 
   saveCfgLocal();
-  saveCfgRemote();
 
   const { renderDashboard } = await import('./dashboard.js');
   renderDashboard();
+  await saveCfgRemote();
 }
 
 export async function saveFinMes() {
-  const guardado = parseFloat(document.getElementById('fin-guardado')?.value || '0') || 0;
-  const investido = parseFloat(document.getElementById('fin-investido')?.value || '0') || 0;
+  const guardado = Math.max(0, parseFloat(document.getElementById('fin-guardado')?.value || '0') || 0);
+  const investido = Math.max(0, parseFloat(document.getElementById('fin-investido')?.value || '0') || 0);
   const now = new Date();
   const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   if (!state.userCfg.finLog) state.userCfg.finLog = [];
@@ -329,10 +329,10 @@ export async function saveFinMes() {
   else state.userCfg.finLog.unshift(entry);
   state.userCfg.finLog = state.userCfg.finLog.slice(0, 24); // keep 2 years
   saveCfgLocal();
-  saveCfgRemote();
   renderFinTracker();
   const { renderDashboard } = await import('./dashboard.js');
   renderDashboard();
+  await saveCfgRemote();
 }
 
 export function getActiveObjective() {

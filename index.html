@@ -216,7 +216,7 @@
     <div id="plan-add-form" style="display:none;margin-top:12px">
       <input id="plan-add-input" class="auth-input" type="text" placeholder="Nome do plano" style="margin-bottom:8px">
       <div style="display:flex;gap:8px">
-        <button onclick="addPlan()" class="btn-primary" style="margin-top:0;padding:10px 16px;font-size:13px">Criar</button>
+        <button onclick="addPlan()" class="btn-primary" id="plan-add-btn-confirm" style="margin-top:0;padding:10px 16px;font-size:13px">Criar</button>
         <button onclick="document.getElementById('plan-add-form').style.display='none'" class="btn-ghost" style="margin-top:0;padding:10px 16px;font-size:13px">Cancelar</button>
       </div>
     </div>
@@ -286,7 +286,7 @@
     </div>
     <div class="sec-label">Nota <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
     <div class="reflection-q" id="reflection-q"></div>
-    <textarea class="nota-area" id="nota-area" placeholder="Vitória, obstáculo, algo que quer lembrar..."></textarea>
+    <textarea class="nota-area" id="nota-area" placeholder="Vitória, obstáculo, algo que quer lembrar..." oninput="onNotaInput()"></textarea>
     <button class="save-btn" id="save-btn" onclick="saveDay()">Salvar check-in</button>
     <div class="toast" id="toast"></div>
     <div id="quarterly-tasks-list"></div>
@@ -443,6 +443,7 @@
     <div class="prof-section">
       <div class="prof-section-title">Lembrete diário</div>
       <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
+      <div class="field-err" id="pref-lembrete-err"></div>
       <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" onclick="toggleReminder(this)"></div></div>
       <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
     </div>

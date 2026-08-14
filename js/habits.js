@@ -52,4 +52,24 @@ export function buildHabitsFromCfg() {
     });
   }
 
+  if (areas.includes('financas')) {
+    state.userHabits.push({
+      id: 'financas', icon: '💰', name: 'Registrar gastos do dia', days: 'todo dia',
+      allDays: true, hasDetail: false,
+    });
+  }
+
+  if (areas.includes('tempo')) {
+    state.userHabits.push({
+      id: 'tempo', icon: '⏱', name: 'Bloco de foco cumprido', days: 'seg a sex',
+      allDays: false, weekdays: [1, 2, 3, 4, 5], hasDetail: false,
+    });
+  }
+
+  if (areas.includes('relacoes')) {
+    state.userHabits.push({
+      id: 'relacoes', icon: '❤️', name: 'Conexão intencional', days: 'todo dia',
+      allDays: true, hasDetail: false,
+    });
+  }
 }

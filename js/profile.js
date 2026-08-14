@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP, ENERGY } from './state.js';
 import { saveCfgAll } from './db.js';
-import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize } from './utils.js';
+import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 
@@ -62,7 +62,7 @@ export function renderPerfil() {
     return `<div class="idiom-row"><div class="idiom-info"><div style="font-size:18px">${id.icon}</div><div><div class="idiom-name">${id.name}</div></div></div><div class="toggle-switch ${on ? 'on' : ''}" onclick="toggleIdioma('${id.id}',this)"></div></div>`;
   }).join('');
 
-  document.getElementById('dark-toggle').classList.toggle('on', localStorage.getItem('voce_sa_dark') === '1');
+  document.getElementById('dark-toggle').classList.toggle('on', document.body.classList.contains('dark'));
   if (state.userCfg.lembreteHora) document.getElementById('pref-lembrete').value = state.userCfg.lembreteHora;
   document.getElementById('lembrete-toggle').classList.toggle('on', !!state.userCfg.lembreteAtivo);
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : '';
@@ -162,15 +162,24 @@ export async function toggleIdioma(id, el) {
   renderCheckin();
 }
 
-export function toggleDark() {
+export async function toggleDark() {
   document.body.classList.toggle('dark');
   const isDark = document.body.classList.contains('dark');
   localStorage.setItem('voce_sa_dark', isDark ? '1' : '0');
   document.getElementById('dark-toggle').classList.toggle('on', isDark);
+  state.userCfg.darkMode = isDark;
+  await saveCfgAll(false);
 }
 
+// userCfg.darkMode é a fonte de verdade após login (sincroniza entre dispositivos);
+// localStorage é usado só como cache local antes do primeiro carregamento de config.
 export function applyDarkIfSaved() {
-  if (localStorage.getItem('voce_sa_dark') === '1') document.body.classList.add('dark');
+  const hasRemotePref = typeof state.userCfg.darkMode === 'boolean';
+  const isDark = hasRemotePref ? state.userCfg.darkMode : localStorage.getItem('voce_sa_dark') === '1';
+  document.body.classList.toggle('dark', isDark);
+  localStorage.setItem('voce_sa_dark', isDark ? '1' : '0');
+  const toggle = document.getElementById('dark-toggle');
+  if (toggle) toggle.classList.toggle('on', isDark);
 }
 
 export function exportCSV() {
@@ -186,7 +195,13 @@ export function exportCSV() {
 }
 
 export async function saveReminder() {
-  state.userCfg.lembreteHora = document.getElementById('pref-lembrete').value;
+  const val = document.getElementById('pref-lembrete').value;
+  if (!val) {
+    showFieldErr('pref-lembrete', 'pref-lembrete-err', 'Escolha um horário para o lembrete.');
+    return;
+  }
+  clearFieldErr('pref-lembrete-err');
+  state.userCfg.lembreteHora = val;
   await saveCfgAll(false);
   if (state.userCfg.lembreteAtivo) scheduleReminder();
 }
@@ -223,8 +238,9 @@ export function scheduleReminder() {
   clearTimeout(window._reminderTimer);
   window._reminderTimer = setTimeout(() => {
     const today = todayKey();
-    const checkedIn = state.log.some(e => e.date === today && Object.values(e.habits || {}).some(Boolean));
-    if (!checkedIn && Notification.permission === 'granted') {
+    const entry = state.log.find(e => e.date === today);
+    const fulfilled = dayFulfilled(entry, today);
+    if (!fulfilled && Notification.permission === 'granted') {
       new Notification('Você S.A. 🔥', { body: 'Hora do seu check-in! Não deixe o streak quebrar.', icon: 'icons/icon-192.png' });
     }
     scheduleReminder();

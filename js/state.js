@@ -1,3 +1,5 @@
+import { dayFulfilled } from './utils.js';
+
 export const SUPABASE_URL = 'https://dwazoldkxgscdkpzaqsj.supabase.co';
 export const SUPABASE_KEY = 'sb_publishable_O0qMyJ3XNCFisGORFrRdPQ_8e6Bp3VL';
 
@@ -34,10 +36,10 @@ export const ACHIEVEMENTS = [
   { id: 'treino10', icon: '🏋️', name: '10 treinos',       desc: '10 treinos feitos',           check: (l, s) => l.filter(e => e.habits && e.habits.treino).length >= 10 },
   { id: 'check30',  icon: '📅', name: '30 registros',     desc: '30 check-ins totais',         check: (l, s) => l.length >= 30 },
   { id: 'check100', icon: '🏆', name: '100 registros',    desc: '100 check-ins totais',        check: (l, s) => l.length >= 100 },
-  { id: 'perfeito', icon: '✨', name: 'Semana perfeita',  desc: 'Todos os hábitos numa semana', check: (l, s) => {
+  { id: 'perfeito', icon: '✨', name: 'Semana perfeita',  desc: 'Todos os hábitos esperados numa semana', check: (l) => {
     const sorted = [...l].sort((a, b) => a.date.localeCompare(b.date));
     for (let i = 0; i <= sorted.length - 7; i++) {
-      if (sorted.slice(i, i + 7).every(e => Object.values(e.habits || {}).some(Boolean))) return true;
+      if (sorted.slice(i, i + 7).every(e => dayFulfilled(e, e.date))) return true;
     }
     return false;
   }},
