@@ -12,6 +12,10 @@ export function getActivePlanId() {
 }
 
 export function openPlanModal() {
+  const addForm = document.getElementById('plan-add-form');
+  const addInput = document.getElementById('plan-add-input');
+  if (addForm) addForm.style.display = 'none';
+  if (addInput) addInput.value = '';
   const plans = getPlans(); const active = getActivePlanId();
   document.getElementById('plan-list').innerHTML = plans.map(p => `
     <div class="plan-row ${p.id === active ? 'active' : ''}" onclick="switchPlan('${p.id}')">
@@ -52,8 +56,9 @@ export async function switchPlan(id) {
 }
 
 export async function addPlan() {
-  const name = prompt('Nome do novo plano:');
-  if (!name) return;
+  const input = document.getElementById('plan-add-input');
+  const name = input ? input.value.trim() : '';
+  if (!name) { if (input) input.focus(); return; }
   const emojis = ['🌟', '💡', '🎯', '🏋️', '💼', '🧘', '🚀', '🌱'];
   const emoji = emojis[Math.floor(Math.random() * emojis.length)];
   const id = 'plan_' + Date.now();
@@ -67,6 +72,10 @@ export async function addPlan() {
     estudoDias: [0, 1, 3], sonoMeta: 7, inglesMeta: 20,
   };
   await saveCfgAll(false);
+  const addForm = document.getElementById('plan-add-form');
+  const addInput = document.getElementById('plan-add-input');
+  if (addForm) addForm.style.display = 'none';
+  if (addInput) addInput.value = '';
   showToast('Plano "' + name + '" criado!');
   openPlanModal();
 }
