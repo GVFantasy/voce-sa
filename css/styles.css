@@ -267,10 +267,10 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 /* ========================================================
    BOTÕES
    ======================================================== */
-.btn-primary{width:100%;padding:14px;border-radius:var(--radius-card);border:none;background:var(--preto);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
-.btn-primary:active{opacity:.8}
-.btn-primary:disabled{opacity:.4;cursor:default}
-.btn-primary.saved{background:var(--verde)}
+.btn-primary,.save-btn{width:100%;padding:14px;border-radius:var(--radius-card);border:none;background:var(--preto);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn-primary:active,.save-btn:active{opacity:.8}
+.btn-primary:disabled,.save-btn:disabled{opacity:.4;cursor:default}
+.btn-primary.saved,.save-btn.saved{background:var(--verde)}
 
 .btn-ghost{width:100%;padding:12px 16px;border-radius:var(--radius-inner);border:1px solid var(--borda);background:transparent;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--cinza);transition:all .15s}
 .btn-ghost:hover{border-color:var(--cinza)}
@@ -365,11 +365,8 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 .nota-area:focus{outline:none;border-color:var(--roxo)}
 .reflection-q{font-size:13px;color:var(--cinza);font-style:italic;margin-bottom:6px}
 
-/* save-btn unificado com btn-primary */
-.save-btn{width:100%;padding:14px;border-radius:var(--radius-card);border:none;background:var(--preto);color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:background 300ms ease,opacity .15s;font-family:inherit;margin-top:10px}
-.save-btn:active{opacity:.8}
-.save-btn:disabled{opacity:.4;cursor:default}
-.save-btn.saved{background:var(--verde)}
+/* .save-btn compartilha a base com .btn-primary (linha ~270); aqui so o que difere */
+.save-btn{margin-top:10px;transition:background 300ms ease,opacity .15s}
 
 .toast{text-align:center;font-size:13px;color:var(--verde);font-weight:500;height:20px;margin-top:5px}
 .btn-secondary{width:100%;padding:11px;border-radius:var(--radius-card);border:1px solid var(--borda);background:var(--card);color:var(--cinza);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}

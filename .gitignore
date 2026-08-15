@@ -1,0 +1,5 @@
+node_modules/
+package-lock.json
+.qa-shot.mjs
+.qa-shot2.mjs
+.qa-mock.mjs

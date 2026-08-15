@@ -1,0 +1,25 @@
+{
+  "name": "voce-sa",
+  "version": "1.0.0",
+  "description": "Aplicativo web de desenvolvimento pessoal com check-in diario, dashboard, OKRs, biblioteca, pomodoro, perfil e sincronizacao via Supabase.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GVFantasy/voce-sa.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/GVFantasy/voce-sa/issues"
+  },
+  "homepage": "https://github.com/GVFantasy/voce-sa#readme",
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
