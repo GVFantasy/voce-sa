@@ -180,7 +180,7 @@ export function renderCheckin() {
     document.getElementById('habit-list').innerHTML =
       '<div class="empty-state"><strong>Nenhum hábito configurado</strong>Vá em Configurações (⚙️) para definir suas áreas e hábitos do plano de 12 meses.</div>';
   } else {
-    document.getElementById('habit-list').innerHTML = state.userHabits.map(h => {
+    const renderHabitCard = h => {
       const done = !!state.ts.habits[h.id]; const exp = isExpected(h, today); const isExtra = done && !exp;
       return `<div class="habit-card ${done ? 'done' : ''} ${!exp && !done ? 'skip' : ''}" id="hcard-${h.id}">
         <div class="habit-main" role="checkbox" aria-checked="${done}" aria-label="${h.name}" tabindex="0" onclick="toggleHabit('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHabit('${h.id}')}">
@@ -195,7 +195,16 @@ export function renderCheckin() {
           <div class="hd-chips">${h.detailOptions.method.map(m => `<button class="hd-chip ${(state.ts.idiomDetails[h.id] || {}).method === m ? 'on' : ''}" onclick="setHabitDetail('${h.id}','method','${m}')">${m}</button>`).join('')}</div>
         </div>` : ''}
       </div>`;
-    }).join('');
+    };
+    const todayHabits = state.userHabits.filter(h => isExpected(h, today));
+    const extraHabits = state.userHabits.filter(h => !isExpected(h, today));
+    let html = todayHabits.length
+      ? todayHabits.map(renderHabitCard).join('')
+      : '<div class="empty-state" style="padding:18px"><strong>Nada esperado hoje</strong>Toque em "extra" abaixo se quiser registrar algo mesmo assim.</div>';
+    if (extraHabits.length) {
+      html += `<div class="sec-label" style="margin-top:14px">Extra, se quiser</div>` + extraHabits.map(renderHabitCard).join('');
+    }
+    document.getElementById('habit-list').innerHTML = html;
   }
   [1, 2, 3].forEach(i => {
     const b = document.getElementById('e' + i);

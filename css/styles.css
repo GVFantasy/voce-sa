@@ -367,6 +367,9 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 
 /* .save-btn compartilha a base com .btn-primary (linha ~270); aqui so o que difere */
 .save-btn{margin-top:10px;transition:background 300ms ease,opacity .15s}
+/* botao de salvar do check-in fica fixo perto do rodape ao rolar - so o #save-btn (nao o
+   .save-btn generico usado na biblioteca) */
+#save-btn{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));z-index:40;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 
 .toast{text-align:center;font-size:13px;color:var(--verde);font-weight:500;height:20px;margin-top:5px}
 .btn-secondary{width:100%;padding:11px;border-radius:var(--radius-card);border:1px solid var(--borda);background:var(--card);color:var(--cinza);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
@@ -512,6 +515,8 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 .tl-lbl{font-size:12px;color:var(--cinza);flex:1}
 .tl-done{font-size:11px;color:var(--verde);font-weight:600}
 .okr-tl-item.past .tl-lbl{opacity:.6}
+.okr-tl-item.future .tl-lbl{opacity:.75}
+.okr-tl-item .qbadge{opacity:.85}
 /* dark mode */
 body.dark .okr-kr-check{border-color:var(--borda-forte)}
 body.dark .okr-edit-form{background:var(--card-elevado);border-color:var(--borda-forte)}

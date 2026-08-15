@@ -227,7 +227,7 @@ export function renderOKRs() {
         ${otherQs ? `<div class="okr-timeline">${otherQs}</div>` : ''}
       </div>
     </div>`;
-  }).join('');
+  }).join('') || '<div class="empty-state"><strong>Nenhum OKR ainda</strong>Escolha suas áreas de foco em Configurações para gerar objetivos do trimestre.</div>';
 
   renderFinTracker();
 

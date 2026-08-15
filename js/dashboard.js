@@ -217,10 +217,14 @@ export function setPeriod(p, el) {
 }
 
 export function renderEnergyChart() {
-  const days = []; for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dateKey(d)); }
-  const colors = ['', '#E24B4A', '#BA7517', '#1D9E75'];
   const chart = document.getElementById('energy-chart');
   if (!chart) return;
+  if (!state.log.length) {
+    chart.innerHTML = '<div class="empty-state" style="padding:20px 8px"><strong>Sem dados ainda</strong>Registre sua energia no check-in para ver o padrão aqui.</div>';
+    return;
+  }
+  const days = []; for (let i = 13; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dateKey(d)); }
+  const colors = ['', 'var(--dan-solid)', 'var(--ambar)', 'var(--verde)'];
   const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   chart.innerHTML = days.map(date => {
     const entry = logMap[date];
