@@ -444,12 +444,12 @@
       <div class="prof-section-title">Lembrete diário</div>
       <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
       <div class="field-err" id="pref-lembrete-err"></div>
-      <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" onclick="toggleReminder(this)"></div></div>
+      <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" role="switch" aria-checked="false" aria-label="Lembrete diário ativo" tabindex="0" onclick="toggleReminder(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReminder(this)}"></div></div>
       <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Aparência</div>
-      <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" onclick="toggleDark()"></div></div>
+      <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" role="switch" aria-checked="false" aria-label="Tema escuro" tabindex="0" onclick="toggleDark()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDark()}"></div></div>
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Dados</div>

@@ -106,7 +106,7 @@ function renderQuarterlyTasks() {
     <div class="qtask-header"><span>Ações do trimestre · Q${aq}</span><span class="qtask-count">${doneCount}/${tasks.length}</span></div>
     ${tasks.map(t => {
       const isDone = !!doneTasks[t.id];
-      return `<div class="qtask ${isDone ? 'done' : ''}" onclick="toggleQTask('${t.id}')">
+      return `<div class="qtask ${isDone ? 'done' : ''}" role="checkbox" aria-checked="${isDone}" aria-label="${t.text}" tabindex="0" onclick="toggleQTask('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQTask('${t.id}')}">
         <div class="qtask-check-box">${isDone ? '✓' : ''}</div>
         <div class="qtask-body">
           <div class="qtask-text">${t.text}</div>
@@ -183,7 +183,7 @@ export function renderCheckin() {
     document.getElementById('habit-list').innerHTML = state.userHabits.map(h => {
       const done = !!state.ts.habits[h.id]; const exp = isExpected(h, today); const isExtra = done && !exp;
       return `<div class="habit-card ${done ? 'done' : ''} ${!exp && !done ? 'skip' : ''}" id="hcard-${h.id}">
-        <div class="habit-main" onclick="toggleHabit('${h.id}')">
+        <div class="habit-main" role="checkbox" aria-checked="${done}" aria-label="${h.name}" tabindex="0" onclick="toggleHabit('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHabit('${h.id}')}">
           <div class="habit-left"><div class="habit-icon">${h.icon}</div>
           <div><div class="habit-name">${h.name}${isExtra ? '<span class="habit-extra-tag">extra</span>' : ''}</div><div class="habit-days">${exp ? h.days : 'toque para registrar como extra'}</div></div></div>
           <div class="habit-toggle">${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
@@ -210,6 +210,7 @@ export function toggleHabit(id) {
   const h = state.userHabits.find(x => x.id === id);
   const exp = h ? isExpected(h, todayKey()) : true; const isExtra = done && !exp;
   card.className = 'habit-card' + (done ? ' done' : '');
+  const main = card.querySelector('.habit-main'); if (main) main.setAttribute('aria-checked', done);
   card.querySelector('.habit-toggle').innerHTML = done
     ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
     : '';

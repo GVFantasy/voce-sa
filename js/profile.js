@@ -59,12 +59,18 @@ export function renderPerfil() {
   const ativos = state.userCfg.idiomasAtivos || ['ingles'];
   document.getElementById('idiom-toggles').innerHTML = allIdiomas.map(id => {
     const on = ativos.includes(id.id);
-    return `<div class="idiom-row"><div class="idiom-info"><div style="font-size:18px">${id.icon}</div><div><div class="idiom-name">${id.name}</div></div></div><div class="toggle-switch ${on ? 'on' : ''}" onclick="toggleIdioma('${id.id}',this)"></div></div>`;
+    return `<div class="idiom-row"><div class="idiom-info"><div style="font-size:18px">${id.icon}</div><div><div class="idiom-name">${id.name}</div></div></div><div class="toggle-switch ${on ? 'on' : ''}" role="switch" aria-checked="${on}" aria-label="${sanitize(id.name)} ativo" tabindex="0" onclick="toggleIdioma('${id.id}',this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleIdioma('${id.id}',this)}"></div></div>`;
   }).join('');
 
-  document.getElementById('dark-toggle').classList.toggle('on', document.body.classList.contains('dark'));
+  const darkOn = document.body.classList.contains('dark');
+  const darkToggleEl = document.getElementById('dark-toggle');
+  darkToggleEl.classList.toggle('on', darkOn);
+  darkToggleEl.setAttribute('aria-checked', darkOn);
   if (state.userCfg.lembreteHora) document.getElementById('pref-lembrete').value = state.userCfg.lembreteHora;
-  document.getElementById('lembrete-toggle').classList.toggle('on', !!state.userCfg.lembreteAtivo);
+  const lembreteOn = !!state.userCfg.lembreteAtivo;
+  const lembreteToggleEl = document.getElementById('lembrete-toggle');
+  lembreteToggleEl.classList.toggle('on', lembreteOn);
+  lembreteToggleEl.setAttribute('aria-checked', lembreteOn);
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : '';
   const activePlan = getPlans().find(p => p.id === getActivePlanId());
   if (activePlan) document.getElementById('plan-badge').textContent = activePlan.emoji + ' ' + activePlan.name;
@@ -152,6 +158,7 @@ export async function toggleEstudoDia(d) {
 
 export async function toggleIdioma(id, el) {
   el.classList.toggle('on');
+  el.setAttribute('aria-checked', el.classList.contains('on'));
   const ativos = state.userCfg.idiomasAtivos || ['ingles'];
   const idx = ativos.indexOf(id);
   if (idx >= 0 && ativos.length > 1) ativos.splice(idx, 1); else if (idx < 0) ativos.push(id);
@@ -166,7 +173,9 @@ export async function toggleDark() {
   document.body.classList.toggle('dark');
   const isDark = document.body.classList.contains('dark');
   localStorage.setItem('voce_sa_dark', isDark ? '1' : '0');
-  document.getElementById('dark-toggle').classList.toggle('on', isDark);
+  const toggleEl = document.getElementById('dark-toggle');
+  toggleEl.classList.toggle('on', isDark);
+  toggleEl.setAttribute('aria-checked', isDark);
   state.userCfg.darkMode = isDark;
   await saveCfgAll(false);
 }
@@ -179,7 +188,7 @@ export function applyDarkIfSaved() {
   document.body.classList.toggle('dark', isDark);
   localStorage.setItem('voce_sa_dark', isDark ? '1' : '0');
   const toggle = document.getElementById('dark-toggle');
-  if (toggle) toggle.classList.toggle('on', isDark);
+  if (toggle) { toggle.classList.toggle('on', isDark); toggle.setAttribute('aria-checked', isDark); }
 }
 
 export function exportCSV() {
@@ -223,6 +232,7 @@ export async function toggleReminder(el) {
     state.userCfg.lembreteHora = document.getElementById('pref-lembrete').value || '19:30';
   }
   el.classList.toggle('on', state.userCfg.lembreteAtivo);
+  el.setAttribute('aria-checked', state.userCfg.lembreteAtivo);
   await saveCfgAll(false);
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : 'Lembrete desativado';
   if (state.userCfg.lembreteAtivo) { scheduleReminder(); showToast('Lembrete ativado!'); }

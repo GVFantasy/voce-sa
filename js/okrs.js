@@ -169,7 +169,7 @@ export function renderOKRs() {
 
     const krItems = qData.krs.map((kr, i) => {
       const done = !!progress[`${area}_q${aq}_${i}`];
-      return `<div class="okr-kr-item ${done ? 'done' : ''}" id="okr-kr-el-${area}-${aq}-${i}" onclick="toggleKR('${area}',${aq},${i})">
+      return `<div class="okr-kr-item ${done ? 'done' : ''}" id="okr-kr-el-${area}-${aq}-${i}" role="checkbox" aria-checked="${done}" tabindex="0" onclick="toggleKR('${area}',${aq},${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKR('${area}',${aq},${i})}">
         <div class="okr-kr-check">${done ? '✓' : ''}</div>
         <div class="okr-kr-text">${esc(kr)}</div>
       </div>`;
@@ -206,7 +206,7 @@ export function renderOKRs() {
           <div class="okr-active-hdr">
             <span class="qbadge ${qColors[aq]}">Q${aq}</span>
             <span class="okr-active-lbl">${esc(qData.label)}</span>
-            <button class="okr-edit-btn" onclick="openOKREdit('${area}',${aq});event.stopPropagation()">✏️</button>
+            <button class="okr-edit-btn" aria-label="Editar objetivo e KRs" onclick="openOKREdit('${area}',${aq});event.stopPropagation()">✏️</button>
           </div>
           <div class="okr-edit-form" id="okr-edit-${area}-${aq}" style="display:none">
             <input class="ob-input" id="okr-obj-${area}-${aq}" value="${esc(qData.label)}" placeholder="Objetivo do trimestre" style="margin-bottom:6px">
@@ -291,6 +291,7 @@ export async function toggleKR(area, q, krIdx) {
   const krEl = document.getElementById(`okr-kr-el-${area}-${q}-${krIdx}`);
   if (krEl) {
     krEl.classList.toggle('done', done);
+    krEl.setAttribute('aria-checked', done);
     const check = krEl.querySelector('.okr-kr-check');
     if (check) check.textContent = done ? '✓' : '';
   }
