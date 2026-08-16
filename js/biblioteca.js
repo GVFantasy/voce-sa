@@ -44,6 +44,13 @@ export async function deleteLivro(id) {
   setSyncStatus('syncing', 'Excluindo...');
   const { error } = await sb.from('biblioteca').delete().eq('id', id).eq('user_id', state.currentUser.id);
   if (error) { setSyncStatus('err', 'Sem conexão'); showToast('Erro ao excluir: ' + error.message, 'err'); return; }
+  if (String(editingLivroId) === String(id)) {
+    // item excluido era o que estava aberto pra edicao - fecha o formulario, senao salvar
+    // continuaria mandando um update pra uma linha que nao existe mais
+    editingLivroId = null;
+    document.getElementById('add-livro-form').style.display = 'none';
+    const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
+  }
   setSyncStatus('ok', 'Sincronizado');
   showToast('Item excluído.');
   renderBiblioteca();

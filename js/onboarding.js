@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP } from './state.js';
 import { sb, saveCfgLocal, saveCfgRemote, setSyncStatus } from './db.js';
-import { showToast, todayKey } from './utils.js';
+import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
 export function startOnboarding() {
@@ -137,6 +137,8 @@ export function obSingle(group, btn) {
     window._newLivroTipo = btn.dataset.val;
   } else if (group === 'pomo-sub') {
     state.pomodoro.subject = btn.dataset.val;
+  } else if (group === 'custom-habit-icon') {
+    window._newHabitIcon = btn.dataset.val;
   }
 }
 
@@ -211,7 +213,7 @@ export function showKickoff() {
     okrQ1[a] ? `<div class="kickoff-q1-item">• ${okrQ1[a]}</div>` : ''
   ).join('');
   if (habitsEl) habitsEl.innerHTML = state.userHabits.map(h =>
-    `<div class="kickoff-habit-row"><span>${h.icon}</span><span>${h.name}</span><span class="kickoff-habit-days">${h.days}</span></div>`
+    `<div class="kickoff-habit-row"><span>${sanitize(h.icon)}</span><span>${sanitize(h.name)}</span><span class="kickoff-habit-days">${h.days}</span></div>`
   ).join('');
   pg.style.display = 'flex';
 }

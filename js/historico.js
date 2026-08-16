@@ -20,10 +20,22 @@ export function loadMoreHistorico() {
   _renderHistoricoInner();
 }
 
+// state.log so guarda os check-ins mais recentes (limit 365 em nav.js loadLog) - navegar para
+// antes do registro mais antigo carregado mostraria meses "vazios" enganosamente, entao trava ali
+function earliestLoadedYearMonth() {
+  if (!state.log.length) return null;
+  const oldest = state.log.reduce((min, e) => (e.date < min ? e.date : min), state.log[0].date);
+  const d = new Date(oldest + 'T12:00:00');
+  return { y: d.getFullYear(), m: d.getMonth() };
+}
+
 export function navCalMonth(delta) {
-  _hiCalMonth += delta;
-  if (_hiCalMonth < 0) { _hiCalMonth = 11; _hiCalYear--; }
-  else if (_hiCalMonth > 11) { _hiCalMonth = 0; _hiCalYear++; }
+  let newMonth = _hiCalMonth + delta, newYear = _hiCalYear;
+  if (newMonth < 0) { newMonth = 11; newYear--; }
+  else if (newMonth > 11) { newMonth = 0; newYear++; }
+  const earliest = earliestLoadedYearMonth();
+  if (delta < 0 && earliest && (newYear < earliest.y || (newYear === earliest.y && newMonth < earliest.m))) return;
+  _hiCalMonth = newMonth; _hiCalYear = newYear;
   _renderHistoricoInner();
 }
 
@@ -66,9 +78,11 @@ function _renderHistoricoInner() {
   }
 
   const isCurrentMonth = y === today.getFullYear() && mo === today.getMonth();
+  const earliest = earliestLoadedYearMonth();
+  const isEarliestMonth = earliest && y === earliest.y && mo === earliest.m;
   const calHTML = `<div class="cal-wrap">
     <div class="cal-nav">
-      <button class="cal-nav-btn" aria-label="Mês anterior" onclick="navCalMonth(-1)">‹</button>
+      <button class="cal-nav-btn" aria-label="Mês anterior" onclick="navCalMonth(-1)" ${isEarliestMonth ? 'disabled' : ''}>‹</button>
       <div class="cal-title">${MNAMES[mo]} ${y}</div>
       <button class="cal-nav-btn" aria-label="Próximo mês" onclick="navCalMonth(1)" ${isCurrentMonth ? 'disabled' : ''}>›</button>
     </div>

@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP, ENERGY } from './state.js';
-import { saveCfgAll } from './db.js';
-import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, csvField } from './utils.js';
+import { saveCfgAll, sb } from './db.js';
+import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, csvField, isValidEmail } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 
@@ -53,6 +53,15 @@ export function renderPerfil() {
       const metaEl = document.getElementById('pref-fin-meta');
       if (metaEl && state.userCfg.finMeta) metaEl.value = state.userCfg.finMeta;
     }
+  }
+
+  const customList = document.getElementById('custom-habits-list');
+  if (customList) {
+    const custom = state.userCfg.customHabits || [];
+    customList.innerHTML = custom.length ? custom.map(h => `
+      <div class="idiom-row"><div class="idiom-info"><div style="font-size:18px">${sanitize(h.icon)}</div><div><div class="idiom-name">${sanitize(h.name)}</div></div></div>
+      <button aria-label="Excluir hábito" onclick="deleteCustomHabit('${h.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px;opacity:.5;line-height:1">🗑️</button></div>
+    `).join('') : '';
   }
 
   const allIdiomas = Object.entries(IDIOMA_MAP).map(([id, v]) => ({ id, ...v }));
@@ -259,4 +268,62 @@ export function scheduleReminder() {
 
 export function initReminder() {
   if (state.userCfg.lembreteAtivo && Notification.permission === 'granted') scheduleReminder();
+}
+
+export async function changeEmail() {
+  const input = document.getElementById('prof-new-email');
+  const email = input.value.trim();
+  clearFieldErr('prof-new-email-err');
+  if (!email || !isValidEmail(email)) {
+    showFieldErr('prof-new-email', 'prof-new-email-err', 'Informe um email válido.');
+    return;
+  }
+  const { error } = await sb.auth.updateUser({ email });
+  if (error) { showFieldErr('prof-new-email', 'prof-new-email-err', error.message); return; }
+  input.value = '';
+  showToast('Confira sua caixa de entrada (atual e nova) para confirmar a troca de email.', 'info', 6000);
+}
+
+export async function addCustomHabit() {
+  const input = document.getElementById('custom-habit-name');
+  const name = input.value.trim();
+  if (!name) { input.focus(); showToast('Dê um nome ao hábito.', 'info', 3000); return; }
+  const icon = window._newHabitIcon || '⭐';
+  const id = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  if (!state.userCfg.customHabits) state.userCfg.customHabits = [];
+  state.userCfg.customHabits.push({ id, name, icon, weekdays: [] });
+  input.value = '';
+  window._newHabitIcon = '⭐';
+  document.querySelectorAll('#custom-habit-icon-chips .ob-chip').forEach((c, i) => c.classList.toggle('on', i === 0));
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  renderPerfil();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
+  showToast('Hábito adicionado!');
+}
+
+export async function deleteCustomHabit(id) {
+  if (!confirm('Excluir este hábito? O histórico de check-ins já feitos não será apagado.')) return;
+  state.userCfg.customHabits = (state.userCfg.customHabits || []).filter(h => h.id !== id);
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  renderPerfil();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
+  showToast('Hábito removido.');
+}
+
+export async function changePassword() {
+  const input = document.getElementById('prof-new-pass');
+  const pass = input.value;
+  clearFieldErr('prof-new-pass-err');
+  if (!pass || pass.length < 6) {
+    showFieldErr('prof-new-pass', 'prof-new-pass-err', 'A senha deve ter pelo menos 6 caracteres.');
+    return;
+  }
+  const { error } = await sb.auth.updateUser({ password: pass });
+  if (error) { showFieldErr('prof-new-pass', 'prof-new-pass-err', error.message); return; }
+  input.value = '';
+  showToast('Senha alterada com sucesso!');
 }

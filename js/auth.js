@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { sb, getCfg, loadCfgRemote, flushPendingCheckins } from './db.js';
-import { showToast, showFieldErr, clearFieldErr } from './utils.js';
+import { showToast, showFieldErr, clearFieldErr, isValidEmail } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
 export function toggleAuthMode() {
@@ -15,6 +15,46 @@ export function toggleAuthMode() {
   document.getElementById('auth-err').textContent = '';
 }
 
+export async function forgotPassword() {
+  const emailEl = document.getElementById('auth-email');
+  const email = emailEl.value.trim();
+  clearFieldErr('auth-email-err');
+  if (!email || !isValidEmail(email)) {
+    showFieldErr('auth-email', 'auth-email-err', 'Informe seu email para recuperar a senha.');
+    return;
+  }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname,
+  });
+  if (error) { showToast('Erro ao enviar: ' + error.message, 'err'); return; }
+  showToast('Se esse email tiver uma conta, enviamos um link de recuperação.', 'info', 6000);
+}
+
+// Disparado quando o link do email de recuperação traz o usuário de volta ao app
+// (evento PASSWORD_RECOVERY do supabase-js) - pede a nova senha antes de liberar o app.
+export function showRecoveryForm() {
+  document.getElementById('pg-auth').style.display = 'none';
+  const app = document.getElementById('app'); if (app) app.style.display = 'none';
+  const mainNav = document.querySelector('.main-nav'); if (mainNav) mainNav.style.display = 'none';
+  document.getElementById('pg-recovery').style.display = 'flex';
+}
+
+export async function confirmRecovery() {
+  const passEl = document.getElementById('recovery-pass');
+  const pass = passEl.value;
+  clearFieldErr('recovery-pass-err');
+  if (!pass || pass.length < 6) {
+    showFieldErr('recovery-pass', 'recovery-pass-err', 'A senha deve ter pelo menos 6 caracteres.');
+    return;
+  }
+  const { error } = await sb.auth.updateUser({ password: pass });
+  if (error) { showFieldErr('recovery-pass', 'recovery-pass-err', error.message); return; }
+  document.getElementById('pg-recovery').style.display = 'none';
+  window._recovering = false;
+  showToast('Senha redefinida! Você já está logado.');
+  await afterLogin();
+}
+
 export async function submitAuth() {
   const emailEl = document.getElementById('auth-email');
   const passEl = document.getElementById('auth-pass');
@@ -22,11 +62,10 @@ export async function submitAuth() {
   const pass = passEl.value;
   const errEl = document.getElementById('auth-err');
   const btn = document.getElementById('auth-btn');
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   let hasErr = false;
   clearFieldErr('auth-email-err'); clearFieldErr('auth-pass-err'); errEl.textContent = '';
   if (!email) { showFieldErr('auth-email', 'auth-email-err', 'Informe seu email.'); hasErr = true; }
-  else if (!emailRegex.test(email)) { showFieldErr('auth-email', 'auth-email-err', 'Email inválido.'); hasErr = true; }
+  else if (!isValidEmail(email)) { showFieldErr('auth-email', 'auth-email-err', 'Email inválido.'); hasErr = true; }
   if (!pass) { showFieldErr('auth-pass', 'auth-pass-err', 'Informe sua senha.'); hasErr = true; }
   else if (pass.length < 6) { showFieldErr('auth-pass', 'auth-pass-err', 'Senha deve ter pelo menos 6 caracteres.'); hasErr = true; }
   if (hasErr) return;

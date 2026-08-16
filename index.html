@@ -42,6 +42,21 @@
     <div class="field-err" id="auth-pass-err"></div>
     <button class="btn-primary" id="auth-btn" onclick="submitAuth()" style="margin-bottom:12px">Entrar</button>
     <div class="auth-toggle" id="auth-toggle" onclick="toggleAuthMode()">Não tem conta? <span>Criar conta grátis</span></div>
+    <div class="auth-toggle" onclick="forgotPassword()" style="margin-top:6px">Esqueceu a senha? <span>Recuperar</span></div>
+  </div>
+</div>
+
+<div id="pg-recovery" style="display:none;min-height:100vh;flex-direction:column;background:var(--roxo)">
+  <div class="auth-hero">
+    <img src="icons/icon-192.png" class="auth-hero-logo" alt="Você S.A.">
+    <div class="auth-hero-title">Nova senha</div>
+    <div class="auth-hero-slogan">Defina uma nova senha para continuar</div>
+  </div>
+  <div class="auth-card">
+    <label class="auth-label" for="recovery-pass">Nova senha</label>
+    <input class="auth-input" id="recovery-pass" type="password" placeholder="Mínimo 6 caracteres" oninput="clearFieldErr('recovery-pass-err')">
+    <div class="field-err" id="recovery-pass-err"></div>
+    <button class="btn-primary" onclick="confirmRecovery()">Confirmar nova senha</button>
   </div>
 </div>
 
@@ -387,6 +402,16 @@
       <div class="prof-row"><div class="prof-label">Início do plano</div><div class="prof-val" id="prof-inicio"></div></div>
       <div class="prof-row"><div class="prof-label">Trimestre ativo</div><div class="prof-val" id="prof-trimestre"></div></div>
     </div>
+
+    <div class="prof-section">
+      <div class="prof-section-title">Segurança</div>
+      <div class="prof-row"><div class="prof-label">Novo email</div><input class="prof-input" id="prof-new-email" type="email" placeholder="novo@email.com"></div>
+      <div class="field-err" id="prof-new-email-err"></div>
+      <button class="btn-ghost" style="margin-top:6px;margin-bottom:14px" onclick="changeEmail()">Alterar email</button>
+      <div class="prof-row"><div class="prof-label">Nova senha</div><input class="prof-input" id="prof-new-pass" type="password" placeholder="mín. 6 caracteres"></div>
+      <div class="field-err" id="prof-new-pass-err"></div>
+      <button class="btn-ghost" style="margin-top:6px" onclick="changePassword()">Alterar senha</button>
+    </div>
     <div class="prof-section">
       <div class="prof-section-title">Ajustes táticos</div>
       <div class="prof-pref-label">Meta de sono</div>
@@ -434,6 +459,22 @@
         <div class="prof-pref-label">Meta mensal de economia</div>
         <div class="fin-input-wrap" style="margin-top:4px"><span>R$</span><input class="fin-input" id="pref-fin-meta" type="number" min="0" step="50" placeholder="500" onchange="saveFinMeta()"></div>
       </div>
+    </div>
+    <div class="prof-section">
+      <div class="prof-section-title">Hábito personalizado</div>
+      <div id="custom-habits-list"></div>
+      <input class="prof-input" id="custom-habit-name" type="text" placeholder="Nome do hábito" style="width:100%;text-align:left;margin-top:8px">
+      <div class="ob-chips" id="custom-habit-icon-chips" style="margin-top:8px">
+        <button class="ob-chip on" data-val="⭐" onclick="obSingle('custom-habit-icon',this)">⭐</button>
+        <button class="ob-chip" data-val="💧" onclick="obSingle('custom-habit-icon',this)">💧</button>
+        <button class="ob-chip" data-val="🧘" onclick="obSingle('custom-habit-icon',this)">🧘</button>
+        <button class="ob-chip" data-val="📝" onclick="obSingle('custom-habit-icon',this)">📝</button>
+        <button class="ob-chip" data-val="🥗" onclick="obSingle('custom-habit-icon',this)">🥗</button>
+        <button class="ob-chip" data-val="☀️" onclick="obSingle('custom-habit-icon',this)">☀️</button>
+        <button class="ob-chip" data-val="🎨" onclick="obSingle('custom-habit-icon',this)">🎨</button>
+        <button class="ob-chip" data-val="💊" onclick="obSingle('custom-habit-icon',this)">💊</button>
+      </div>
+      <button class="btn-ghost" style="margin-top:8px" onclick="addCustomHabit()">+ Adicionar hábito</button>
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Idiomas ativos</div>

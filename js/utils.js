@@ -11,6 +11,8 @@ export const dateKey = d =>
 export const fmtDate = iso =>
   new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
 
+export const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 export const isExpected = (h, date) => {
   if (h.allDays) return true;
   if (h.weekdays) return h.weekdays.includes(new Date(date + 'T12:00:00').getDay());

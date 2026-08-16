@@ -1,14 +1,14 @@
 import { state } from './state.js';
 import { sb } from './db.js';
 import { clearFieldErr } from './utils.js';
-import { toggleAuthMode, submitAuth, signOut, afterLogin } from './auth.js';
+import { toggleAuthMode, submitAuth, signOut, afterLogin, forgotPassword, showRecoveryForm, confirmRecovery } from './auth.js';
 import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
 import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, toggleQTask, onNotaInput } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar, getActiveObjective, toggleKR, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth } from './historico.js';
 import { renderConquistas } from './conquistas.js';
-import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta } from './profile.js';
+import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit } from './profile.js';
 import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca } from './biblioteca.js';
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
@@ -18,6 +18,8 @@ import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } 
 window.clearFieldErr = clearFieldErr;
 window.toggleAuthMode = toggleAuthMode;
 window.submitAuth = submitAuth;
+window.forgotPassword = forgotPassword;
+window.confirmRecovery = confirmRecovery;
 window.signOut = signOut;
 
 window.startOnboarding = startOnboarding;
@@ -86,6 +88,10 @@ window.toggleTreinoDia = toggleTreinoDia;
 window.toggleEstudoDia = toggleEstudoDia;
 window.toggleFinPerfil = toggleFinPerfil;
 window.saveFinMeta = saveFinMeta;
+window.changeEmail = changeEmail;
+window.changePassword = changePassword;
+window.addCustomHabit = addCustomHabit;
+window.deleteCustomHabit = deleteCustomHabit;
 window.saveFinMes = saveFinMes;
 
 window.renderBiblioteca = renderBiblioteca;
@@ -120,14 +126,30 @@ window.navFromMais = navFromMais;
 
 // Init
 async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) { state.currentUser = session.user; await afterLogin(); }
-  else document.getElementById('pg-auth').style.display = 'block';
+  // registrado ANTES de getSession(): se o link de recuperacao de senha ja tiver sido
+  // processado pelo supabase-js durante o load da pagina, o evento PASSWORD_RECOVERY so
+  // chega a quem ja estava inscrito - registrar depois arrisca perder o evento
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session && !state.currentUser) {
+    if (event === 'PASSWORD_RECOVERY') {
+      // veio do link do email de "esqueci a senha" - pede a nova senha antes de liberar o
+      // app, nao entra direto (senao a recuperacao nunca chegaria a trocar a senha de fato).
+      // window._recovering evita que o SIGNED_IN abaixo entre direto na app; confirmRecovery()
+      // (auth.js) reseta a flag depois de trocar a senha com sucesso.
+      window._recovering = true;
+      state.currentUser = session?.user || null;
+      showRecoveryForm();
+      return;
+    }
+    if (event === 'SIGNED_IN' && session && !state.currentUser && !window._recovering) {
       state.currentUser = session.user; await afterLogin();
     }
   });
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && !state.currentUser && !window._recovering) {
+    state.currentUser = session.user; await afterLogin();
+  } else if (!session && !state.currentUser && !window._recovering) {
+    document.getElementById('pg-auth').style.display = 'block';
+  }
   window.addEventListener('online', () => { if (state.currentUser) loadLog(); });
 }
 

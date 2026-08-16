@@ -1,7 +1,7 @@
 import { state, ENERGY, ECLASS, REFLECTIONS } from './state.js';
 import { getActiveObjective } from './okrs.js';
 import { sb, setSyncStatus, saveCfgLocal, saveCfgRemote, saveCfgAll, saveTsLocal, loadTsLocal, clearTsLocal, queuePendingCheckin, clearPendingCheckin, refreshPendingCheckinIfQueued } from './db.js';
-import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, getActiveQ } from './utils.js';
+import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, getActiveQ, sanitize } from './utils.js';
 import { getActivePlanId } from './plans.js';
 
 const QUARTERLY_TASKS = {
@@ -183,9 +183,9 @@ export function renderCheckin() {
     const renderHabitCard = h => {
       const done = !!state.ts.habits[h.id]; const exp = isExpected(h, today); const isExtra = done && !exp;
       return `<div class="habit-card ${done ? 'done' : ''} ${!exp && !done ? 'skip' : ''}" id="hcard-${h.id}">
-        <div class="habit-main" role="checkbox" aria-checked="${done}" aria-label="${h.name}" tabindex="0" onclick="toggleHabit('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHabit('${h.id}')}">
-          <div class="habit-left"><div class="habit-icon">${h.icon}</div>
-          <div><div class="habit-name">${h.name}${isExtra ? '<span class="habit-extra-tag">extra</span>' : ''}</div><div class="habit-days">${exp ? h.days : 'toque para registrar como extra'}</div></div></div>
+        <div class="habit-main" role="checkbox" aria-checked="${done}" aria-label="${sanitize(h.name)}" tabindex="0" onclick="toggleHabit('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleHabit('${h.id}')}">
+          <div class="habit-left"><div class="habit-icon">${sanitize(h.icon)}</div>
+          <div><div class="habit-name">${sanitize(h.name)}${isExtra ? '<span class="habit-extra-tag">extra</span>' : ''}</div><div class="habit-days">${exp ? h.days : 'toque para registrar como extra'}</div></div></div>
           <div class="habit-toggle">${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
         </div>
         ${h.hasDetail ? `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${h.id}">
@@ -224,7 +224,7 @@ export function toggleHabit(id) {
     ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
     : '';
   const nameEl = card.querySelector('.habit-name');
-  if (nameEl && h) nameEl.innerHTML = h.name + (isExtra ? '<span class="habit-extra-tag">extra</span>' : '');
+  if (nameEl && h) nameEl.innerHTML = sanitize(h.name) + (isExtra ? '<span class="habit-extra-tag">extra</span>' : '');
   const detail = document.getElementById('hdetail-' + id); if (detail) detail.classList.toggle('open', done);
   if (done) { card.classList.add('pop'); setTimeout(() => card.classList.remove('pop'), 200); }
   persistTsDraft();
@@ -319,7 +319,7 @@ export function renderWeeklyReview() {
     });
     const pct = possible > 0 ? Math.round(done / possible * 100) : 0;
     const cls = pct >= 80 ? 'rs-ok' : pct >= 50 ? 'rs-warn' : 'rs-bad';
-    html += `<div class="review-stat"><div class="rs-label">${h.icon} ${h.name}</div><div class="rs-val ${cls}">${done}/${possible}</div></div>`;
+    html += `<div class="review-stat"><div class="rs-label">${sanitize(h.icon)} ${sanitize(h.name)}</div><div class="rs-val ${cls}">${done}/${possible}</div></div>`;
   });
   document.getElementById('review-stats').innerHTML = html;
 }

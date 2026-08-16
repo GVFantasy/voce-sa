@@ -13,6 +13,18 @@ export function getActivePlanId() {
 
 let editingPlanId = null;
 
+// Aplica a config salva de um plano sobre state.userCfg, preservando planConfigs/plans
+// (que nao fazem parte do snapshot de um plano individual, senao criaria referencia circular)
+function restorePlanConfig(id) {
+  const saved = state.userCfg.planConfigs?.[id];
+  if (!saved) return;
+  const currentPlanConfigs = state.userCfg.planConfigs;
+  const currentPlans = state.userCfg.plans;
+  Object.assign(state.userCfg, saved);
+  state.userCfg.planConfigs = currentPlanConfigs;
+  state.userCfg.plans = currentPlans;
+}
+
 export function openPlanModal() {
   editingPlanId = null;
   const addForm = document.getElementById('plan-add-form');
@@ -69,6 +81,13 @@ export function closePlanModal(e) {
     document.getElementById('plan-modal').style.display = 'none';
 }
 
+async function rerenderAfterPlanChange() {
+  const { renderCheckin } = await import('./checkin.js');
+  const { renderDashboard } = await import('./dashboard.js');
+  const { renderOKRs } = await import('./okrs.js');
+  buildHabitsFromCfg(); renderCheckin(); renderDashboard(); renderOKRs();
+}
+
 export async function switchPlan(id) {
   const allPlans = getPlans(); const target = allPlans.find(p => p.id === id);
   if (!target) return;
@@ -76,14 +95,7 @@ export async function switchPlan(id) {
   // Salvar config atual SEM planConfigs e SEM activePlan (evita referência circular)
   const { planConfigs, activePlan, plans, ...cfgSnapshot } = state.userCfg;
   state.userCfg.planConfigs[getActivePlanId()] = cfgSnapshot;
-  const saved = state.userCfg.planConfigs[id];
-  if (saved) {
-    const currentPlanConfigs = state.userCfg.planConfigs;
-    const currentPlans = state.userCfg.plans;
-    Object.assign(state.userCfg, saved);
-    state.userCfg.planConfigs = currentPlanConfigs;
-    state.userCfg.plans = currentPlans;
-  }
+  restorePlanConfig(id);
   state.userCfg.activePlan = id;
   await saveCfgAll(false);
   document.getElementById('plan-badge').textContent = target.emoji + ' ' + target.name;
@@ -91,10 +103,7 @@ export async function switchPlan(id) {
   // Descarta rascunho não salvo do check-in de hoje — pertencia ao contexto do plano anterior
   // (habits/energy/nota daquele plano não fazem sentido misturados com o novo).
   clearTsLocal(todayKey());
-  const { renderCheckin } = await import('./checkin.js');
-  const { renderDashboard } = await import('./dashboard.js');
-  const { renderOKRs } = await import('./okrs.js');
-  buildHabitsFromCfg(); renderCheckin(); renderDashboard(); renderOKRs();
+  await rerenderAfterPlanChange();
 }
 
 export async function deletePlan(id) {
@@ -109,21 +118,10 @@ export async function deletePlan(id) {
   if (state.userCfg.planConfigs) delete state.userCfg.planConfigs[id];
   if (wasActive) {
     const next = remaining[0];
-    const saved = state.userCfg.planConfigs?.[next.id];
-    if (saved) {
-      const currentPlanConfigs = state.userCfg.planConfigs;
-      const currentPlans = state.userCfg.plans;
-      Object.assign(state.userCfg, saved);
-      state.userCfg.planConfigs = currentPlanConfigs;
-      state.userCfg.plans = currentPlans;
-    }
+    restorePlanConfig(next.id);
     state.userCfg.activePlan = next.id;
-    buildHabitsFromCfg();
-    const { renderCheckin } = await import('./checkin.js');
-    const { renderDashboard } = await import('./dashboard.js');
-    const { renderOKRs } = await import('./okrs.js');
     clearTsLocal(todayKey());
-    renderCheckin(); renderDashboard(); renderOKRs();
+    await rerenderAfterPlanChange();
     const badge = document.getElementById('plan-badge');
     if (badge) badge.textContent = next.emoji + ' ' + next.name;
   }

@@ -8,3 +8,4 @@ package-lock.json
 .qa-desktop.mjs
 .qa-supabase-sdk.js
 .qa-fase5a.mjs
+.qa-fase5b.mjs
