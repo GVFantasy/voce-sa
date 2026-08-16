@@ -1,4 +1,5 @@
 import { state, ACHIEVEMENTS } from './state.js';
+import { saveCfgAll } from './db.js';
 import { calcStreak, getBestStreak } from './utils.js';
 
 // Mapeamento de raridade por achievement id
@@ -7,6 +8,7 @@ const RARITY = {
   semana1:  'comum',
   treino10: 'comum',
   check30:  'comum',
+  pomodoro10: 'comum',
   mes1:     'raro',
   perfeito: 'raro',
   idioma30: 'raro',
@@ -30,8 +32,46 @@ function getProgress(a, log, streak) {
     case 'check30':  return { cur: Math.min(log.length, 30), max: 30 };
     case 'check100': return { cur: Math.min(log.length, 100), max: 100 };
     case 'idioma30': return { cur: Math.min(log.filter(e => e.habits && Object.keys(e.habits).some(k => IDIOMA_IDS.includes(k) && e.habits[k])).length, 30), max: 30 };
+    case 'pomodoro10': return { cur: Math.min((state.userCfg.pomodoroLog || []).length, 10), max: 10 };
     default: return null;
   }
+}
+
+// Celebra desbloqueios novos reaproveitando o modal de streak (mesmo componente visual).
+// Na primeira vez que a conta usa este recurso, marca tudo que ja esta desbloqueado como "visto"
+// sem festejar retroativamente - so celebra o que for desbloqueado dai pra frente.
+async function handleAchievementUnlocks(allUnlockedIds) {
+  // sem isso, abrir a aba Conquistas antes de loadLog() terminar (state.log ainda incompleto)
+  // fixaria "visto" um conjunto errado, e os achievements que faltaram apareceriam como
+  // "recem-desbloqueados" (falso positivo) assim que o log completo chegasse
+  if (!state.logLoaded) return;
+  const seenExists = Array.isArray(state.userCfg.seenAchievements);
+  if (!seenExists) {
+    state.userCfg.seenAchievements = allUnlockedIds;
+    await saveCfgAll(false);
+    return;
+  }
+  const seen = state.userCfg.seenAchievements;
+  const newlyUnlocked = ACHIEVEMENTS.filter(a => allUnlockedIds.includes(a.id) && !seen.includes(a.id));
+  if (!newlyUnlocked.length) return;
+  state.userCfg.seenAchievements = allUnlockedIds;
+  await saveCfgAll(false);
+  const el = document.getElementById('streak-boom');
+  if (!el) return;
+  const a = newlyUnlocked[0];
+  const showCelebration = () => {
+    document.getElementById('streak-boom-num').textContent = a.icon;
+    document.getElementById('streak-boom-label').textContent = 'Nova conquista: ' + a.name + '!';
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3500);
+  };
+  if (el.classList.contains('show')) {
+    // ja tem a celebracao de streak (checkin.js showBoom) mostrando no mesmo modal -
+    // espera ela sumir em vez de sobrescrever o conteudo no meio da animacao
+    setTimeout(showCelebration, 3600);
+    return;
+  }
+  showCelebration();
 }
 
 export function renderConquistas() {
@@ -50,8 +90,10 @@ export function renderConquistas() {
     bestLabel = `Esse é seu recorde!`;
   }
   document.getElementById('streak-best-label').textContent = bestLabel;
+  const allUnlockedIds = [];
   document.getElementById('achiev-grid').innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = a.check(state.log, streak);
+    if (unlocked) allUnlockedIds.push(a.id);
     const rarity = RARITY[a.id] || 'comum';
     const rarityClass = rarity !== 'comum' ? ` ${rarity}` : '';
     const badge = RARITY_BADGE[rarity]
@@ -67,4 +109,5 @@ export function renderConquistas() {
       ${badge}
     </div>`;
   }).join('');
+  handleAchievementUnlocks(allUnlockedIds);
 }

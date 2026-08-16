@@ -381,6 +381,13 @@
       </div>
       <div class="pomo-sessions" id="pomo-sessions"></div>
     </div>
+    <div class="sec-label">Duração do foco</div>
+    <div class="ob-chips" id="pomo-duration-chips" style="margin-bottom:12px">
+      <button class="ob-chip" data-val="15" onclick="setFocusDuration(15)">15min</button>
+      <button class="ob-chip on" data-val="25" onclick="setFocusDuration(25)">25min</button>
+      <button class="ob-chip" data-val="45" onclick="setFocusDuration(45)">45min</button>
+      <button class="ob-chip" data-val="60" onclick="setFocusDuration(60)">60min</button>
+    </div>
     <div class="sec-label">O que vai estudar?</div>
     <div class="ob-chips" id="pomo-subject" style="margin-bottom:12px">
       <button class="ob-chip" data-val="idioma" onclick="obSingle('pomo-sub',this)">Idioma</button>
@@ -390,6 +397,8 @@
       <button class="ob-chip" data-val="leitura" onclick="obSingle('pomo-sub',this)">Leitura</button>
     </div>
     <div class="alert alert-suc" id="pomo-complete" style="display:none">✅ Sessão concluída! Contabilizado no check-in de hoje.</div>
+    <div class="sec-label">Últimas sessões</div>
+    <div class="card" id="pomo-log-list"></div>
   </div>
 
   <!-- PERFIL -->

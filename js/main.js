@@ -10,7 +10,7 @@ import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth } from './hi
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit } from './profile.js';
 import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca } from './biblioteca.js';
-import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
+import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions, setFocusDuration } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
 
@@ -105,6 +105,7 @@ window.pomodoroToggle = pomodoroToggle;
 window.pomodoroReset = pomodoroReset;
 window.renderPomodoroTime = renderPomodoroTime;
 window.renderPomodoroSessions = renderPomodoroSessions;
+window.setFocusDuration = setFocusDuration;
 
 window.getPlans = getPlans;
 window.getActivePlanId = getActivePlanId;

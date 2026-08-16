@@ -46,6 +46,9 @@ export const ACHIEVEMENTS = [
   { id: 'idioma30', icon: '🗣️', name: '30 dias de idioma', desc: '30 dias estudando idioma', check: (l, s) => {
     return l.filter(e => e.habits && Object.keys(e.habits).some(k => IDIOMA_MAP[k] && e.habits[k])).length >= 30;
   }},
+  { id: 'pomodoro10', icon: '🍅', name: '10 sessões de foco', desc: '10 pomodoros concluídos', check: () => {
+    return (state.userCfg.pomodoroLog || []).length >= 10;
+  }},
 ];
 
 export const state = {
@@ -54,6 +57,7 @@ export const state = {
   userHabits: [],
   log: [],
   period: 'semana',
+  logLoaded: false,
   authMode: 'login',
   ts: { habits: {}, energy: 0, nota: '', idiomDetails: {} },
   obData: {

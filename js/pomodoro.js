@@ -1,11 +1,16 @@
 import { state } from './state.js';
-import { lsKey } from './db.js';
+import { lsKey, saveCfgAll } from './db.js';
+import { todayKey, fmtDate } from './utils.js';
 
 // Raio do arco SVG (deve coincidir com o r="68" no HTML)
 const ARC_RADIUS = 68;
 const ARC_CIRCUMFERENCE = 2 * Math.PI * ARC_RADIUS;
-const FOCUS_SECONDS = 25 * 60;
-const BREAK_SECONDS = 5 * 60;
+const SHORT_BREAK_SECONDS = 5 * 60;
+const LONG_BREAK_SECONDS = 15 * 60;
+
+function focusSeconds() {
+  return (state.userCfg.pomoFocusMin || 25) * 60;
+}
 
 function storageKey() {
   return lsKey('pomo');
@@ -17,6 +22,7 @@ function persistPomodoro() {
       endTime: state.pomodoro.endTime || null,
       isRunning: state.pomodoro.isRunning,
       isBreak: state.pomodoro.isBreak,
+      isLongBreak: state.pomodoro.isLongBreak,
       sessions: state.pomodoro.sessions,
       subject: state.pomodoro.subject,
       seconds: state.pomodoro.seconds,
@@ -29,7 +35,8 @@ export function clearPomodoroStorage() {
 }
 
 function getFullDuration() {
-  return state.pomodoro.isBreak ? BREAK_SECONDS : FOCUS_SECONDS;
+  if (state.pomodoro.isBreak) return state.pomodoro.isLongBreak ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS;
+  return focusSeconds();
 }
 
 function updateArc() {
@@ -37,11 +44,43 @@ function updateArc() {
   if (!arc) return;
   const full = getFullDuration();
   const remaining = state.pomodoro.seconds;
-  const progress = remaining / full; // 1.0 = cheio, 0.0 = vazio
+  const progress = full > 0 ? remaining / full : 0; // 1.0 = cheio, 0.0 = vazio
   const offset = ARC_CIRCUMFERENCE * (1 - progress);
   arc.style.strokeDasharray = ARC_CIRCUMFERENCE;
   arc.style.strokeDashoffset = offset;
   arc.classList.toggle('break', state.pomodoro.isBreak);
+}
+
+// Toca um bipe curto (Web Audio API, sem depender de arquivo externo — funciona offline)
+// e vibra se o dispositivo suportar, para avisar o fim do ciclo mesmo com a aba em segundo plano.
+function notifyPhaseEnd() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) {
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start(); osc.stop(ctx.currentTime + 0.6);
+      osc.onended = () => ctx.close().catch(() => {});
+    }
+  } catch (e) {}
+  if (navigator.vibrate) { try { navigator.vibrate(200); } catch (e) {} }
+}
+
+async function logCompletedSession() {
+  if (!state.userCfg) return;
+  if (!state.userCfg.pomodoroLog) state.userCfg.pomodoroLog = [];
+  state.userCfg.pomodoroLog.unshift({
+    date: todayKey(), subject: state.pomodoro.subject || '',
+    durationMin: Math.round(focusSeconds() / 60),
+  });
+  state.userCfg.pomodoroLog = state.userCfg.pomodoroLog.slice(0, 200);
+  renderPomodoroLog();
+  await saveCfgAll(false);
 }
 
 // Recalcula os segundos restantes a partir de um timestamp de término em vez de decrementar
@@ -64,16 +103,21 @@ function completePhase() {
   clearInterval(state.pomodoro.timer);
   state.pomodoro.isRunning = false;
   const circle = document.getElementById('pomo-circle');
+  notifyPhaseEnd();
   if (!state.pomodoro.isBreak) {
     state.pomodoro.sessions++;
+    logCompletedSession();
+    const isLong = state.pomodoro.sessions % 4 === 0;
     state.pomodoro.isBreak = true;
-    state.pomodoro.seconds = BREAK_SECONDS;
-    const label = document.getElementById('pomo-label'); if (label) label.textContent = 'Pausa';
+    state.pomodoro.isLongBreak = isLong;
+    state.pomodoro.seconds = isLong ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS;
+    const label = document.getElementById('pomo-label'); if (label) label.textContent = isLong ? 'Pausa longa' : 'Pausa';
     const complete = document.getElementById('pomo-complete'); if (complete) complete.style.display = 'block';
     renderPomodoroSessions();
   } else {
     state.pomodoro.isBreak = false;
-    state.pomodoro.seconds = FOCUS_SECONDS;
+    state.pomodoro.isLongBreak = false;
+    state.pomodoro.seconds = focusSeconds();
     const label = document.getElementById('pomo-label'); if (label) label.textContent = 'Foco';
   }
   const startBtn = document.getElementById('pomo-start'); if (startBtn) startBtn.textContent = 'Iniciar';
@@ -106,13 +150,30 @@ export function pomodoroReset() {
   clearInterval(state.pomodoro.timer);
   state.pomodoro.isRunning = false;
   state.pomodoro.isBreak = false;
-  state.pomodoro.seconds = FOCUS_SECONDS;
+  state.pomodoro.isLongBreak = false;
+  state.pomodoro.seconds = focusSeconds();
   state.pomodoro.endTime = null;
   document.getElementById('pomo-start').textContent = 'Iniciar';
   document.getElementById('pomo-label').textContent = 'Foco';
   document.getElementById('pomo-circle').classList.remove('running', 'break');
   renderPomodoroTime();
   persistPomodoro();
+}
+
+export async function setFocusDuration(min) {
+  // so ajusta o contador visivel se o ciclo atual ainda nao foi tocado (senao um foco pausado
+  // no meio perderia o progresso so por trocar a preferencia de duracao pra sessao seguinte)
+  const untouched = state.pomodoro.seconds === focusSeconds();
+  state.userCfg.pomoFocusMin = min;
+  document.querySelectorAll('#pomo-duration-chips .ob-chip').forEach(btn => {
+    btn.classList.toggle('on', parseInt(btn.dataset.val) === min);
+  });
+  if (!state.pomodoro.isRunning && !state.pomodoro.isBreak && untouched) {
+    state.pomodoro.seconds = focusSeconds();
+    renderPomodoroTime();
+    persistPomodoro();
+  }
+  await saveCfgAll(false);
 }
 
 export function renderPomodoroTime() {
@@ -123,22 +184,45 @@ export function renderPomodoroTime() {
 }
 
 export function renderPomodoroSessions() {
+  const s = state.pomodoro.sessions;
+  const inCycle = s > 0 && s % 4 === 0 ? 4 : s % 4;
   let html = '';
   for (let i = 0; i < 4; i++) {
-    html += `<div class="pomo-dot ${i < state.pomodoro.sessions ? 'done' : ''}"></div>`;
+    html += `<div class="pomo-dot ${i < inCycle ? 'done' : ''}"></div>`;
   }
   document.getElementById('pomo-sessions').innerHTML = html;
+}
+
+export function renderPomodoroDuration() {
+  const wrap = document.getElementById('pomo-duration-chips');
+  if (!wrap) return;
+  const min = state.userCfg.pomoFocusMin || 25;
+  wrap.querySelectorAll('.ob-chip').forEach(btn => {
+    btn.classList.toggle('on', parseInt(btn.dataset.val) === min);
+  });
+}
+
+export function renderPomodoroLog() {
+  const el = document.getElementById('pomo-log-list');
+  if (!el) return;
+  const log = (state.userCfg.pomodoroLog || []).slice(0, 8);
+  if (!log.length) { el.innerHTML = '<div style="font-size:12px;color:var(--cinza)">Nenhuma sessão concluída ainda.</div>'; return; }
+  const subjNames = { idioma: 'Idioma', habilidade: 'Habilidade', tecnico: 'Técnico', faculdade: 'Faculdade', leitura: 'Leitura' };
+  el.innerHTML = log.map(s => `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);padding:4px 0;border-bottom:1px solid var(--borda)">
+    <span>${fmtDate(s.date)}${s.subject ? ' · ' + (subjNames[s.subject] || s.subject) : ''}</span><span>${s.durationMin}min</span>
+  </div>`).join('');
 }
 
 // Restaura um ciclo em andamento após reload/fechamento do app. Sempre reseta para um estado
 // limpo primeiro — evita herdar isRunning/endTime de outro usuário após um troca de conta.
 export function restorePomodoro() {
   clearInterval(state.pomodoro.timer);
-  state.pomodoro = { timer: null, seconds: FOCUS_SECONDS, isRunning: false, isBreak: false, sessions: 0, subject: '' };
+  state.pomodoro = { timer: null, seconds: focusSeconds(), isRunning: false, isBreak: false, isLongBreak: false, sessions: 0, subject: '' };
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(storageKey()) || 'null'); } catch (e) {}
   if (!saved) { renderPomodoroTime(); renderPomodoroSessions(); return; }
   state.pomodoro.isBreak = !!saved.isBreak;
+  state.pomodoro.isLongBreak = !!saved.isLongBreak;
   state.pomodoro.sessions = saved.sessions || 0;
   state.pomodoro.subject = saved.subject || '';
   if (saved.isRunning && saved.endTime) {
@@ -151,7 +235,7 @@ export function restorePomodoro() {
       const startBtn = document.getElementById('pomo-start');
       const label = document.getElementById('pomo-label');
       if (startBtn) startBtn.textContent = 'Pausar';
-      if (label) label.textContent = state.pomodoro.isBreak ? 'Pausa' : 'Foco';
+      if (label) label.textContent = state.pomodoro.isBreak ? (state.pomodoro.isLongBreak ? 'Pausa longa' : 'Pausa') : 'Foco';
       if (circle) circle.classList.toggle('running', !state.pomodoro.isBreak);
       if (circle) circle.classList.toggle('break', state.pomodoro.isBreak);
       startTicking();
