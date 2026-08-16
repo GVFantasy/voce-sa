@@ -1003,3 +1003,18 @@ body.dark .dash-focus-text{color:var(--preto)}
 .qtask-hint{font-size:11px;color:var(--cinza);margin-top:2px;line-height:1.4}
 body.dark .qtask-check-box{border-color:var(--borda-forte)}
 body.dark .qtask.done .qtask-check-box{background:var(--roxo);border-color:var(--roxo)}
+
+/* ========================================================
+   RESPONSIVO — tablet/desktop
+   Ajuste fluido leve sobre a mesma estrutura mobile-first, sem layout
+   dedicado de desktop (sem sidebar). So da mais respiro e usa colunas
+   extras onde ja e grid.
+   ======================================================== */
+@media (min-width:768px){
+  .achiev-grid{grid-template-columns:repeat(4,1fr)}
+  .ob-wrap{max-width:520px}
+}
+@media (min-width:1024px){
+  .page{max-width:840px}
+  .achiev-grid{grid-template-columns:repeat(5,1fr)}
+}

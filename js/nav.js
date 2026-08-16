@@ -16,6 +16,18 @@ export function startApp() {
   if (mainNav) mainNav.style.display = '';
   document.getElementById('user-info').textContent = state.currentUser?.email?.split('@')[0] || '';
   applyDarkIfSaved(); initReminder(); restorePomodoro(); loadLog();
+  // deep link vindo dos atalhos do PWA (manifest.json "shortcuts", ex: ?tab=pomodoro)
+  // allowlist fixa - nunca interpola o valor da URL num seletor
+  const MAIN_NAV_TABS = ['dashboard', 'okrs', 'conquistas'];
+  const tab = new URLSearchParams(location.search).get('tab');
+  if (tab === 'pomodoro') {
+    navFromMais('pomodoro');
+  } else if (MAIN_NAV_TABS.includes(tab)) {
+    // seguro interpolar aqui: tab so chega a este ponto se for exatamente um dos 3
+    // valores fixos do allowlist acima, nunca um valor arbitrario vindo da URL
+    const btn = document.querySelector(`.nav-btn[onclick*="nav('${tab}'"]`);
+    nav(tab, btn);
+  }
 }
 
 async function notifyStreakRecalcOnce() {

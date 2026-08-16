@@ -4,3 +4,6 @@ package-lock.json
 .qa-shot2.mjs
 .qa-mock.mjs
 .qa-skel.mjs
+.qa-resize.mjs
+.qa-desktop.mjs
+.qa-supabase-sdk.js

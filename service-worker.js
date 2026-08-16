@@ -1,4 +1,4 @@
-const CACHE_NAME = "voce-sa-v30";
+const CACHE_NAME = "voce-sa-v31";
 const OFFLINE_URL = "./offline.html";
 const APP_SHELL = [
   "./",
@@ -11,6 +11,11 @@ const APP_SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
+
+// Dependencias externas conhecidas e estaveis (SDK do Supabase, fonte) - cacheadas
+// cache-first assim como os recursos same-origin. Nunca inclui o subdominio do projeto
+// Supabase (dados ao vivo, nao deve ser cacheado).
+const CACHEABLE_CROSS_ORIGIN_HOSTS = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -49,13 +54,13 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  if (!isSameOrigin) return;
+  if (!isSameOrigin && !CACHEABLE_CROSS_ORIGIN_HOSTS.includes(requestUrl.hostname)) return;
 
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
 
-      return fetch(event.request).then(response => {
+      return fetch(event.request, { mode: isSameOrigin ? undefined : "cors" }).then(response => {
         if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
