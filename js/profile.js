@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP, ENERGY } from './state.js';
 import { saveCfgAll } from './db.js';
-import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled } from './utils.js';
+import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, csvField } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 
@@ -192,10 +192,10 @@ export function applyDarkIfSaved() {
 }
 
 export function exportCSV() {
-  const headers = 'Data,' + state.userHabits.map(h => h.name).join(',') + ',Energia,Nota';
+  const headers = ['Data', ...state.userHabits.map(h => h.name), 'Energia', 'Nota'].map(csvField).join(',');
   const rows = state.log.map(e => {
-    const habits = state.userHabits.map(h => e.habits && e.habits[h.id] ? 'Sim' : 'Não').join(',');
-    return `${e.date},${habits},${e.energy ? ENERGY[e.energy] : ''},${(e.nota || '').replace(/,/g, ';')}`;
+    const habits = state.userHabits.map(h => e.habits && e.habits[h.id] ? 'Sim' : 'Não');
+    return [e.date, ...habits, e.energy ? ENERGY[e.energy] : '', e.nota || ''].map(csvField).join(',');
   });
   const csv = [headers, ...rows].join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });

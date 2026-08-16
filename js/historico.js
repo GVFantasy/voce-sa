@@ -2,14 +2,28 @@ import { state, ENERGY } from './state.js';
 import { fmtDate, isExpected, dateKey, sanitize } from './utils.js';
 
 let _hiLimit = 15;
+let _hiCalYear = new Date().getFullYear();
+let _hiCalMonth = new Date().getMonth();
 
 export function renderHistorico() {
   _hiLimit = 15;
+  // recalcula "hoje" a cada abertura da aba - o app pode ficar aberto (PWA) atravessando
+  // meia-noite/virada de mes, entao nao pode confiar num valor cacheado no load do modulo
+  const today = new Date();
+  _hiCalYear = today.getFullYear();
+  _hiCalMonth = today.getMonth();
   _renderHistoricoInner();
 }
 
 export function loadMoreHistorico() {
   _hiLimit += 15;
+  _renderHistoricoInner();
+}
+
+export function navCalMonth(delta) {
+  _hiCalMonth += delta;
+  if (_hiCalMonth < 0) { _hiCalMonth = 11; _hiCalYear--; }
+  else if (_hiCalMonth > 11) { _hiCalMonth = 0; _hiCalYear++; }
   _renderHistoricoInner();
 }
 
@@ -20,9 +34,9 @@ function _renderHistoricoInner() {
     return;
   }
 
-  // --- Calendário do mês atual ---
+  // --- Calendário (navegável entre meses) ---
   const today = new Date();
-  const y = today.getFullYear(), mo = today.getMonth();
+  const y = _hiCalYear, mo = _hiCalMonth;
   const dim = new Date(y, mo + 1, 0).getDate();
   const firstDow = new Date(y, mo, 1).getDay();
   const MNAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -51,8 +65,13 @@ function _renderHistoricoInner() {
     calCells += `<div class="${cls}"${hasEntry ? ` onclick="showHiDay('${dk}')"` : ''}>${d}</div>`;
   }
 
+  const isCurrentMonth = y === today.getFullYear() && mo === today.getMonth();
   const calHTML = `<div class="cal-wrap">
-    <div class="cal-title">${MNAMES[mo]} ${y}</div>
+    <div class="cal-nav">
+      <button class="cal-nav-btn" aria-label="Mês anterior" onclick="navCalMonth(-1)">‹</button>
+      <div class="cal-title">${MNAMES[mo]} ${y}</div>
+      <button class="cal-nav-btn" aria-label="Próximo mês" onclick="navCalMonth(1)" ${isCurrentMonth ? 'disabled' : ''}>›</button>
+    </div>
     <div class="cal-grid">${calCells}</div>
     <div id="hi-day-detail" class="hi-day-detail"></div>
   </div>`;

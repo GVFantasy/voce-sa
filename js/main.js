@@ -6,12 +6,12 @@ import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggle
 import { renderCheckin, toggleHabit, setHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, toggleQTask, onNotaInput } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar, getActiveObjective, toggleKR, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
-import { renderHistorico, loadMoreHistorico, showHiDay } from './historico.js';
+import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta } from './profile.js';
-import { renderBiblioteca, showAddLivro, saveLivro } from './biblioteca.js';
+import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca } from './biblioteca.js';
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions } from './pomodoro.js';
-import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan } from './plans.js';
+import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
 
 // Expõe ao window para os onclick inline no HTML
@@ -67,6 +67,7 @@ window.saveOKREdit = saveOKREdit;
 
 window.renderHistorico = renderHistorico;
 window.loadMoreHistorico = loadMoreHistorico;
+window.navCalMonth = navCalMonth;
 window.showHiDay = showHiDay;
 window.renderConquistas = renderConquistas;
 
@@ -90,6 +91,9 @@ window.saveFinMes = saveFinMes;
 window.renderBiblioteca = renderBiblioteca;
 window.showAddLivro = showAddLivro;
 window.saveLivro = saveLivro;
+window.editLivro = editLivro;
+window.deleteLivro = deleteLivro;
+window.filterBiblioteca = filterBiblioteca;
 
 window.pomodoroToggle = pomodoroToggle;
 window.pomodoroReset = pomodoroReset;
@@ -102,6 +106,10 @@ window.openPlanModal = openPlanModal;
 window.closePlanModal = closePlanModal;
 window.switchPlan = switchPlan;
 window.addPlan = addPlan;
+window.deletePlan = deletePlan;
+window.startRenamePlan = startRenamePlan;
+window.cancelPlanForm = cancelPlanForm;
+window.openNewPlanForm = openNewPlanForm;
 
 window.nav = nav;
 window.startApp = startApp;

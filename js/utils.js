@@ -112,6 +112,15 @@ export function sanitize(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// Formata um valor para uma celula CSV: neutraliza injecao de formula (Excel/Sheets executam
+// valores comecando com =,+,-,@) e escapa aspas/virgulas/quebras de linha via RFC 4180.
+export function csvField(val) {
+  let s = String(val ?? '');
+  if (/^[=+\-@]/.test(s)) s = "'" + s;
+  if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
 export function getBestStreak(lg) {
   if (!lg.length) return 0;
   const map = Object.fromEntries(lg.map(e => [e.date, e]));
