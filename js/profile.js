@@ -3,6 +3,7 @@ import { saveCfgAll, sb } from './db.js';
 import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, csvField, isValidEmail } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
+import { subscribeToPush, unsubscribeFromPush } from './push.js';
 
 export function renderPerfil() {
   const aq = getActiveQ(state.userCfg.startDate);
@@ -220,6 +221,7 @@ export async function saveReminder() {
   }
   clearFieldErr('pref-lembrete-err');
   state.userCfg.lembreteHora = val;
+  state.userCfg.tzOffsetMin = new Date().getTimezoneOffset();
   await saveCfgAll(false);
   if (state.userCfg.lembreteAtivo) scheduleReminder();
 }
@@ -240,11 +242,17 @@ export async function toggleReminder(el) {
   if (state.userCfg.lembreteAtivo && !state.userCfg.lembreteHora) {
     state.userCfg.lembreteHora = document.getElementById('pref-lembrete').value || '19:30';
   }
+  if (state.userCfg.lembreteAtivo) state.userCfg.tzOffsetMin = new Date().getTimezoneOffset();
   el.classList.toggle('on', state.userCfg.lembreteAtivo);
   el.setAttribute('aria-checked', state.userCfg.lembreteAtivo);
   await saveCfgAll(false);
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : 'Lembrete desativado';
-  if (state.userCfg.lembreteAtivo) { scheduleReminder(); showToast('Lembrete ativado!'); }
+  if (state.userCfg.lembreteAtivo) {
+    scheduleReminder(); showToast('Lembrete ativado!');
+    subscribeToPush();
+  } else {
+    unsubscribeFromPush();
+  }
 }
 
 export function scheduleReminder() {
@@ -312,6 +320,27 @@ export async function deleteCustomHabit(id) {
   const { renderCheckin } = await import('./checkin.js');
   renderCheckin();
   showToast('Hábito removido.');
+}
+
+export async function deleteAccount() {
+  const confirmInput = document.getElementById('prof-delete-confirm');
+  clearFieldErr('prof-delete-err');
+  if (confirmInput.value.trim().toLowerCase() !== 'excluir') {
+    showFieldErr('prof-delete-confirm', 'prof-delete-err', 'Digite exatamente "excluir" para confirmar.');
+    return;
+  }
+  const btn = document.getElementById('prof-delete-btn');
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = 'Excluindo...';
+  const { error } = await sb.functions.invoke('delete-account');
+  if (error) {
+    btn.disabled = false; btn.textContent = 'Excluir minha conta';
+    showFieldErr('prof-delete-confirm', 'prof-delete-err', 'Não foi possível excluir a conta: ' + error.message);
+    return;
+  }
+  const { signOut } = await import('./auth.js');
+  await signOut();
+  showToast('Conta excluída. Sentiremos sua falta.', 'info', 5000);
 }
 
 export async function changePassword() {

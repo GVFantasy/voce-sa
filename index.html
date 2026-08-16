@@ -422,6 +422,13 @@
       <button class="btn-ghost" style="margin-top:6px" onclick="changePassword()">Alterar senha</button>
     </div>
     <div class="prof-section">
+      <div class="prof-section-title">Zona de perigo</div>
+      <div style="font-size:13px;color:var(--cinza);margin-bottom:10px">Excluir sua conta apaga permanentemente seu login, check-ins, biblioteca e configurações. Essa ação não pode ser desfeita.</div>
+      <div class="prof-row"><div class="prof-label">Digite "excluir" para confirmar</div><input class="prof-input" id="prof-delete-confirm" type="text" placeholder="excluir" autocomplete="off"></div>
+      <div class="field-err" id="prof-delete-err"></div>
+      <button class="btn-danger" id="prof-delete-btn" style="margin-top:6px" onclick="deleteAccount()">Excluir minha conta</button>
+    </div>
+    <div class="prof-section">
       <div class="prof-section-title">Ajustes táticos</div>
       <div class="prof-pref-label">Meta de sono</div>
       <div class="ob-chips" id="sono-chips">
