@@ -662,6 +662,16 @@ body.dark .fin-perfil-badge{background:#2A2660}
 .dqs-sep{width:1px;height:32px;background:var(--borda);margin:0 8px;flex-shrink:0}
 .dash-divider{border:none;border-top:1px solid var(--borda);margin:12px 0 16px}
 
+/* SKELETON — placeholder de carregamento generico, evita flash de conteudo vazio
+   enquanto os dados ainda nao chegaram do servidor (ex: primeiro load apos login) */
+.skeleton-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:13px 15px;margin-bottom:8px}
+.skeleton-line{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--borda) 25%,var(--fundo) 50%,var(--borda) 75%);background-size:200% 100%;animation:skeletonShimmer 1.4s ease-in-out infinite}
+.skeleton-line + .skeleton-line{margin-top:8px}
+.skeleton-line.w-60{width:60%}
+.skeleton-line.w-40{width:40%}
+@keyframes skeletonShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+body.dark .skeleton-line{background:linear-gradient(90deg,var(--borda-forte) 25%,var(--card-elevado) 50%,var(--borda-forte) 75%);background-size:200% 100%}
+
 /* PAGE TRANSITIONS */
 .page.fade-in{animation:pageFadeIn 150ms ease-out forwards}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
