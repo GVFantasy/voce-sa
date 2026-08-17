@@ -1,4 +1,4 @@
-const CACHE_NAME = "voce-sa-v35";
+const CACHE_NAME = "voce-sa-v36";
 const OFFLINE_URL = "./offline.html";
 const APP_SHELL = [
   "./",
@@ -7,15 +7,18 @@ const APP_SHELL = [
   "./css/styles.css",
   "./js/main.js",
   "./js/pwa.js",
+  "./js/vendor/supabase.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
 
-// Dependencias externas conhecidas e estaveis (SDK do Supabase, fonte) - cacheadas
-// cache-first assim como os recursos same-origin. Nunca inclui o subdominio do projeto
-// Supabase (dados ao vivo, nao deve ser cacheado).
-const CACHEABLE_CROSS_ORIGIN_HOSTS = ["cdn.jsdelivr.net", "fonts.googleapis.com", "fonts.gstatic.com"];
+// Dependencia externa conhecida e estavel (fonte) - cacheada cache-first assim como os
+// recursos same-origin. Nunca inclui o subdominio do projeto Supabase (dados ao vivo,
+// nao deve ser cacheado). O SDK do Supabase deixou de ser cross-origin: agora e vendorizado
+// em js/vendor/supabase.js (ver commit que corrigiu o app travando quando a CDN falhava/
+// demorava a carregar).
+const CACHEABLE_CROSS_ORIGIN_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 self.addEventListener("install", event => {
   event.waitUntil(

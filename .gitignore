@@ -11,4 +11,5 @@ package-lock.json
 .qa-fase5b.mjs
 .qa-fase5c.mjs
 .qa-fase5d.mjs
+.qa-sdk-fix.mjs
 supabase/.temp/
