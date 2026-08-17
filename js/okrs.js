@@ -1,5 +1,5 @@
 import { state, META_LABELS } from './state.js';
-import { getActiveQ, getPeriodDates, isExpected, dayFulfilled } from './utils.js';
+import { getActiveQ, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
 
 const areaIcons = { corpo: '🏃', mente: '🧠', financas: '💰', tempo: '⏱', relacoes: '❤️' };
@@ -151,102 +151,9 @@ const finDicas = {
   investidor: 'Revise sua alocação trimestralmente e compare o retorno real com benchmarks (CDI, IBOV).',
 };
 
-// ---- Motor de KRs automáticos: todas as funções abaixo leem só dado que o check-in já grava
-// (state.log / state.userHabits / state.userCfg.finLog), escopado ao trimestre ativo via
-// getPeriodDates('trimestre'). Nenhuma coleta nova.
-
-function habitPctInQuarter(log, habitId) {
-  const h = (state.userHabits || []).find(x => x.id === habitId);
-  if (!h) return 0;
-  const dates = getPeriodDates('trimestre');
-  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let done = 0, possible = 0;
-  dates.forEach(date => {
-    if (isExpected(h, date)) {
-      possible++;
-      const e = logMap[date];
-      if (e && e.habits[habitId]) done++;
-    }
-  });
-  return possible > 0 ? done / possible : 0;
-}
-
-function weeklyFreqInQuarter(log, habitId) {
-  const dates = getPeriodDates('trimestre');
-  if (!dates.length) return 0;
-  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let doneCount = 0;
-  dates.forEach(date => { const e = logMap[date]; if (e && e.habits[habitId]) doneCount++; });
-  return doneCount / (dates.length / 7);
-}
-
-function habitStreakInQuarter(log, habitId) {
-  const dates = getPeriodDates('trimestre');
-  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let best = 0, cur = 0;
-  dates.forEach(date => {
-    const e = logMap[date];
-    if (e && e.habits[habitId]) { cur++; if (cur > best) best = cur; } else cur = 0;
-  });
-  return best;
-}
-
-function overallStreakInQuarter(log) {
-  const dates = getPeriodDates('trimestre');
-  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let best = 0, cur = 0;
-  dates.forEach(date => {
-    if (dayFulfilled(logMap[date], date)) { cur++; if (cur > best) best = cur; } else cur = 0;
-  });
-  return best;
-}
-
-function overallPctInQuarter(log) {
-  const dates = getPeriodDates('trimestre');
-  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let done = 0, possible = 0;
-  dates.forEach(date => {
-    (state.userHabits || []).forEach(h => {
-      if (isExpected(h, date)) { possible++; const e = logMap[date]; if (e && e.habits[h.id]) done++; }
-    });
-  });
-  return possible > 0 ? done / possible : 0;
-}
-
-// meses do trimestre ativo ja decorridos (inclui o atual), no formato "AAAA-MM" usado em finLog
-function quarterMonthsSoFar() {
-  const aq = getActiveQ(state.userCfg.startDate);
-  const start = new Date(state.userCfg.startDate || new Date());
-  const qs = new Date(start.getFullYear(), start.getMonth() + (aq - 1) * 3, 1);
-  const now = new Date();
-  const months = [];
-  let d = new Date(qs);
-  while (d <= now && months.length < 3) {
-    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-    d.setMonth(d.getMonth() + 1);
-  }
-  return months;
-}
-
-function finLogConsistencyInQuarter() {
-  const months = quarterMonthsSoFar();
-  const finLog = state.userCfg.finLog || [];
-  const withData = months.filter(m => {
-    const entry = finLog.find(x => x.mes === m);
-    return entry && ((entry.guardado || 0) + (entry.investido || 0)) > 0;
-  });
-  return { done: withData.length, total: months.length };
-}
-
-function finLogGrowthInQuarter() {
-  const months = quarterMonthsSoFar();
-  if (months.length < 2) return false;
-  const finLog = state.userCfg.finLog || [];
-  const totalFor = m => { const e = finLog.find(x => x.mes === m); return e ? (e.guardado || 0) + (e.investido || 0) : 0; };
-  return totalFor(months[months.length - 1]) > totalFor(months[0]);
-}
-
-// Avalia uma regra "auto" e devolve { done, pct } (pct 0-100, so pra exibir progresso).
+// Avalia uma regra "auto" e devolve { done, pct } (pct 0-100, so pra exibir progresso). As
+// métricas em si (habitPctInQuarter etc.) vivem em utils.js — reaproveitadas também pelas
+// Ações do trimestre em checkin.js.
 function evalAutoKR(auto, log) {
   switch (auto.type) {
     case 'habitPct': {

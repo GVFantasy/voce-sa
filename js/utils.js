@@ -140,3 +140,98 @@ export function getBestStreak(lg) {
   }
   return best;
 }
+
+// ---- Métricas escopadas ao trimestre ativo (getPeriodDates('trimestre')) — usadas tanto pelo
+// motor de KRs automáticos (okrs.js) quanto pelas Ações do trimestre (checkin.js). Leem só dado
+// já coletado (log de check-ins / state.userCfg.finLog), nenhuma coleta nova.
+
+export function habitPctInQuarter(log, habitId) {
+  const h = (state.userHabits || []).find(x => x.id === habitId);
+  if (!h) return 0;
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let done = 0, possible = 0;
+  dates.forEach(date => {
+    if (isExpected(h, date)) {
+      possible++;
+      const e = logMap[date];
+      if (e && e.habits[habitId]) done++;
+    }
+  });
+  return possible > 0 ? done / possible : 0;
+}
+
+export function weeklyFreqInQuarter(log, habitId) {
+  const dates = getPeriodDates('trimestre');
+  if (!dates.length) return 0;
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let doneCount = 0;
+  dates.forEach(date => { const e = logMap[date]; if (e && e.habits[habitId]) doneCount++; });
+  return doneCount / (dates.length / 7);
+}
+
+export function habitStreakInQuarter(log, habitId) {
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let best = 0, cur = 0;
+  dates.forEach(date => {
+    const e = logMap[date];
+    if (e && e.habits[habitId]) { cur++; if (cur > best) best = cur; } else cur = 0;
+  });
+  return best;
+}
+
+export function overallStreakInQuarter(log) {
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let best = 0, cur = 0;
+  dates.forEach(date => {
+    if (dayFulfilled(logMap[date], date)) { cur++; if (cur > best) best = cur; } else cur = 0;
+  });
+  return best;
+}
+
+export function overallPctInQuarter(log) {
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let done = 0, possible = 0;
+  dates.forEach(date => {
+    (state.userHabits || []).forEach(h => {
+      if (isExpected(h, date)) { possible++; const e = logMap[date]; if (e && e.habits[h.id]) done++; }
+    });
+  });
+  return possible > 0 ? done / possible : 0;
+}
+
+// meses do trimestre ativo já decorridos (inclui o atual), no formato "AAAA-MM" usado em finLog
+export function quarterMonthsSoFar() {
+  const aq = getActiveQ(state.userCfg.startDate);
+  const start = new Date(state.userCfg.startDate || new Date());
+  const qs = new Date(start.getFullYear(), start.getMonth() + (aq - 1) * 3, 1);
+  const now = new Date();
+  const months = [];
+  let d = new Date(qs);
+  while (d <= now && months.length < 3) {
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    d.setMonth(d.getMonth() + 1);
+  }
+  return months;
+}
+
+export function finLogConsistencyInQuarter() {
+  const months = quarterMonthsSoFar();
+  const finLog = state.userCfg.finLog || [];
+  const withData = months.filter(m => {
+    const entry = finLog.find(x => x.mes === m);
+    return entry && ((entry.guardado || 0) + (entry.investido || 0)) > 0;
+  });
+  return { done: withData.length, total: months.length };
+}
+
+export function finLogGrowthInQuarter() {
+  const months = quarterMonthsSoFar();
+  if (months.length < 2) return false;
+  const finLog = state.userCfg.finLog || [];
+  const totalFor = m => { const e = finLog.find(x => x.mes === m); return e ? (e.guardado || 0) + (e.investido || 0) : 0; };
+  return totalFor(months[months.length - 1]) > totalFor(months[0]);
+}

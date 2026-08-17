@@ -3,6 +3,18 @@ import { saveCfgAll, clearTsLocal } from './db.js';
 import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
+// Ultima atividade de um plano especifico, a partir do plan_id ja gravado em cada check-in
+// (nunca lido de volta ate agora) - sem nenhuma busca nova ao Supabase.
+function planActivityLabel(planId) {
+  const entries = state.log.filter(e => (e.plan_id || 'principal') === planId);
+  if (!entries.length) return 'sem check-ins ainda';
+  const lastDate = entries[0].date; // state.log ja vem ordenado por data desc (loadLog)
+  const days = Math.round((new Date(todayKey() + 'T12:00:00') - new Date(lastDate + 'T12:00:00')) / 86400000);
+  if (days <= 0) return 'hoje';
+  if (days === 1) return 'ontem';
+  return `${days}d atrás`;
+}
+
 export function getPlans() {
   return state.userCfg.plans || [{ id: 'principal', name: 'Principal', emoji: '⬡' }];
 }
@@ -36,7 +48,10 @@ export function openPlanModal() {
   const plans = getPlans(); const active = getActivePlanId();
   document.getElementById('plan-list').innerHTML = plans.map(p => `
     <div class="plan-row ${p.id === active ? 'active' : ''}">
-      <div class="plan-row-left" style="cursor:pointer" onclick="switchPlan('${p.id}')"><span style="font-size:18px">${sanitize(p.emoji)}</span> ${sanitize(p.name)}</div>
+      <div class="plan-row-left" style="cursor:pointer" onclick="switchPlan('${p.id}')">
+        <span style="font-size:18px">${sanitize(p.emoji)}</span>
+        <div><div>${sanitize(p.name)}</div><div style="font-size:11px;color:var(--cinza);font-weight:400">${planActivityLabel(p.id)}</div></div>
+      </div>
       <div style="display:flex;align-items:center;gap:6px">
         ${p.id === active ? '<span style="font-size:11px;color:var(--roxo);font-weight:600">ativo</span>' : ''}
         <button aria-label="Renomear plano" onclick="startRenamePlan('${p.id}')" style="background:none;border:none;cursor:pointer;font-size:13px;padding:4px;opacity:.5;line-height:1">✏️</button>

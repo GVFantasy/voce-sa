@@ -1,7 +1,7 @@
 import { state, ENERGY, ECLASS, REFLECTIONS } from './state.js';
 import { getActiveObjective } from './okrs.js';
 import { sb, setSyncStatus, saveCfgLocal, saveCfgRemote, saveCfgAll, saveTsLocal, loadTsLocal, clearTsLocal, queuePendingCheckin, clearPendingCheckin, refreshPendingCheckinIfQueued } from './db.js';
-import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, getActiveQ, sanitize } from './utils.js';
+import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, getActiveQ, sanitize, habitPctInQuarter, habitStreakInQuarter } from './utils.js';
 import { getActivePlanId } from './plans.js';
 
 const QUARTERLY_TASKS = {
@@ -93,6 +93,37 @@ const QUARTERLY_TASKS = {
   },
 };
 
+// 6 itens do checklist tem proxy honesto direto no que o check-in ja grava (mesmo principio do
+// motor de KRs automaticos de okrs.js) - fecham sozinhos, sem clique manual. O resto continua
+// exatamente como hoje (checkbox manual via tasksDone).
+const TASK_AUTO = {
+  mente_q1_c: () => habitStreakInQuarter(state.log, 'estudo') >= 30,
+  tempo_q1_b: () => {
+    const dates = new Set(getPeriodDates('trimestre'));
+    return Object.keys(state.userCfg.weeklyReviews || {}).some(d => dates.has(d));
+  },
+  tempo_q2_a: () => {
+    const quarterDates = getPeriodDates('trimestre');
+    if (!quarterDates.length) return false;
+    const qStart = new Date(quarterDates[0] + 'T12:00:00');
+    const dateSet = new Set(quarterDates);
+    const weeks = new Set();
+    (state.userCfg.pomodoroLog || []).forEach(s => {
+      if (!dateSet.has(s.date)) return;
+      const d = new Date(s.date + 'T12:00:00');
+      weeks.add(Math.floor((d - qStart) / (7 * 86400000)));
+    });
+    return weeks.size >= 2;
+  },
+  fin_q1_a: () => habitPctInQuarter(state.log, 'financas') >= 0.7,
+  fin_q1_b: () => (state.userCfg.finMeta || 0) > 0,
+  fin_q3_a: () => {
+    const now = new Date();
+    const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return (state.userCfg.finLog || []).some(m => m.mes === mesAtual && ((m.guardado || 0) + (m.investido || 0)) > 0);
+  },
+};
+
 function renderQuarterlyTasks() {
   const el = document.getElementById('quarterly-tasks-list');
   if (!el) return;
@@ -101,15 +132,18 @@ function renderQuarterlyTasks() {
   const doneTasks = state.userCfg.tasksDone || {};
   const tasks = areas.flatMap(area => (QUARTERLY_TASKS[area]?.[aq] || []).map(t => ({ ...t, area })));
   if (!tasks.length) { el.innerHTML = ''; return; }
-  const doneCount = tasks.filter(t => doneTasks[t.id]).length;
+  const isTaskDone = t => TASK_AUTO[t.id] ? TASK_AUTO[t.id]() : !!doneTasks[t.id];
+  const doneCount = tasks.filter(isTaskDone).length;
   el.innerHTML = `<div class="qtask-section">
     <div class="qtask-header"><span>Ações do trimestre · Q${aq}</span><span class="qtask-count">${doneCount}/${tasks.length}</span></div>
     ${tasks.map(t => {
-      const isDone = !!doneTasks[t.id];
-      return `<div class="qtask ${isDone ? 'done' : ''}" role="checkbox" aria-checked="${isDone}" aria-label="${t.text}" tabindex="0" onclick="toggleQTask('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQTask('${t.id}')}">
+      const auto = !!TASK_AUTO[t.id];
+      const isDone = isTaskDone(t);
+      const interactiveAttrs = auto ? '' : ` role="checkbox" aria-checked="${isDone}" tabindex="0" onclick="toggleQTask('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQTask('${t.id}')}"`;
+      return `<div class="qtask ${isDone ? 'done' : ''}${auto ? ' auto' : ''}" aria-label="${t.text}"${interactiveAttrs}>
         <div class="qtask-check-box">${isDone ? '✓' : ''}</div>
         <div class="qtask-body">
-          <div class="qtask-text">${t.text}</div>
+          <div class="qtask-text">${t.text}${auto ? '<span class="okr-kr-auto-tag">automático</span>' : ''}</div>
           ${t.hint ? `<div class="qtask-hint">${t.hint}</div>` : ''}
         </div>
       </div>`;
@@ -315,7 +349,7 @@ export async function saveDay() {
   if (!state.currentUser) { showToast('Sessão expirada. Faça login novamente.', 'err'); return; }
   const na = document.getElementById('nota-area'); state.ts.nota = na ? na.value : '';
   const btn = document.getElementById('save-btn'); btn.disabled = true; btn.textContent = 'Salvando...';
-  const entry = { date: todayKey(), habits: { ...state.ts.habits }, energy: state.ts.energy, nota: state.ts.nota, idiomDetails: { ...state.ts.idiomDetails } };
+  const entry = { date: todayKey(), habits: { ...state.ts.habits }, energy: state.ts.energy, nota: state.ts.nota, idiomDetails: { ...state.ts.idiomDetails }, plan_id: getActivePlanId() };
   const idx = state.log.findIndex(e => e.date === todayKey());
   if (idx >= 0) state.log[idx] = entry; else state.log.unshift(entry);
   const prevStreak = calcStreak(state.log.filter(e => e.date !== todayKey()));

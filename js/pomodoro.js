@@ -220,11 +220,16 @@ export function restorePomodoro() {
   state.pomodoro = { timer: null, seconds: focusSeconds(), isRunning: false, isBreak: false, isLongBreak: false, sessions: 0, subject: '' };
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(storageKey()) || 'null'); } catch (e) {}
-  if (!saved) { renderPomodoroTime(); renderPomodoroSessions(); return; }
+  if (!saved) {
+    // sem ciclo salvo: pre-seleciona o ultimo assunto usado, em vez de comecar em branco
+    state.pomodoro.subject = state.userCfg.pomodoroLog?.[0]?.subject || '';
+    renderPomodoroTime(); renderPomodoroSessions(); renderPomoSubjectChips();
+    return;
+  }
   state.pomodoro.isBreak = !!saved.isBreak;
   state.pomodoro.isLongBreak = !!saved.isLongBreak;
   state.pomodoro.sessions = saved.sessions || 0;
-  state.pomodoro.subject = saved.subject || '';
+  state.pomodoro.subject = saved.subject || state.userCfg.pomodoroLog?.[0]?.subject || '';
   if (saved.isRunning && saved.endTime) {
     const remaining = Math.round((saved.endTime - Date.now()) / 1000);
     if (remaining > 0) {
@@ -250,4 +255,13 @@ export function restorePomodoro() {
   }
   renderPomodoroTime();
   renderPomodoroSessions();
+  renderPomoSubjectChips();
+}
+
+export function renderPomoSubjectChips() {
+  const container = document.getElementById('pomo-subject');
+  if (!container) return;
+  container.querySelectorAll('.ob-chip').forEach(chip => {
+    chip.classList.toggle('on', chip.dataset.val === state.pomodoro.subject);
+  });
 }

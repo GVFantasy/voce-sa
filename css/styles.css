@@ -1016,6 +1016,7 @@ body.dark .dash-focus-text{color:var(--preto)}
 .qtask{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--borda);cursor:pointer;transition:opacity .15s}
 .qtask:last-child{border-bottom:none;padding-bottom:2px}
 .qtask.done{opacity:.5}
+.qtask.auto{cursor:default}
 .qtask-check-box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--borda);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--roxo);margin-top:2px;transition:all .15s}
 .qtask.done .qtask-check-box{background:var(--roxo);border-color:var(--roxo);color:#fff}
 .qtask-text{font-size:13px;font-weight:500;color:var(--preto);line-height:1.4}

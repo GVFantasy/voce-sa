@@ -56,7 +56,7 @@ export async function loadLog() {
   state.log = data.map(r => {
     const raw = r.habits || {};
     const { _d: idiomDetails = {}, ...habits } = raw;
-    return { date: r.date, habits, energy: r.energy || 0, nota: r.nota || '', idiomDetails };
+    return { date: r.date, habits, energy: r.energy || 0, nota: r.nota || '', idiomDetails, plan_id: r.plan_id || null };
   });
   state.logLoaded = true;
   setSyncStatus('ok', 'Sincronizado');
