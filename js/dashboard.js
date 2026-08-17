@@ -1,4 +1,4 @@
-import { state, ENERGY, DLABELS } from './state.js';
+import { state, ENERGY, DLABELS, META_LABELS, SITUATION_START_HINTS } from './state.js';
 import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize } from './utils.js';
 
 export function generateDashboardInsight() {
@@ -32,8 +32,9 @@ export function generateDashboardInsight() {
   });
   let msg, sub, color, label;
   if (streak === 0) {
-    msg = 'Hora de começar. O primeiro passo é o mais importante.';
-    sub = 'Faça seu check-in de hoje e plante a semente da consistência.';
+    const hint = SITUATION_START_HINTS[state.userCfg.situation];
+    msg = hint ? hint.msg : 'Hora de começar. O primeiro passo é o mais importante.';
+    sub = hint ? hint.sub : 'Faça seu check-in de hoje e plante a semente da consistência.';
     color = 'roxo'; label = 'Vamos lá';
   } else if (streak >= 30) {
     msg = `${streak} dias consecutivos. Você está construindo algo sólido.`;
@@ -64,6 +65,20 @@ export function generateDashboardInsight() {
     sub = 'Faça seu primeiro check-in hoje. O plano de 12 meses começa com um único dia.';
     color = 'roxo'; label = 'Pronto para começar';
   }
+  // revisão semanal recente ("pesada") deixa de ser write-only e complementa a mensagem
+  if (streak > 0) {
+    const reviews = state.userCfg.weeklyReviews || {};
+    const recentDate = Object.keys(reviews).sort().reverse()
+      .find(d => (new Date(today) - new Date(d)) / 86400000 <= 7);
+    const recentReview = recentDate ? reviews[recentDate] : null;
+    if (recentReview && recentReview.feel === 'pesada') {
+      const adjustLabels = { treinos: 'os treinos', estudo: 'o estudo', sono: 'o sono' };
+      const wanted = (recentReview.adjust || []).map(a => adjustLabels[a]).filter(Boolean);
+      if (wanted.length) {
+        sub += ` Você marcou a semana passada como pesada e queria ajustar ${wanted.join(' e ')} — hoje pode ser mais leve.`;
+      }
+    }
+  }
   return { msg, sub, color, label, streak, pct7, worstHabit, worstPct, trimPct, trimPassed, trimTotal, aq, ql };
 }
 
@@ -76,6 +91,7 @@ export async function renderDashboard() {
       <div class="dash-hero-label">${insight.label}</div>
       <div class="dash-hero-msg">${insight.msg}</div>
       <div class="dash-hero-sub">${insight.sub}</div>
+      ${state.userCfg.meta ? `<div class="dash-hero-focus">Seu foco: ${sanitize(META_LABELS[state.userCfg.meta] || state.userCfg.meta)}</div>` : ''}
     </div>`;
   if (insight.worstHabit && insight.worstPct < 80) {
     document.getElementById('dash-focus-wrap').innerHTML = `

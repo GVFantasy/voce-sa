@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, META_LABELS } from './state.js';
 import { getActiveQ } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
 
@@ -156,7 +156,7 @@ export function renderOKRs() {
   document.getElementById('q-badge').innerHTML =
     `<div class="q-badge-active" style="background:${bgColors[aq]};color:${txtColors[aq]}">Q${aq} — ${qLabels[aq]} · trimestre ativo</div>`;
 
-  if (state.userCfg.meta) document.getElementById('user-mission').textContent = '"' + state.userCfg.meta + '"';
+  if (state.userCfg.meta) document.getElementById('user-mission').textContent = '"' + (META_LABELS[state.userCfg.meta] || state.userCfg.meta) + '"';
 
   document.getElementById('pillar-list').innerHTML = areas.map(area => {
     const defMap = getDefaultMap(area);
@@ -340,22 +340,33 @@ export function getActiveObjective() {
   if (!state.userCfg.startDate) return null;
   const aq = getActiveQ(state.userCfg.startDate);
   const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
-  const primaryArea = areas[0];
-  if (!primaryArea) return null;
-  const defMap = getDefaultMap(primaryArea);
-  if (!defMap.length) return null;
-  const qData = getQData(primaryArea, aq);
-  if (!qData) return null;
+  if (!areas.length) return null;
   const progress = state.userCfg.okrProgress || {};
-  const krsProgress = qData.krs.map((_, i) => !!progress[`${primaryArea}_q${aq}_${i}`]);
-  const doneCnt = krsProgress.filter(Boolean).length;
-  return {
-    aq, area: primaryArea,
-    areaName: areaNames[primaryArea] || primaryArea,
-    label: qData.label,
-    krs: qData.krs,
-    krsProgress,
-    doneCnt,
-    totalCnt: qData.krs.length,
-  };
+
+  // monta o objeto de cada área e escolhe a mais atrasada (menor % de KRs concluídos);
+  // empate mantém a ordem original das áreas escolhidas no onboarding
+  let best = null;
+  for (const area of areas) {
+    const defMap = getDefaultMap(area);
+    if (!defMap.length) continue;
+    const qData = getQData(area, aq);
+    if (!qData) continue;
+    const krsProgress = qData.krs.map((_, i) => !!progress[`${area}_q${aq}_${i}`]);
+    const doneCnt = krsProgress.filter(Boolean).length;
+    const totalCnt = qData.krs.length;
+    const pct = totalCnt > 0 ? doneCnt / totalCnt : 0;
+    const candidate = {
+      aq, area,
+      areaName: areaNames[area] || area,
+      label: qData.label,
+      krs: qData.krs,
+      krsProgress,
+      doneCnt,
+      totalCnt,
+    };
+    if (!best || pct < best.pct) best = { ...candidate, pct };
+  }
+  if (!best) return null;
+  const { pct, ...obj } = best;
+  return obj;
 }

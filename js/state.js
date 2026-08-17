@@ -28,6 +28,20 @@ export const IDIOMA_MAP = {
   arabe:    { name: 'Árabe',     icon: '🇸🇦' },
   libras:   { name: 'Libras',    icon: '🤟' },
 };
+export const META_LABELS = {
+  corpo: 'Ter um corpo saudável e com energia',
+  idioma: 'Falar um novo idioma com confiança',
+  rotina: 'Ter uma rotina organizada e consistente',
+  conhecimento: 'Aprender habilidades que me diferenciam',
+  equilibrio: 'Ter mais equilíbrio e qualidade de vida',
+};
+export const SITUATION_START_HINTS = {
+  sobrecarregado: { msg: 'Um hábito de cada vez.', sub: 'Você chegou aqui sobrecarregado — comece pequeno. Um check-in hoje já é suficiente.' },
+  desorganizado: { msg: 'Vamos dar o primeiro passo.', sub: 'Você disse que não sabia por onde começar — o plano já está pronto, só falta registrar o dia de hoje.' },
+  estagnado: { msg: 'Hora de sair do lugar.', sub: 'Você sentia que não estava evoluindo — o primeiro check-in de hoje já quebra essa inércia.' },
+  'recomeçando': { msg: 'Bem-vindo de volta.', sub: 'Toda pausa pode virar recomeço. Hoje é o dia 1 da nova sequência.' },
+  acelerando: { msg: 'Hora de acelerar de verdade.', sub: 'Você já tem ritmo — use o check-in de hoje pra manter o pé no acelerador.' },
+};
 export const ACHIEVEMENTS = [
   { id: 'primeiro', icon: '🌱', name: 'Primeiro passo',   desc: 'Primeiro check-in',          check: (l, s) => l.length >= 1 },
   { id: 'semana1',  icon: '🔥', name: '7 dias',           desc: '7 dias consecutivos',         check: (l, s) => s >= 7 },

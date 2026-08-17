@@ -147,6 +147,14 @@ export function renderCheckin() {
     state.ts = ex
       ? { habits: { ...ex.habits }, energy: ex.energy || 0, nota: ex.nota || '', idiomDetails: { ...ex.idiomDetails || {} } }
       : { habits: {}, energy: 0, nota: '', idiomDetails: {} };
+    if (!ex) {
+      // dia novo: pré-preenche tempo/método de hábitos com detalhe com a última escolha do usuário
+      state.userHabits.forEach(hb => {
+        if (!hb.hasDetail) return;
+        const past = state.log.find(e => e.idiomDetails && e.idiomDetails[hb.id]);
+        if (past) state.ts.idiomDetails[hb.id] = { ...past.idiomDetails[hb.id] };
+      });
+    }
   }
   const h = new Date().getHours();
   document.getElementById('greeting').textContent =
