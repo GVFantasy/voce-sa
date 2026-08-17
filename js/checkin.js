@@ -137,6 +137,64 @@ function persistTsDraft() {
   });
 }
 
+// state.log só reflete o dia de hoje depois de "Salvar check-in" — pra mostrar o impacto de um
+// toque no hábito em tempo real, montamos um log temporário com o rascunho do dia substituindo
+// (ou inserindo) a entrada de hoje, sem alterar state.log de verdade.
+function logWithTodayDraft() {
+  const today = todayKey();
+  const draftEntry = { date: today, habits: { ...state.ts.habits }, energy: state.ts.energy, nota: state.ts.nota, idiomDetails: { ...state.ts.idiomDetails } };
+  const idx = state.log.findIndex(e => e.date === today);
+  const log = [...state.log];
+  if (idx >= 0) log[idx] = draftEntry; else log.unshift(draftEntry);
+  return log;
+}
+
+export function renderOkrFocusStrip() {
+  const okrFocusEl = document.getElementById('okr-focus-strip');
+  if (!okrFocusEl) return;
+  const obj = getActiveObjective(logWithTodayDraft());
+  okrFocusEl.innerHTML = obj
+    ? `<div class="okr-focus-strip">
+        <div class="okr-focus-top">Q${obj.aq} · ${obj.areaName}</div>
+        <div class="okr-focus-label">${obj.label}</div>
+        <div class="okr-focus-krs">${obj.krs.map(k => `<div class="okr-focus-kr">
+            <span>${k.done ? '✓' : '→'} ${sanitize(k.text)}</span>
+            ${k.isAuto && !k.done ? `<div class="okr-kr-mini-bar"><div class="okr-kr-mini-fill" style="width:${k.pct}%"></div></div>` : ''}
+          </div>`).join('')}</div>
+      </div>`
+    : '';
+}
+
+function renderDetailBlock(h, done) {
+  const val = state.ts.idiomDetails[h.id] || {};
+  const touched = !!(state.ts._detailTouched && state.ts._detailTouched[h.id]);
+  const collapsed = val.time && val.method && !touched;
+  if (collapsed) {
+    return `<div class="habit-detail-summary ${done ? 'open' : ''}" id="hdetail-${h.id}" onclick="expandHabitDetail('${h.id}')">
+      <span>${sanitize(val.time)} · ${sanitize(val.method)}</span>
+      <span class="hd-edit-link">editar</span>
+    </div>`;
+  }
+  return `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${h.id}">${renderDetailChips(h, h.id)}</div>`;
+}
+
+function renderDetailChips(h, habitId) {
+  return `<div class="hd-label">Tempo</div>
+    <div class="hd-chips">${h.detailOptions.time.map(t => `<button class="hd-chip ${(state.ts.idiomDetails[habitId] || {}).time === t ? 'on' : ''}" onclick="setHabitDetail('${habitId}','time','${t}')">${t}</button>`).join('')}</div>
+    <div class="hd-label">Método</div>
+    <div class="hd-chips">${h.detailOptions.method.map(m => `<button class="hd-chip ${(state.ts.idiomDetails[habitId] || {}).method === m ? 'on' : ''}" onclick="setHabitDetail('${habitId}','method','${m}')">${m}</button>`).join('')}</div>`;
+}
+
+export function expandHabitDetail(habitId) {
+  if (!state.ts._detailTouched) state.ts._detailTouched = {};
+  state.ts._detailTouched[habitId] = true;
+  const h = state.userHabits.find(x => x.id === habitId);
+  const el = document.getElementById('hdetail-' + habitId);
+  if (!el || !h) return;
+  const done = !!state.ts.habits[habitId];
+  el.outerHTML = `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${habitId}">${renderDetailChips(h, habitId)}</div>`;
+}
+
 export function renderCheckin() {
   const today = todayKey();
   const draft = loadTsLocal(today);
@@ -163,19 +221,7 @@ export function renderCheckin() {
     new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   document.getElementById('streak-val').textContent = calcStreak(state.log) + 'd';
 
-  // OKR focus strip
-  const okrFocusEl = document.getElementById('okr-focus-strip');
-  if (okrFocusEl) {
-    const obj = getActiveObjective();
-    okrFocusEl.innerHTML = obj
-      ? `<div class="okr-focus-strip">
-          <div class="okr-focus-top">Q${obj.aq} · ${obj.areaName}</div>
-          <div class="okr-focus-label">${obj.label}</div>
-          <div class="okr-focus-krs">${obj.krs.map(k => `<span>→ ${k}</span>`).join('')}</div>
-        </div>`
-      : '';
-  }
-
+  renderOkrFocusStrip();
   renderQuarterlyTasks();
   document.getElementById('reflection-q').textContent = REFLECTIONS[new Date().getDay() % REFLECTIONS.length];
   if (new Date().getDay() === 5 && state.userCfg.lastReviewedWeek !== today) {
@@ -196,12 +242,7 @@ export function renderCheckin() {
           <div><div class="habit-name">${sanitize(h.name)}${isExtra ? '<span class="habit-extra-tag">extra</span>' : ''}</div><div class="habit-days">${exp ? h.days : 'toque para registrar como extra'}</div></div></div>
           <div class="habit-toggle">${done ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
         </div>
-        ${h.hasDetail ? `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${h.id}">
-          <div class="hd-label">Tempo</div>
-          <div class="hd-chips">${h.detailOptions.time.map(t => `<button class="hd-chip ${(state.ts.idiomDetails[h.id] || {}).time === t ? 'on' : ''}" onclick="setHabitDetail('${h.id}','time','${t}')">${t}</button>`).join('')}</div>
-          <div class="hd-label">Método</div>
-          <div class="hd-chips">${h.detailOptions.method.map(m => `<button class="hd-chip ${(state.ts.idiomDetails[h.id] || {}).method === m ? 'on' : ''}" onclick="setHabitDetail('${h.id}','method','${m}')">${m}</button>`).join('')}</div>
-        </div>` : ''}
+        ${h.hasDetail ? renderDetailBlock(h, done) : ''}
       </div>`;
     };
     const todayHabits = state.userHabits.filter(h => isExpected(h, today));
@@ -236,11 +277,14 @@ export function toggleHabit(id) {
   const detail = document.getElementById('hdetail-' + id); if (detail) detail.classList.toggle('open', done);
   if (done) { card.classList.add('pop'); setTimeout(() => card.classList.remove('pop'), 200); }
   persistTsDraft();
+  renderOkrFocusStrip();
 }
 
 export function setHabitDetail(habitId, key, val) {
   if (!state.ts.idiomDetails[habitId]) state.ts.idiomDetails[habitId] = {};
   state.ts.idiomDetails[habitId][key] = val;
+  if (!state.ts._detailTouched) state.ts._detailTouched = {};
+  state.ts._detailTouched[habitId] = true;
   const detail = document.getElementById('hdetail-' + habitId); if (!detail) return;
   const groups = detail.querySelectorAll('.hd-chips');
   groups.forEach((group, gi) => {

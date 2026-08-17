@@ -73,7 +73,7 @@ export const state = {
   period: 'semana',
   logLoaded: false,
   authMode: 'login',
-  ts: { habits: {}, energy: 0, nota: '', idiomDetails: {} },
+  ts: { habits: {}, energy: 0, nota: '', idiomDetails: {}, _detailTouched: {} },
   obData: {
     areas: [], exercicios: [], idiomas: [], idiomasAtivos: [], aprender: [],
     horario: '', tempoLivre: '', corpoNivel: '', treinoDias: [2, 4, 6],

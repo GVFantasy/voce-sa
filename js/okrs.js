@@ -1,5 +1,5 @@
 import { state, META_LABELS } from './state.js';
-import { getActiveQ } from './utils.js';
+import { getActiveQ, getPeriodDates, isExpected, dayFulfilled } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
 
 const areaIcons = { corpo: '🏃', mente: '🧠', financas: '💰', tempo: '⏱', relacoes: '❤️' };
@@ -9,51 +9,139 @@ const qLabels = ['', 'Fundação', 'Aceleração', 'Escala', 'Colheita'];
 const bgColors = [, 'var(--info-bg)', 'var(--suc-bg)', 'var(--warn-bg)', 'var(--dan-bg)'];
 const txtColors = [, 'var(--info-txt)', 'var(--suc-txt)', 'var(--warn-txt)', 'var(--dan-txt)'];
 
+// KRs sao objetos { id, text, auto? }. Quando "auto" existe, o progresso e calculado a partir
+// do check-in/dados ja coletados (ver evalAutoKR) em vez de checkbox manual. So ficam sem "auto"
+// os KRs que genuinamente nao tem proxy honesto nos dados do app (ex: "concluir um livro" - a
+// Biblioteca so registra "adicionado", nao "lido"). Custom KRs editados pelo usuario (okrCustom)
+// continuam strings simples e sao sempre manuais - ver normalizeKR().
 const defaultOKR = {
   corpo: [
-    { q: 1, label: 'Instalar movimento', krs: ['Treinar nos dias escolhidos consistentemente', 'Dormir 7h+ em 5 dias/semana', 'Tela off 30 min antes de dormir'] },
-    { q: 2, label: 'Elevar frequência', krs: ['Adicionar mais 1 dia de treino', 'Sono 7h+ em 6/7 dias'] },
-    { q: 3, label: 'Alta performance', krs: ['4+ treinos/semana', 'Participar de evento esportivo'] },
-    { q: 4, label: 'Alta performance — manter', krs: ['4+ treinos/semana', 'Encerrar o ano com evolução documentada'] },
+    { q: 1, label: 'Instalar movimento', krs: [
+      { id: 'treino_pct', text: 'Treinar nos dias escolhidos (≥80% do trimestre)', auto: { type: 'habitPct', habit: 'treino', min: 0.8 } },
+      { id: 'sono_pct', text: 'Dormir bem em pelo menos 5 dias por semana', auto: { type: 'habitPct', habit: 'sono', min: 0.7 } },
+    ] },
+    { q: 2, label: 'Elevar frequência', krs: [
+      { id: 'treino_freq4', text: 'Treinar 4+ vezes por semana em média', auto: { type: 'weeklyFreq', habit: 'treino', min: 4 } },
+      { id: 'sono_pct85', text: 'Dormir bem em pelo menos 6 dias por semana', auto: { type: 'habitPct', habit: 'sono', min: 0.857 } },
+    ] },
+    { q: 3, label: 'Alta performance', krs: [
+      { id: 'treino_freq4', text: 'Manter 4+ treinos por semana', auto: { type: 'weeklyFreq', habit: 'treino', min: 4 } },
+      { id: 'streak21', text: 'Sequência de 21+ dias cumprindo os hábitos do trimestre', auto: { type: 'overallStreak', min: 21 } },
+    ] },
+    { q: 4, label: 'Alta performance — manter', krs: [
+      { id: 'treino_freq4', text: 'Manter 4+ treinos por semana', auto: { type: 'weeklyFreq', habit: 'treino', min: 4 } },
+      { id: 'overall_pct80', text: 'Fechar o trimestre com 80%+ de consistência geral', auto: { type: 'overallPct', min: 0.8 } },
+    ] },
   ],
   mente: [
-    { q: 1, label: 'Hábito diário de aprendizado', krs: ['Idioma nos dias escolhidos', 'Streak de 30 dias de estudo', '1 livro por mês'] },
-    { q: 2, label: 'Conversação básica', krs: ['Ter uma conversa simples no idioma', 'Consumir 30 min de conteúdo sem parar'] },
-    { q: 3, label: 'Fluência progressiva', krs: ['Usar o idioma em situação real', '3 livros lidos no trimestre'] },
-    { q: 4, label: 'Fluência consolidada', krs: ['Idioma integrado à rotina', 'Avaliar e documentar evolução anual'] },
+    { q: 1, label: 'Hábito diário de aprendizado', krs: [
+      { id: 'estudo_pct', text: 'Estudar nos dias escolhidos (≥80% do trimestre)', auto: { type: 'habitPct', habit: 'estudo', min: 0.8 } },
+      { id: 'estudo_streak14', text: 'Sequência de 14+ dias estudando', auto: { type: 'habitStreak', habit: 'estudo', min: 14 } },
+      { id: null, text: 'Concluir 1 livro ou curso no trimestre' },
+    ] },
+    { q: 2, label: 'Conversação básica', krs: [
+      { id: 'estudo_pct85', text: 'Estudar nos dias escolhidos (≥85% do trimestre)', auto: { type: 'habitPct', habit: 'estudo', min: 0.85 } },
+      { id: 'estudo_streak21', text: 'Sequência de 21+ dias estudando', auto: { type: 'habitStreak', habit: 'estudo', min: 21 } },
+    ] },
+    { q: 3, label: 'Fluência progressiva', krs: [
+      { id: 'estudo_pct90', text: 'Estudar nos dias escolhidos (≥90% do trimestre)', auto: { type: 'habitPct', habit: 'estudo', min: 0.9 } },
+      { id: 'estudo_streak30', text: 'Sequência de 30+ dias estudando', auto: { type: 'habitStreak', habit: 'estudo', min: 30 } },
+    ] },
+    { q: 4, label: 'Fluência consolidada', krs: [
+      { id: 'estudo_pct90', text: 'Manter o estudo nos dias escolhidos (≥90% do trimestre)', auto: { type: 'habitPct', habit: 'estudo', min: 0.9 } },
+      { id: 'overall_pct80', text: 'Fechar o trimestre com 80%+ de consistência geral', auto: { type: 'overallPct', min: 0.8 } },
+    ] },
   ],
   tempo: [
-    { q: 1, label: 'Estruturar semana', krs: ['Criar blocos fixos de foco', 'Revisão semanal toda sexta', 'Eliminar 1 atividade improdutiva'] },
-    { q: 2, label: 'Proteção do tempo', krs: ['Deep work diário de 90 min', 'Delegar 1 tarefa operacional'] },
-    { q: 3, label: 'Eficiência avançada', krs: ['Tirar férias reais de 3–5 dias', 'Hábitos no piloto automático'] },
-    { q: 4, label: 'Legado do tempo', krs: ['Auditar onde foi o tempo este ano', 'Projetar a estrutura do próximo ano'] },
+    { q: 1, label: 'Estruturar semana', krs: [
+      { id: 'tempo_pct', text: 'Cumprir o bloco de foco nos dias esperados (≥80% do trimestre)', auto: { type: 'habitPct', habit: 'tempo', min: 0.8 } },
+      { id: 'tempo_streak14', text: 'Sequência de 14+ dias cumprindo o bloco de foco', auto: { type: 'habitStreak', habit: 'tempo', min: 14 } },
+    ] },
+    { q: 2, label: 'Proteção do tempo', krs: [
+      { id: 'tempo_pct85', text: 'Cumprir o bloco de foco nos dias esperados (≥85% do trimestre)', auto: { type: 'habitPct', habit: 'tempo', min: 0.85 } },
+      { id: 'tempo_streak21', text: 'Sequência de 21+ dias cumprindo o bloco de foco', auto: { type: 'habitStreak', habit: 'tempo', min: 21 } },
+    ] },
+    { q: 3, label: 'Eficiência avançada', krs: [
+      { id: 'tempo_pct90', text: 'Cumprir o bloco de foco nos dias esperados (≥90% do trimestre)', auto: { type: 'habitPct', habit: 'tempo', min: 0.9 } },
+      { id: 'streak21', text: 'Sequência de 21+ dias cumprindo os hábitos do trimestre', auto: { type: 'overallStreak', min: 21 } },
+    ] },
+    { q: 4, label: 'Legado do tempo', krs: [
+      { id: 'tempo_pct90', text: 'Manter o bloco de foco nos dias esperados (≥90% do trimestre)', auto: { type: 'habitPct', habit: 'tempo', min: 0.9 } },
+      { id: 'overall_pct80', text: 'Fechar o trimestre com 80%+ de consistência geral', auto: { type: 'overallPct', min: 0.8 } },
+    ] },
   ],
   relacoes: [
-    { q: 1, label: 'Presença e qualidade', krs: ['1 encontro intencional por semana', 'Reduzir scroll passivo em 30%', 'Listar 3 pessoas para cultivar'] },
-    { q: 2, label: 'Aprofundamento', krs: ['Cultivar 3 relações importantes', 'Ter 1 conversa difícil que está adiando'] },
-    { q: 3, label: 'Comunidade', krs: ['Entrar em grupo com propósito', 'Retomar contato com alguém que se distanciou'] },
-    { q: 4, label: 'Celebrar e renovar', krs: ['Celebrar o ano com as pessoas certas', 'Agradecer pelas relações que importam'] },
+    { q: 1, label: 'Presença e qualidade', krs: [
+      { id: 'relacoes_freq1', text: 'Conexão intencional pelo menos 1x por semana', auto: { type: 'weeklyFreq', habit: 'relacoes', min: 1 } },
+      { id: 'relacoes_pct', text: 'Manter o hábito nos dias esperados (≥80% do trimestre)', auto: { type: 'habitPct', habit: 'relacoes', min: 0.8 } },
+    ] },
+    { q: 2, label: 'Aprofundamento', krs: [
+      { id: 'relacoes_freq2', text: 'Conexão intencional pelo menos 2x por semana', auto: { type: 'weeklyFreq', habit: 'relacoes', min: 2 } },
+    ] },
+    { q: 3, label: 'Comunidade', krs: [
+      { id: 'relacoes_freq3', text: 'Conexão intencional pelo menos 3x por semana', auto: { type: 'weeklyFreq', habit: 'relacoes', min: 3 } },
+    ] },
+    { q: 4, label: 'Celebrar e renovar', krs: [
+      { id: 'relacoes_freq3b', text: 'Manter conexão intencional 3x+ por semana', auto: { type: 'weeklyFreq', habit: 'relacoes', min: 3 } },
+      { id: 'overall_pct80', text: 'Fechar o trimestre com 80%+ de consistência geral', auto: { type: 'overallPct', min: 0.8 } },
+    ] },
   ],
 };
 
 const finOKR = {
   iniciante: [
-    { q: 1, label: 'Instalar controle financeiro', krs: ['Mapear todas as despesas do mês', 'Definir % fixo do salário para guardar', 'Abrir conta de investimento gratuita'] },
-    { q: 2, label: 'Hábito de poupar', krs: ['Guardar % fixo todo mês sem falhar', 'Eliminar ou renegociar 1 gasto desnecessário', 'Primeiro investimento em renda fixa'] },
-    { q: 3, label: 'Primeiros investimentos', krs: ['Reserva de emergência completa (3× despesas)', 'Investir em Tesouro Selic ou CDB', 'Entender a diferença entre guardar e investir'] },
-    { q: 4, label: 'Avaliar e crescer', krs: ['Calcular patrimônio acumulado no ano', 'Aumentar % de economia para o próximo ano', 'Definir meta financeira para os próximos 12 meses'] },
+    { q: 1, label: 'Instalar controle financeiro', krs: [
+      { id: 'fin_pct', text: 'Registrar os gastos do dia (≥70% do trimestre)', auto: { type: 'habitPct', habit: 'financas', min: 0.7 } },
+      { id: null, text: 'Abrir conta de investimento gratuita' },
+    ] },
+    { q: 2, label: 'Hábito de poupar', krs: [
+      { id: 'fin_pct85', text: 'Registrar os gastos do dia (≥85% do trimestre)', auto: { type: 'habitPct', habit: 'financas', min: 0.85 } },
+      { id: 'fin_consist', text: 'Guardar ou investir algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+    ] },
+    { q: 3, label: 'Primeiros investimentos', krs: [
+      { id: 'fin_consist', text: 'Guardar ou investir algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+      { id: 'fin_growth', text: 'Aumentar o valor guardado/investido no trimestre', auto: { type: 'finLogGrowth' } },
+    ] },
+    { q: 4, label: 'Avaliar e crescer', krs: [
+      { id: 'fin_consist', text: 'Manter guardado/investido em todos os meses', auto: { type: 'finLogConsistency' } },
+      { id: 'fin_growth', text: 'Fechar o trimestre com aumento no valor guardado/investido', auto: { type: 'finLogGrowth' } },
+    ] },
   ],
   transicao: [
-    { q: 1, label: 'Organizar e automatizar', krs: ['Automatizar aporte mensal no dia do salário', 'Revisar e cortar 2+ gastos desnecessários', 'Criar planilha ou usar app de orçamento'] },
-    { q: 2, label: 'Diversificar carteira', krs: ['Iniciar em renda variável (FII ou ETF)', 'Estudar tributação de cada tipo de investimento', 'Rebalancear alocação por perfil de risco'] },
-    { q: 3, label: 'Crescer patrimônio', krs: ['Aumentar % investido em 5+ pontos', 'Calcular taxa de poupança atual', 'Comparar retorno da carteira com o CDI'] },
-    { q: 4, label: 'Otimizar e planejar', krs: ['Rebalancear carteira ao fim do ano', 'Calcular retorno real dos investimentos', 'Definir meta de patrimônio para os próximos 5 anos'] },
+    { q: 1, label: 'Organizar e automatizar', krs: [
+      { id: 'fin_pct', text: 'Registrar os gastos do dia (≥70% do trimestre)', auto: { type: 'habitPct', habit: 'financas', min: 0.7 } },
+      { id: 'fin_consist', text: 'Aportar algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+    ] },
+    { q: 2, label: 'Diversificar carteira', krs: [
+      { id: 'fin_consist', text: 'Aportar algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+      { id: null, text: 'Estudar tributação de cada tipo de investimento' },
+    ] },
+    { q: 3, label: 'Crescer patrimônio', krs: [
+      { id: 'fin_growth', text: 'Aumentar o valor investido no trimestre', auto: { type: 'finLogGrowth' } },
+      { id: 'fin_consist', text: 'Aportar algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+    ] },
+    { q: 4, label: 'Otimizar e planejar', krs: [
+      { id: 'fin_growth', text: 'Fechar o trimestre com aumento no valor investido', auto: { type: 'finLogGrowth' } },
+      { id: 'fin_consist', text: 'Manter aportes em todos os meses', auto: { type: 'finLogConsistency' } },
+    ] },
   ],
   investidor: [
-    { q: 1, label: 'Revisar estratégia', krs: ['Rebalancear alocação da carteira', 'Revisar tese de cada posição ativa', 'Calcular retorno vs benchmark (CDI / IBOV)'] },
-    { q: 2, label: 'Escalar aportes', krs: ['Aumentar aporte vs trimestre anterior', 'Explorar nova classe de ativo ou mercado', 'Otimizar carga tributária dos investimentos'] },
-    { q: 3, label: 'Renda passiva', krs: ['Calcular renda passiva mensal gerada', 'Medir % das despesas cobertas por investimentos', 'Avaliar oportunidades de diversificação internacional'] },
-    { q: 4, label: 'Planejar próximo nível', krs: ['Calcular FI Number (independência financeira)', 'Revisar plano de 5 anos', 'Definir estratégia de alocação para o próximo ano'] },
+    { q: 1, label: 'Revisar estratégia', krs: [
+      { id: 'fin_consist', text: 'Aportar algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+      { id: null, text: 'Revisar tese de cada posição ativa' },
+    ] },
+    { q: 2, label: 'Escalar aportes', krs: [
+      { id: 'fin_growth', text: 'Aumentar o aporte vs. o início do trimestre', auto: { type: 'finLogGrowth' } },
+      { id: 'fin_consist', text: 'Aportar algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+    ] },
+    { q: 3, label: 'Renda passiva', krs: [
+      { id: 'fin_growth', text: 'Aumentar o aporte vs. o início do trimestre', auto: { type: 'finLogGrowth' } },
+      { id: 'fin_consist', text: 'Aportar algo em todos os meses do trimestre', auto: { type: 'finLogConsistency' } },
+    ] },
+    { q: 4, label: 'Planejar próximo nível', krs: [
+      { id: 'fin_growth', text: 'Fechar o trimestre com aumento no aporte', auto: { type: 'finLogGrowth' } },
+      { id: 'fin_consist', text: 'Manter aportes em todos os meses', auto: { type: 'finLogConsistency' } },
+    ] },
   ],
 };
 
@@ -62,6 +150,157 @@ const finDicas = {
   transicao: 'Automatize: configure transferência automática para investimento no dia que cai o salário.',
   investidor: 'Revise sua alocação trimestralmente e compare o retorno real com benchmarks (CDI, IBOV).',
 };
+
+// ---- Motor de KRs automáticos: todas as funções abaixo leem só dado que o check-in já grava
+// (state.log / state.userHabits / state.userCfg.finLog), escopado ao trimestre ativo via
+// getPeriodDates('trimestre'). Nenhuma coleta nova.
+
+function habitPctInQuarter(log, habitId) {
+  const h = (state.userHabits || []).find(x => x.id === habitId);
+  if (!h) return 0;
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let done = 0, possible = 0;
+  dates.forEach(date => {
+    if (isExpected(h, date)) {
+      possible++;
+      const e = logMap[date];
+      if (e && e.habits[habitId]) done++;
+    }
+  });
+  return possible > 0 ? done / possible : 0;
+}
+
+function weeklyFreqInQuarter(log, habitId) {
+  const dates = getPeriodDates('trimestre');
+  if (!dates.length) return 0;
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let doneCount = 0;
+  dates.forEach(date => { const e = logMap[date]; if (e && e.habits[habitId]) doneCount++; });
+  return doneCount / (dates.length / 7);
+}
+
+function habitStreakInQuarter(log, habitId) {
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let best = 0, cur = 0;
+  dates.forEach(date => {
+    const e = logMap[date];
+    if (e && e.habits[habitId]) { cur++; if (cur > best) best = cur; } else cur = 0;
+  });
+  return best;
+}
+
+function overallStreakInQuarter(log) {
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let best = 0, cur = 0;
+  dates.forEach(date => {
+    if (dayFulfilled(logMap[date], date)) { cur++; if (cur > best) best = cur; } else cur = 0;
+  });
+  return best;
+}
+
+function overallPctInQuarter(log) {
+  const dates = getPeriodDates('trimestre');
+  const logMap = Object.fromEntries(log.map(e => [e.date, e]));
+  let done = 0, possible = 0;
+  dates.forEach(date => {
+    (state.userHabits || []).forEach(h => {
+      if (isExpected(h, date)) { possible++; const e = logMap[date]; if (e && e.habits[h.id]) done++; }
+    });
+  });
+  return possible > 0 ? done / possible : 0;
+}
+
+// meses do trimestre ativo ja decorridos (inclui o atual), no formato "AAAA-MM" usado em finLog
+function quarterMonthsSoFar() {
+  const aq = getActiveQ(state.userCfg.startDate);
+  const start = new Date(state.userCfg.startDate || new Date());
+  const qs = new Date(start.getFullYear(), start.getMonth() + (aq - 1) * 3, 1);
+  const now = new Date();
+  const months = [];
+  let d = new Date(qs);
+  while (d <= now && months.length < 3) {
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    d.setMonth(d.getMonth() + 1);
+  }
+  return months;
+}
+
+function finLogConsistencyInQuarter() {
+  const months = quarterMonthsSoFar();
+  const finLog = state.userCfg.finLog || [];
+  const withData = months.filter(m => {
+    const entry = finLog.find(x => x.mes === m);
+    return entry && ((entry.guardado || 0) + (entry.investido || 0)) > 0;
+  });
+  return { done: withData.length, total: months.length };
+}
+
+function finLogGrowthInQuarter() {
+  const months = quarterMonthsSoFar();
+  if (months.length < 2) return false;
+  const finLog = state.userCfg.finLog || [];
+  const totalFor = m => { const e = finLog.find(x => x.mes === m); return e ? (e.guardado || 0) + (e.investido || 0) : 0; };
+  return totalFor(months[months.length - 1]) > totalFor(months[0]);
+}
+
+// Avalia uma regra "auto" e devolve { done, pct } (pct 0-100, so pra exibir progresso).
+function evalAutoKR(auto, log) {
+  switch (auto.type) {
+    case 'habitPct': {
+      const pct = habitPctInQuarter(log, auto.habit);
+      return { done: pct >= auto.min, pct: Math.round(pct * 100) };
+    }
+    case 'weeklyFreq': {
+      const freq = weeklyFreqInQuarter(log, auto.habit);
+      return { done: freq >= auto.min, pct: Math.round(Math.min(1, freq / auto.min) * 100) };
+    }
+    case 'habitStreak': {
+      const streak = habitStreakInQuarter(log, auto.habit);
+      return { done: streak >= auto.min, pct: Math.round(Math.min(1, streak / auto.min) * 100) };
+    }
+    case 'overallStreak': {
+      const streak = overallStreakInQuarter(log);
+      return { done: streak >= auto.min, pct: Math.round(Math.min(1, streak / auto.min) * 100) };
+    }
+    case 'overallPct': {
+      const pct = overallPctInQuarter(log);
+      return { done: pct >= auto.min, pct: Math.round(pct * 100) };
+    }
+    case 'finLogConsistency': {
+      const { done, total } = finLogConsistencyInQuarter();
+      return { done: total > 0 && done >= total, pct: total > 0 ? Math.round(done / total * 100) : 0 };
+    }
+    case 'finLogGrowth': {
+      const g = finLogGrowthInQuarter();
+      return { done: g, pct: g ? 100 : 0 };
+    }
+    default:
+      return { done: false, pct: 0 };
+  }
+}
+
+// String (KR custom digitado pelo usuario) -> sempre manual, sem id estavel (usa indice).
+function normalizeKR(kr) {
+  return typeof kr === 'string' ? { id: null, text: kr, auto: null } : kr;
+}
+
+// Monta a lista de KRs de um trimestre com "done"/"pct" ja calculados — para KRs automaticos,
+// usa a regra; para manuais, cai no checkbox de sempre (state.userCfg.okrProgress).
+function computeKRs(area, q, krsRaw, log) {
+  const progress = state.userCfg.okrProgress || {};
+  return krsRaw.map((raw, i) => {
+    const kr = normalizeKR(raw);
+    if (kr.auto) {
+      const { done, pct } = evalAutoKR(kr.auto, log);
+      return { ...kr, done, pct, isAuto: true, idx: i, progressKey: null };
+    }
+    const progressKey = `${area}_q${q}_${kr.id || i}`;
+    return { ...kr, done: !!progress[progressKey], pct: null, isAuto: false, idx: i, progressKey };
+  });
+}
 
 function getQData(area, q) {
   const custom = state.userCfg.okrCustom?.[`${area}_q${q}`];
@@ -150,7 +389,6 @@ function renderFinTracker() {
 export function renderOKRs() {
   const aq = getActiveQ(state.userCfg.startDate);
   const areas = (state.userCfg.areas || ['corpo', 'mente']).filter(a => a !== 'negocio');
-  const progress = state.userCfg.okrProgress || {};
   const custom = state.userCfg.okrCustom || {};
 
   document.getElementById('q-badge').innerHTML =
@@ -163,20 +401,29 @@ export function renderOKRs() {
     if (!defMap.length) return '';
     const qData = getQData(area, aq);
     if (!qData) return '';
-    const totalCnt = qData.krs.length;
-    const doneCnt = qData.krs.filter((_, i) => progress[`${area}_q${aq}_${i}`]).length;
+    const krs = computeKRs(area, aq, qData.krs, state.log);
+    const totalCnt = krs.length;
+    const doneCnt = krs.filter(k => k.done).length;
     const pct = totalCnt > 0 ? Math.round(doneCnt / totalCnt * 100) : 0;
 
-    const krItems = qData.krs.map((kr, i) => {
-      const done = !!progress[`${area}_q${aq}_${i}`];
-      return `<div class="okr-kr-item ${done ? 'done' : ''}" id="okr-kr-el-${area}-${aq}-${i}" role="checkbox" aria-checked="${done}" tabindex="0" onclick="toggleKR('${area}',${aq},${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKR('${area}',${aq},${i})}">
-        <div class="okr-kr-check">${done ? '✓' : ''}</div>
-        <div class="okr-kr-text">${esc(kr)}</div>
+    const krItems = krs.map(kr => {
+      if (kr.isAuto) {
+        return `<div class="okr-kr-item auto ${kr.done ? 'done' : ''}">
+          <div class="okr-kr-check">${kr.done ? '✓' : ''}</div>
+          <div class="okr-kr-body">
+            <div class="okr-kr-text">${esc(kr.text)}<span class="okr-kr-auto-tag">automático</span></div>
+            ${!kr.done ? `<div class="okr-kr-mini-bar"><div class="okr-kr-mini-fill" style="width:${kr.pct}%"></div></div>` : ''}
+          </div>
+        </div>`;
+      }
+      return `<div class="okr-kr-item ${kr.done ? 'done' : ''}" id="okr-kr-el-${area}-${aq}-${kr.idx}" role="checkbox" aria-checked="${kr.done}" tabindex="0" onclick="toggleKR('${area}',${aq},${kr.idx},'${kr.progressKey}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKR('${area}',${aq},${kr.idx},'${kr.progressKey}')}">
+        <div class="okr-kr-check">${kr.done ? '✓' : ''}</div>
+        <div class="okr-kr-text">${esc(kr.text)}</div>
       </div>`;
     }).join('');
 
-    const editInputs = qData.krs.map((kr, i) =>
-      `<input class="ob-input" id="okr-kr-${area}-${aq}-${i}" value="${esc(kr)}" placeholder="Key result ${i + 1}" style="margin-bottom:6px">`
+    const editInputs = krs.map((kr, i) =>
+      `<input class="ob-input" id="okr-kr-${area}-${aq}-${i}" value="${esc(kr.text)}" placeholder="Key result ${i + 1}" style="margin-bottom:6px">`
     ).join('');
 
     const otherQs = defMap
@@ -184,8 +431,9 @@ export function renderOKRs() {
       .map(x => {
         const isPast = x.q < aq;
         const lbl = custom[`${area}_q${x.q}`]?.label || x.label;
-        const doneOther = (custom[`${area}_q${x.q}`]?.krs || x.krs).filter((_, i) => progress[`${area}_q${x.q}_${i}`]).length;
-        const totOther = (custom[`${area}_q${x.q}`]?.krs || x.krs).length;
+        const otherKrs = computeKRs(area, x.q, custom[`${area}_q${x.q}`]?.krs || x.krs, state.log);
+        const doneOther = otherKrs.filter(k => k.done).length;
+        const totOther = otherKrs.length;
         return `<div class="okr-tl-item ${isPast ? 'past' : 'future'}">
           <span class="qbadge ${qColors[x.q] || 'q3b'}">Q${x.q}</span>
           <span class="tl-lbl">${esc(lbl)}</span>
@@ -282,11 +530,10 @@ export async function saveOKREdit(area, q, krCount) {
   await saveCfgRemote();
 }
 
-export async function toggleKR(area, q, krIdx) {
-  const key = `${area}_q${q}_${krIdx}`;
+export async function toggleKR(area, q, krIdx, progressKey) {
   if (!state.userCfg.okrProgress) state.userCfg.okrProgress = {};
-  state.userCfg.okrProgress[key] = !state.userCfg.okrProgress[key];
-  const done = state.userCfg.okrProgress[key];
+  state.userCfg.okrProgress[progressKey] = !state.userCfg.okrProgress[progressKey];
+  const done = state.userCfg.okrProgress[progressKey];
 
   const krEl = document.getElementById(`okr-kr-el-${area}-${q}-${krIdx}`);
   if (krEl) {
@@ -296,12 +543,12 @@ export async function toggleKR(area, q, krIdx) {
     if (check) check.textContent = done ? '✓' : '';
   }
 
+  const qData = getQData(area, q);
   const progWrap = document.getElementById(`okr-prog-${area}-${q}`);
-  if (progWrap) {
-    const total = parseInt(progWrap.dataset.total || '0');
-    const pr = state.userCfg.okrProgress;
-    let doneCnt = 0;
-    for (let i = 0; i < total; i++) { if (pr[`${area}_q${q}_${i}`]) doneCnt++; }
+  if (progWrap && qData) {
+    const krs = computeKRs(area, q, qData.krs, state.log);
+    const doneCnt = krs.filter(k => k.done).length;
+    const total = krs.length;
     const pct = total > 0 ? Math.round(doneCnt / total * 100) : 0;
     const fill = progWrap.querySelector('.okr-progress-fill');
     const lbl = progWrap.querySelector('.okr-progress-label');
@@ -336,12 +583,14 @@ export async function saveFinMes() {
   await saveCfgRemote();
 }
 
-export function getActiveObjective() {
+// logOverride: usado pelo check-in pra pré-visualizar o impacto do rascunho do dia (state.ts)
+// sem esperar o "Salvar check-in" — ver renderOkrFocusStrip() em checkin.js.
+export function getActiveObjective(logOverride) {
   if (!state.userCfg.startDate) return null;
   const aq = getActiveQ(state.userCfg.startDate);
   const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
   if (!areas.length) return null;
-  const progress = state.userCfg.okrProgress || {};
+  const log = logOverride || state.log;
 
   // monta o objeto de cada área e escolhe a mais atrasada (menor % de KRs concluídos);
   // empate mantém a ordem original das áreas escolhidas no onboarding
@@ -351,16 +600,15 @@ export function getActiveObjective() {
     if (!defMap.length) continue;
     const qData = getQData(area, aq);
     if (!qData) continue;
-    const krsProgress = qData.krs.map((_, i) => !!progress[`${area}_q${aq}_${i}`]);
-    const doneCnt = krsProgress.filter(Boolean).length;
-    const totalCnt = qData.krs.length;
+    const krs = computeKRs(area, aq, qData.krs, log);
+    const doneCnt = krs.filter(k => k.done).length;
+    const totalCnt = krs.length;
     const pct = totalCnt > 0 ? doneCnt / totalCnt : 0;
     const candidate = {
       aq, area,
       areaName: areaNames[area] || area,
       label: qData.label,
-      krs: qData.krs,
-      krsProgress,
+      krs,
       doneCnt,
       totalCnt,
     };

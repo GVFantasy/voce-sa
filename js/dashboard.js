@@ -115,7 +115,7 @@ export async function renderDashboard() {
         <div class="okr-progress-bg"><div class="okr-progress-fill" style="width:${pct}%"></div></div>
         <span class="okr-progress-label">${obj.doneCnt}/${obj.totalCnt} KRs</span>
       </div>
-      <div class="dash-okr-krs">${obj.krs.map((k, i) => `<span>${obj.krsProgress[i] ? '✓' : '→'} ${k}</span>`).join('')}</div>
+      <div class="dash-okr-krs">${obj.krs.map(k => `<span>${k.done ? '✓' : '→'} ${sanitize(k.text)}</span>`).join('')}</div>
     </div>`;
   } else if (dashOkrEl) {
     dashOkrEl.innerHTML = '';

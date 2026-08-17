@@ -58,7 +58,10 @@ export function getActiveQ(s) {
 }
 
 export function getPeriodDates(p) {
-  const today = new Date(); const days = [];
+  // ancorado ao meio-dia local (mesmo idioma de isExpected/fmtDate) - datas "AAAA-MM-DD" sem
+  // hora sao interpretadas como meia-noite UTC pelo Date nativo, o que em fusos negativos (ex:
+  // Brasil) pode empurrar o dia pro anterior e fazer o intervalo excluir o dia de hoje.
+  const today = new Date(todayKey() + 'T12:00:00'); const days = [];
   if (p === 'semana') {
     for (let i = 6; i >= 0; i--) { const d = new Date(today); d.setDate(today.getDate() - i); days.push(dateKey(d)); }
   } else if (p === 'mes') {
@@ -67,13 +70,13 @@ export function getPeriodDates(p) {
     for (let i = 1; i <= dim; i++) { days.push(dateKey(new Date(y, m, i))); }
   } else if (p === 'trimestre') {
     const aq = getActiveQ(state.userCfg.startDate);
-    const start = new Date(state.userCfg.startDate || todayKey());
+    const start = new Date((state.userCfg.startDate || todayKey()) + 'T12:00:00');
     const qs = new Date(start); qs.setMonth(start.getMonth() + (aq - 1) * 3);
     const qe = new Date(qs); qe.setMonth(qs.getMonth() + 3);
     let d = new Date(qs);
     while (d <= today && d < qe) { days.push(dateKey(d)); d.setDate(d.getDate() + 1); }
   } else {
-    const start = new Date(state.userCfg.startDate || todayKey());
+    const start = new Date((state.userCfg.startDate || todayKey()) + 'T12:00:00');
     let d = new Date(start);
     while (d <= today) { days.push(dateKey(d)); d.setDate(d.getDate() + 1); }
   }
