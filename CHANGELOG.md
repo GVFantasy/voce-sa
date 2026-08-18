@@ -1,5 +1,9 @@
 # Changelog — Você S.A.
 
+## v4.0.1 — 2026-08-18
+
+- **Correção**: sequência (streak) exigia 100% dos hábitos esperados no dia desde a v3.0.0 — com vários hábitos simultâneos (idioma, treino, estudo, finanças, bloco de foco), faltar 1 único já derrubava o dia inteiro. Passa a exigir 80% dos hábitos do dia (mantendo o perdão de 1 dia/mês). A conquista "Semana perfeita" continua exigindo 100%, sem mudança.
+
 ## v4.0.0 — 2026-08-18
 
 Mega atualização: nova auditoria completa (funcionalidades, design/visual, saúde técnica) seguida de 6 fases de entrega.

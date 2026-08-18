@@ -89,16 +89,21 @@ export function getPeriodDates(p) {
 // o que zeraria streaks antigas do dia para a noite.
 const STRICT_CRITERIA_SINCE = '2026-08-14';
 
-// Um dia conta para a streak se todo hábito esperado (isExpected) naquele dia foi concluído.
+// Um dia conta como cumprido se a fração de hábitos esperados (isExpected) feitos naquele dia
+// atinge o threshold (1 = todos, exigido pela conquista "Semana perfeita"; STREAK_THRESHOLD = 80%,
+// usado pela sequência - com vários hábitos por dia, exigir 100% travava a streak por 1 hábito só).
 // Dias sem nenhum hábito esperado não quebram a streak. Sem userHabits carregado, ou para
 // datas anteriores ao cutover acima, usa o critério antigo de "algum hábito marcado".
-export function dayFulfilled(entry, date) {
+export const STREAK_THRESHOLD = 0.8;
+
+export function dayFulfilled(entry, date, threshold = 1) {
   const habits = state.userHabits || [];
   const doneMap = (entry && entry.habits) || {};
   if (!habits.length || date < STRICT_CRITERIA_SINCE) return Object.values(doneMap).some(Boolean);
   const expected = habits.filter(h => isExpected(h, date));
   if (!expected.length) return true;
-  return expected.every(h => !!doneMap[h.id]);
+  const doneCount = expected.filter(h => !!doneMap[h.id]).length;
+  return doneCount / expected.length >= threshold;
 }
 
 // Chave de mês-calendário (ex: "2026-7" pra agosto/2026, mês 0-indexado como Date.getMonth())
@@ -116,7 +121,7 @@ export function calcStreak(lg) {
   let s = 0; let d = new Date(); d.setDate(d.getDate() - 1);
   for (let i = 0; i < 365; i++) {
     const k = dateKey(d);
-    if (dayFulfilled(map[k], k)) {
+    if (dayFulfilled(map[k], k, STREAK_THRESHOLD)) {
       s++;
     } else {
       const mk = monthKeyOf(k);
@@ -125,7 +130,7 @@ export function calcStreak(lg) {
     }
     d.setDate(d.getDate() - 1);
   }
-  if (dayFulfilled(map[todayKey()], todayKey())) s++;
+  if (dayFulfilled(map[todayKey()], todayKey(), STREAK_THRESHOLD)) s++;
   return s;
 }
 
@@ -167,7 +172,7 @@ export function getBestStreak(lg) {
   const firstDate = [...lg].map(e => e.date).sort()[0];
   const dates = []; let d = new Date(firstDate + 'T12:00:00'); const end = new Date();
   while (d <= end) { dates.push(dateKey(d)); d.setDate(d.getDate() + 1); }
-  return longestRunWithPardon(dates, k => dayFulfilled(map[k], k));
+  return longestRunWithPardon(dates, k => dayFulfilled(map[k], k, STREAK_THRESHOLD));
 }
 
 // ---- Métricas escopadas ao trimestre ativo (getPeriodDates('trimestre')) — usadas tanto pelo
@@ -208,7 +213,7 @@ export function habitStreakInQuarter(log, habitId) {
 export function overallStreakInQuarter(log) {
   const dates = getPeriodDates('trimestre');
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  return longestRunWithPardon(dates, date => dayFulfilled(logMap[date], date));
+  return longestRunWithPardon(dates, date => dayFulfilled(logMap[date], date, STREAK_THRESHOLD));
 }
 
 export function overallPctInQuarter(log) {

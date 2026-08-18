@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP, ENERGY } from './state.js';
 import { saveCfgAll, sb } from './db.js';
-import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, csvField, isValidEmail } from './utils.js';
+import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, STREAK_THRESHOLD, csvField, isValidEmail } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 import { subscribeToPush, unsubscribeFromPush } from './push.js';
@@ -279,7 +279,7 @@ export function scheduleReminder() {
   window._reminderTimer = setTimeout(() => {
     const today = todayKey();
     const entry = state.log.find(e => e.date === today);
-    const fulfilled = dayFulfilled(entry, today);
+    const fulfilled = dayFulfilled(entry, today, STREAK_THRESHOLD);
     if (!fulfilled && Notification.permission === 'granted') {
       new Notification('Você S.A. 🔥', { body: 'Hora do seu check-in! Não deixe o streak quebrar.', icon: 'icons/icon-192.png' });
     }
