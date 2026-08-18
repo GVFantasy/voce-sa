@@ -1,5 +1,14 @@
 # Changelog — Você S.A.
 
+## v5.0.0-fase1 — 2026-08-18
+
+Mega atualização v5 (Fase 1 de 6): nivelando Tempo, Relações e Corpo com o resto do app.
+
+- Conquistas novas: "10 blocos de foco" (Tempo) e "10 conexões" (Relações) — antes zero conquistas dedicadas pra esses dois pilares
+- Ações do trimestre automáticas pra Corpo (2 itens) e Relações (1 item), mesmo princípio já usado em Finanças/Tempo/Mente
+- Seletor de dias da semana pra hábitos de Relações, Finanças e hábitos personalizados (antes só treino/estudo tinham) — em Perfil
+- Proxy mais fraco do app corrigido: "definir % do salário pra guardar" agora verifica se o primeiro mês do trimestre teve lançamento de verdade, não só se uma meta foi digitada
+
 ## v5.0.0-fase0 — 2026-08-18
 
 Mega atualização v5 (Fase 0 de 6): saúde técnica, fundação pras próximas fases.

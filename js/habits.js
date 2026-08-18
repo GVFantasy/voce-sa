@@ -62,9 +62,10 @@ export function buildHabitsFromCfg() {
   }
 
   if (areas.includes('financas')) {
+    const { daysLabel, allDays, weekdays } = weekdaysMeta(state.userCfg.financasDias || [0, 1, 2, 3, 4, 5, 6]);
     state.userHabits.push({
-      id: 'financas', icon: '💰', name: 'Registrar gastos do dia', days: 'todo dia',
-      allDays: true, hasDetail: true, detailType: 'amount',
+      id: 'financas', icon: '💰', name: 'Registrar gastos do dia', days: daysLabel,
+      allDays, weekdays, hasDetail: true, detailType: 'amount',
       detailOptions: { label: 'Quanto você gastou hoje?' },
     });
   }
@@ -77,9 +78,10 @@ export function buildHabitsFromCfg() {
   }
 
   if (areas.includes('relacoes')) {
+    const { daysLabel, allDays, weekdays } = weekdaysMeta(state.userCfg.relacoesDias || [0, 1, 2, 3, 4, 5, 6]);
     state.userHabits.push({
-      id: 'relacoes', icon: '❤️', name: 'Conexão intencional', days: 'todo dia',
-      allDays: true, hasDetail: false,
+      id: 'relacoes', icon: '❤️', name: 'Conexão intencional', days: daysLabel,
+      allDays, weekdays, hasDetail: false,
     });
   }
 

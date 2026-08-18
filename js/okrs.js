@@ -1,5 +1,5 @@
 import { state, META_LABELS } from './state.js';
-import { getActiveQ, getPeriodDates, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter } from './utils.js';
+import { getActiveQ, getPeriodDates, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter, quarterMonthsSoFar } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
 import { defaultOKR, finOKR, finDicas, QUARTERLY_TASKS } from './okrs-data.js';
 import { fetchBibConcluidosCount } from './biblioteca.js';
@@ -180,7 +180,7 @@ function renderFinTracker() {
   </div>`;
 }
 
-// 7 itens do checklist tem proxy honesto direto no que o check-in/Biblioteca ja grava (mesmo
+// 10 itens do checklist tem proxy honesto direto no que o check-in/Biblioteca ja grava (mesmo
 // principio do motor de KRs automaticos acima) - fecham sozinhos, sem clique manual. O resto
 // continua exatamente como hoje (checkbox manual via tasksDone).
 const TASK_AUTO = {
@@ -204,11 +204,30 @@ const TASK_AUTO = {
     return weeks.size >= 2;
   },
   fin_q1_a: () => habitPctInQuarter(state.log, 'financas') >= 0.7,
-  fin_q1_b: () => (state.userCfg.finMeta || 0) > 0,
+  // antes so checava finMeta>0 (digitar um numero, sem nenhuma acao real) - agora exige que o
+  // primeiro mes do trimestre ja tenha guardado/investido de verdade lancado.
+  fin_q1_b: () => {
+    const months = quarterMonthsSoFar();
+    if (!months.length) return false;
+    const entry = (state.userCfg.finLog || []).find(m => m.mes === months[0]);
+    return !!(entry && ((entry.guardado || 0) + (entry.investido || 0)) > 0);
+  },
   fin_q3_a: () => {
     const now = new Date();
     const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     return (state.userCfg.finLog || []).some(m => m.mes === mesAtual && ((m.guardado || 0) + (m.investido || 0)) > 0);
+  },
+  // "Definir horario fixo de treino": uma semana de streak sem falhar e o sinal mais honesto
+  // de que a rotina de fato existe, nao so foi pensada.
+  corpo_q1_a: () => habitStreakInQuarter(state.log, 'treino') >= 7,
+  // "Adicionar mais 1 dia de treino a semana": treinar acima da frequencia configurada em
+  // Perfil (treinoDias) e o unico jeito honesto de detectar "adicionei um dia" sem perguntar.
+  corpo_q2_b: () => weeklyFreqInQuarter(state.log, 'treino') > (state.userCfg.treinoDias || []).length,
+  // "Agendar 1 encontro com cada uma das 3 pessoas": nao da pra verificar quem, mas 3+ conexoes
+  // intencionais registradas no trimestre e o proxy honesto mais proximo do texto do item.
+  rel_q1_b: () => {
+    const dates = new Set(getPeriodDates('trimestre'));
+    return state.log.filter(e => dates.has(e.date) && e.habits && e.habits.relacoes).length >= 3;
   },
 };
 

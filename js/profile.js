@@ -42,6 +42,28 @@ export function renderPerfil() {
     }
   }
 
+  const relWrap = document.getElementById('relacoes-dias-wrap');
+  if (relWrap) {
+    relWrap.style.display = areas.includes('relacoes') ? '' : 'none';
+    if (areas.includes('relacoes')) {
+      const relacoesDias = state.userCfg.relacoesDias || [0, 1, 2, 3, 4, 5, 6];
+      document.querySelectorAll('#relacoes-dias-btns .ob-day-btn').forEach((btn, i) => {
+        btn.classList.toggle('on', relacoesDias.includes(i));
+      });
+    }
+  }
+
+  const finDiasWrap = document.getElementById('financas-dias-wrap');
+  if (finDiasWrap) {
+    finDiasWrap.style.display = areas.includes('financas') ? '' : 'none';
+    if (areas.includes('financas')) {
+      const financasDias = state.userCfg.financasDias || [0, 1, 2, 3, 4, 5, 6];
+      document.querySelectorAll('#financas-dias-btns .ob-day-btn').forEach((btn, i) => {
+        btn.classList.toggle('on', financasDias.includes(i));
+      });
+    }
+  }
+
   const finSection = document.getElementById('fin-pref-section');
   if (finSection) {
     const hasFinancas = (state.userCfg.areas || []).includes('financas');
@@ -59,10 +81,19 @@ export function renderPerfil() {
   const customList = document.getElementById('custom-habits-list');
   if (customList) {
     const custom = state.userCfg.customHabits || [];
-    customList.innerHTML = custom.length ? custom.map(h => `
-      <div class="idiom-row"><div class="idiom-info"><div style="font-size:18px">${sanitize(h.icon)}</div><div><div class="idiom-name">${sanitize(h.name)}</div></div></div>
-      <button aria-label="Excluir hábito" onclick="deleteCustomHabit('${h.id}')" style="background:none;border:none;cursor:pointer;padding:4px;opacity:.5;line-height:1;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>
-    `).join('') : '';
+    const DAY_LETTERS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+    customList.innerHTML = custom.length ? custom.map(h => {
+      const dias = h.weekdays && h.weekdays.length ? h.weekdays : [0, 1, 2, 3, 4, 5, 6];
+      return `<div style="margin-bottom:12px">
+        <div class="idiom-row">
+          <div class="idiom-info"><div style="font-size:18px">${sanitize(h.icon)}</div><div><div class="idiom-name">${sanitize(h.name)}</div></div></div>
+          <button aria-label="Excluir hábito" onclick="deleteCustomHabit('${h.id}')" style="background:none;border:none;cursor:pointer;padding:4px;opacity:.5;line-height:1;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        </div>
+        <div class="ob-days-grid" style="margin-bottom:8px">${DAY_LETTERS.map((l, i) =>
+          `<button class="ob-day-btn ${dias.includes(i) ? 'on' : ''}" onclick="toggleCustomHabitDia('${h.id}',${i})">${l}</button>`
+        ).join('')}</div>
+      </div>`;
+    }).join('') : '';
   }
 
   const allIdiomas = Object.entries(IDIOMA_MAP).map(([id, v]) => ({ id, ...v }));
@@ -129,6 +160,36 @@ export async function toggleTreinoDia(d) {
   else if (idx < 0) dias.push(d);
   state.userCfg.treinoDias = dias;
   document.querySelectorAll('#treino-dias-btns .ob-day-btn').forEach((btn, i) => {
+    btn.classList.toggle('on', dias.includes(i));
+  });
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
+}
+
+export async function toggleRelacoesDia(d) {
+  const dias = [...(state.userCfg.relacoesDias || [0, 1, 2, 3, 4, 5, 6])];
+  const idx = dias.indexOf(d);
+  if (idx >= 0 && dias.length > 1) dias.splice(idx, 1);
+  else if (idx < 0) dias.push(d);
+  state.userCfg.relacoesDias = dias;
+  document.querySelectorAll('#relacoes-dias-btns .ob-day-btn').forEach((btn, i) => {
+    btn.classList.toggle('on', dias.includes(i));
+  });
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
+}
+
+export async function toggleFinancasDia(d) {
+  const dias = [...(state.userCfg.financasDias || [0, 1, 2, 3, 4, 5, 6])];
+  const idx = dias.indexOf(d);
+  if (idx >= 0 && dias.length > 1) dias.splice(idx, 1);
+  else if (idx < 0) dias.push(d);
+  state.userCfg.financasDias = dias;
+  document.querySelectorAll('#financas-dias-btns .ob-day-btn').forEach((btn, i) => {
     btn.classList.toggle('on', dias.includes(i));
   });
   await saveCfgAll(false);
@@ -332,6 +393,21 @@ export async function addCustomHabit() {
   const { renderCheckin } = await import('./checkin.js');
   renderCheckin();
   showToast('Hábito adicionado!');
+}
+
+export async function toggleCustomHabitDia(id, d) {
+  const h = (state.userCfg.customHabits || []).find(x => x.id === id);
+  if (!h) return;
+  const dias = h.weekdays && h.weekdays.length ? [...h.weekdays] : [0, 1, 2, 3, 4, 5, 6];
+  const idx = dias.indexOf(d);
+  if (idx >= 0 && dias.length > 1) dias.splice(idx, 1);
+  else if (idx < 0) dias.push(d);
+  h.weekdays = dias;
+  await saveCfgAll(false);
+  buildHabitsFromCfg();
+  renderPerfil();
+  const { renderCheckin } = await import('./checkin.js');
+  renderCheckin();
 }
 
 export async function deleteCustomHabit(id) {

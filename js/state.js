@@ -83,6 +83,10 @@ export const ACHIEVEMENTS = [
     }
     return false;
   }},
+  // Tempo e Relações ficavam sem nenhuma conquista dedicada apesar de serem pilares completos
+  // de OKR - mesmo padrão de treino10, só trocando o hábito verificado.
+  { id: 'tempo10', icon: '⏱', name: '10 blocos de foco', desc: '10 blocos de foco cumpridos', check: (l, s) => l.filter(e => e.habits && e.habits.tempo).length >= 10 },
+  { id: 'relacoes10', icon: '❤️', name: '10 conexões', desc: '10 conexões intencionais registradas', check: (l, s) => l.filter(e => e.habits && e.habits.relacoes).length >= 10 },
 ];
 
 export const state = {

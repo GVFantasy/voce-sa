@@ -1,4 +1,4 @@
-const CACHE_NAME = "voce-sa-v50";
+const CACHE_NAME = "voce-sa-v51";
 const OFFLINE_URL = "./offline.html";
 const APP_SHELL = [
   "./",

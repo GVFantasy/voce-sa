@@ -26,6 +26,8 @@ const RARITY = {
   pomodoro10: 'comum',
   leitor3:  'comum',
   fin_registro10: 'comum',
+  tempo10: 'comum',
+  relacoes10: 'comum',
   mes1:     'raro',
   perfeito: 'raro',
   idioma30: 'raro',
@@ -53,6 +55,8 @@ function getProgress(a, log, streak) {
     case 'pomodoro10': return { cur: Math.min((state.userCfg.pomodoroLog || []).length, 10), max: 10 };
     case 'leitor3': return { cur: Math.min(state.bibConcluidosCount || 0, 3), max: 3 };
     case 'fin_registro10': return { cur: Math.min(log.filter(e => e.idiomDetails?.financas?.valor !== undefined && e.idiomDetails.financas.valor !== '').length, 10), max: 10 };
+    case 'tempo10': return { cur: Math.min(log.filter(e => e.habits?.tempo).length, 10), max: 10 };
+    case 'relacoes10': return { cur: Math.min(log.filter(e => e.habits?.relacoes).length, 10), max: 10 };
     default: return null;
   }
 }
