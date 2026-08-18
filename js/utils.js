@@ -260,3 +260,12 @@ export function finLogGrowthInQuarter() {
   const totalFor = m => { const e = finLog.find(x => x.mes === m); return e ? (e.guardado || 0) + (e.investido || 0) : 0; };
   return totalFor(months[months.length - 1]) > totalFor(months[0]);
 }
+
+// Valor de gasto registrado no dia (hábito "financas", detalhe tipo amount) - 0 se não registrado.
+export function gastoDoDia(entry) {
+  return parseFloat(entry && entry.idiomDetails && entry.idiomDetails.financas && entry.idiomDetails.financas.valor) || 0;
+}
+
+export function sumGastosInPeriod(dates, logMap) {
+  return dates.reduce((sum, date) => sum + gastoDoDia(logMap[date]), 0);
+}

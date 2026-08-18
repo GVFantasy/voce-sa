@@ -1,5 +1,5 @@
 import { state, ENERGY, DLABELS, META_LABELS, SITUATION_START_HINTS } from './state.js';
-import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize } from './utils.js';
+import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize, sumGastosInPeriod } from './utils.js';
 
 // % cumprido de cada habito num intervalo de datas, individual e agregado - usado pra comparar
 // a semana atual com a anterior (generateDashboardInsight) sem duplicar o loop duas vezes.
@@ -171,6 +171,36 @@ export async function renderDashboard() {
         </div>`;
     } else {
       compareEl.innerHTML = '';
+    }
+  }
+
+  // financeiro: meta do mês (dado que já existe em finLog) + gasto da semana (contexto, sem cor
+  // de bem/mal - gastar mais não é necessariamente ruim, ao contrário de faltar num hábito).
+  // Só aparece pra quem tem a área financeira ativa.
+  const finEl = document.getElementById('dash-fin-wrap');
+  if (finEl) {
+    if ((state.userCfg.areas || []).includes('financas')) {
+      const now = new Date();
+      const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const finEntry = (state.userCfg.finLog || []).find(f => f.mes === mesAtual);
+      const finMeta = state.userCfg.finMeta || 0;
+      const totalMes = finEntry ? (finEntry.guardado || 0) + (finEntry.investido || 0) : 0;
+      const metaPct = finMeta > 0 ? Math.min(100, Math.round(totalMes / finMeta * 100)) : null;
+      const gastoSemana = sumGastosInPeriod(getPeriodDates('semana'), logMap);
+      const fmtR$ = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      finEl.innerHTML = `
+        <div class="dash-focus">
+          <div class="dash-focus-label">Financeiro</div>
+          <div class="dc-card">
+            ${metaPct !== null ? `
+              <div class="dc-row"><span class="dc-name">Meta do mês</span><span class="dc-val ${metaPct >= 100 ? 'dc-up' : ''}">R$ ${fmtR$(totalMes)} / ${fmtR$(finMeta)}</span></div>
+              <div class="bar-bg" style="margin:4px 0 8px"><div class="bar-fill" style="width:${metaPct}%;background:var(--verde)"></div></div>
+            ` : `<div class="dc-row"><span class="dc-name">Meta do mês</span><span class="dc-val">Nenhuma definida</span></div>`}
+            <div class="dc-row"><span class="dc-name">Gasto essa semana</span><span class="dc-val">R$ ${fmtR$(gastoSemana)}</span></div>
+          </div>
+        </div>`;
+    } else {
+      finEl.innerHTML = '';
     }
   }
 

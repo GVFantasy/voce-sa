@@ -1,6 +1,6 @@
 import { state, IDIOMA_MAP, ENERGY } from './state.js';
 import { saveCfgAll, sb } from './db.js';
-import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, STREAK_THRESHOLD, csvField, isValidEmail } from './utils.js';
+import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected, sanitize, showFieldErr, clearFieldErr, dayFulfilled, STREAK_THRESHOLD, csvField, isValidEmail, gastoDoDia } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 import { subscribeToPush, unsubscribeFromPush } from './push.js';
@@ -202,12 +202,19 @@ export function applyDarkIfSaved() {
 }
 
 export function exportCSV() {
-  const headers = ['Data', ...state.userHabits.map(h => h.name), 'Energia', 'Nota'].map(csvField).join(',');
+  const temFinancas = state.userHabits.some(h => h.id === 'financas');
+  const headers = ['Data', ...state.userHabits.map(h => h.name), 'Energia', 'Nota', ...(temFinancas ? ['Gasto do dia (R$)'] : [])].map(csvField).join(',');
   const rows = state.log.map(e => {
     const habits = state.userHabits.map(h => e.habits && e.habits[h.id] ? 'Sim' : 'Não');
-    return [e.date, ...habits, e.energy ? ENERGY[e.energy] : '', e.nota || ''].map(csvField).join(',');
+    return [e.date, ...habits, e.energy ? ENERGY[e.energy] : '', e.nota || '', ...(temFinancas ? [gastoDoDia(e) || ''] : [])].map(csvField).join(',');
   });
-  const csv = [headers, ...rows].join('\n');
+  let csv = [headers, ...rows].join('\n');
+  const finLog = state.userCfg.finLog || [];
+  if (finLog.length) {
+    const finRows = [...finLog].sort((a, b) => a.mes.localeCompare(b.mes))
+      .map(f => [f.mes, f.guardado || 0, f.investido || 0].map(csvField).join(','));
+    csv += '\n\n' + ['Mês', 'Guardado (R$)', 'Investido (R$)'].map(csvField).join(',') + '\n' + finRows.join('\n');
+  }
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = 'voce_sa_historico.csv'; a.click(); URL.revokeObjectURL(url);
@@ -215,12 +222,15 @@ export function exportCSV() {
 
 // Mesmo dado do exportCSV(), em formato alternativo (mais fácil de reprocessar programaticamente).
 export function exportJSON() {
-  const data = state.log.map(e => ({
+  const temFinancas = state.userHabits.some(h => h.id === 'financas');
+  const checkins = state.log.map(e => ({
     data: e.date,
     habitos: Object.fromEntries(state.userHabits.map(h => [h.name, !!(e.habits && e.habits[h.id])])),
     energia: e.energy ? ENERGY[e.energy] : null,
     nota: e.nota || '',
+    ...(temFinancas ? { gasto: gastoDoDia(e) } : {}),
   }));
+  const data = { checkins, financas_mensal: state.userCfg.finLog || [] };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = 'voce_sa_historico.json'; a.click(); URL.revokeObjectURL(url);

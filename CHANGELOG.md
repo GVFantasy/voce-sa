@@ -1,5 +1,14 @@
 # Changelog — Você S.A.
 
+## v4.2.0 — 2026-08-18
+
+Financeiro de verdade: registro diário com valor, dashboard e conquistas.
+
+- **Registro de gastos**: o hábito diário "Registrar gastos do dia" ganha um campo de valor (R$) em vez de ser só um checkbox — mesmo mecanismo de detalhe já usado por idioma/treino, sem mudança de schema
+- **Dashboard**: novo card financeiro (só pra quem tem a área ativa) — progresso da meta de economia do mês e total gasto na semana
+- **Conquistas**: "10 registros de gastos" e "3 meses de meta batida seguidos"
+- **Exportação**: CSV ganha coluna de gasto diário e uma segunda tabela com o histórico mensal de guardado/investido; JSON passa a incluir `gasto` por dia e `financas_mensal` (formato do JSON mudou de lista solta pra objeto com duas seções)
+
 ## v4.1.0 — 2026-08-18
 
 Dashboard redesenhado: menos cartões, mais sensação de evolução.

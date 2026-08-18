@@ -45,6 +45,16 @@ export function renderOkrFocusStrip() {
 function renderDetailBlock(h, done) {
   const val = state.ts.idiomDetails[h.id] || {};
   const touched = !!(state.ts._detailTouched && state.ts._detailTouched[h.id]);
+  if (h.detailType === 'amount') {
+    const collapsed = val.valor !== undefined && val.valor !== '' && !touched;
+    if (collapsed) {
+      return `<div class="habit-detail-summary ${done ? 'open' : ''}" id="hdetail-${h.id}" role="button" tabindex="0" aria-label="Gasto registrado: R$ ${sanitize(val.valor)} — toque para editar" onclick="expandHabitDetail('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandHabitDetail('${h.id}')}">
+        <span>R$ ${sanitize(val.valor)}</span>
+        <span class="hd-edit-link">editar</span>
+      </div>`;
+    }
+    return `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${h.id}">${renderAmountDetail(h, h.id)}</div>`;
+  }
   const collapsed = val.time && val.method && !touched;
   if (collapsed) {
     return `<div class="habit-detail-summary ${done ? 'open' : ''}" id="hdetail-${h.id}" role="button" tabindex="0" aria-label="Tempo e método: ${sanitize(val.time)}, ${sanitize(val.method)} — toque para editar" onclick="expandHabitDetail('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandHabitDetail('${h.id}')}">
@@ -62,6 +72,12 @@ function renderDetailChips(h, habitId) {
     <div class="hd-chips">${h.detailOptions.method.map(m => `<button class="hd-chip ${(state.ts.idiomDetails[habitId] || {}).method === m ? 'on' : ''}" onclick="setHabitDetail('${habitId}','method','${m}')">${m}</button>`).join('')}</div>`;
 }
 
+function renderAmountDetail(h, habitId) {
+  const val = (state.ts.idiomDetails[habitId] || {}).valor ?? '';
+  return `<div class="hd-label">${sanitize(h.detailOptions.label)}</div>
+    <div class="fin-input-wrap"><span>R$</span><input type="number" inputmode="decimal" step="0.01" min="0" class="fin-input" placeholder="0,00" value="${sanitize(val)}" oninput="setHabitDetail('${habitId}','valor',this.value)"></div>`;
+}
+
 export function expandHabitDetail(habitId) {
   if (!state.ts._detailTouched) state.ts._detailTouched = {};
   state.ts._detailTouched[habitId] = true;
@@ -69,7 +85,8 @@ export function expandHabitDetail(habitId) {
   const el = document.getElementById('hdetail-' + habitId);
   if (!el || !h) return;
   const done = !!state.ts.habits[habitId];
-  el.outerHTML = `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${habitId}">${renderDetailChips(h, habitId)}</div>`;
+  const inner = h.detailType === 'amount' ? renderAmountDetail(h, habitId) : renderDetailChips(h, habitId);
+  el.outerHTML = `<div class="habit-detail ${done ? 'open' : ''}" id="hdetail-${habitId}">${inner}</div>`;
 }
 
 export function renderCheckin() {
@@ -85,7 +102,8 @@ export function renderCheckin() {
     if (!ex) {
       // dia novo: pré-preenche tempo/método de hábitos com detalhe com a última escolha do usuário
       state.userHabits.forEach(hb => {
-        if (!hb.hasDetail) return;
+        // valor gasto não é uma preferência que se repete como tempo/método - não pré-preencher
+        if (!hb.hasDetail || hb.detailType === 'amount') return;
         const past = state.log.find(e => e.idiomDetails && e.idiomDetails[hb.id]);
         if (past) state.ts.idiomDetails[hb.id] = { ...past.idiomDetails[hb.id] };
       });

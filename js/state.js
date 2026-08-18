@@ -66,6 +66,23 @@ export const ACHIEVEMENTS = [
   // state.bibConcluidosCount e um cache local (nao persistido) populado por conquistas.js -
   // Biblioteca nao carrega no login, entao esse numero comeca em 0 e chega via busca assincrona.
   { id: 'leitor3', icon: '📚', name: '3 itens concluídos', desc: '3 itens concluídos na Biblioteca', check: () => (state.bibConcluidosCount || 0) >= 3 },
+  { id: 'fin_registro10', icon: '💰', name: '10 registros de gastos', desc: '10 dias com gastos registrados', check: (l) => {
+    return l.filter(e => e.idiomDetails && e.idiomDetails.financas && e.idiomDetails.financas.valor !== undefined && e.idiomDetails.financas.valor !== '').length >= 10;
+  }},
+  { id: 'fin_meta3', icon: '🏅', name: '3 meses de meta', desc: 'Meta de economia batida 3 meses seguidos', check: () => {
+    const meta = state.userCfg.finMeta || 0;
+    if (meta <= 0) return false;
+    const monthsDiff = (a, b) => { const [ay, am] = a.split('-').map(Number); const [by, bm] = b.split('-').map(Number); return (by - ay) * 12 + (bm - am); };
+    const sorted = [...(state.userCfg.finLog || [])].sort((a, b) => a.mes.localeCompare(b.mes));
+    let run = 0, prevMes = null;
+    for (const entry of sorted) {
+      const hit = (entry.guardado || 0) + (entry.investido || 0) >= meta;
+      run = hit ? (prevMes && monthsDiff(prevMes, entry.mes) === 1 ? run + 1 : 1) : 0;
+      prevMes = entry.mes;
+      if (run >= 3) return true;
+    }
+    return false;
+  }},
 ];
 
 export const state = {

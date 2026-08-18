@@ -64,7 +64,8 @@ export function buildHabitsFromCfg() {
   if (areas.includes('financas')) {
     state.userHabits.push({
       id: 'financas', icon: '💰', name: 'Registrar gastos do dia', days: 'todo dia',
-      allDays: true, hasDetail: false,
+      allDays: true, hasDetail: true, detailType: 'amount',
+      detailOptions: { label: 'Quanto você gastou hoje?' },
     });
   }
 
