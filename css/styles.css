@@ -90,6 +90,8 @@ body.dark .achiev-card.unlocked .achiev-desc{color:var(--ambar)}
 .ec-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
 .ec-bar{width:100%;border-radius:3px 3px 0 0;min-height:3px;transition:height .4s}
 .ec-lbl{font-size:11px;color:var(--cinza);text-align:center}
+.bib-stats-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.bib-stat-chip{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-inner);padding:6px 12px;font-size:12px;font-weight:500}
 .bib-item{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:14px 16px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
 .bib-tipo{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--cinza);margin-bottom:3px;display:flex;align-items:center;gap:6px}
 .bib-titulo{font-size:14px;font-weight:500;margin-bottom:3px}
@@ -497,6 +499,10 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 .okr-active-lbl{font-size:13px;font-weight:600;flex:1;color:var(--preto);min-width:0}
 .okr-edit-btn{background:none;border:none;cursor:pointer;padding:2px 4px;opacity:.45;line-height:1;border-radius:4px;display:flex;align-items:center}
 .okr-edit-btn:hover{opacity:1;background:var(--borda)}
+/* botao de icone generico (editar/excluir) - biblioteca, perfil (habito custom), planos.
+   Antes cada tela reimplementava o mesmo estilo inline; agora reaproveitam esta classe. */
+.icon-btn{background:none;border:none;cursor:pointer;padding:4px;opacity:.5;line-height:1;display:flex;border-radius:4px;transition:all .15s}
+.icon-btn:hover{opacity:1;background:var(--borda)}
 .okr-edit-form{margin-bottom:10px;padding:10px;background:var(--fundo);border-radius:8px;border:1px solid var(--borda)}
 .okr-kr-item{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--borda);cursor:pointer;transition:opacity .15s}
 .okr-kr-item:last-child{border-bottom:none}
@@ -639,6 +645,9 @@ body.dark .fin-perfil-badge{background:#2A2660}
 .pomo-stat-val{font-size:18px;font-weight:700;color:var(--preto)}
 .pomo-stat-label{font-size:11px;color:var(--cinza);margin-top:2px}
 body.dark .pomo-stat-tile{box-shadow:none}
+.pomo-log-row{display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);padding:8px 0;border-bottom:1px solid var(--borda)}
+.pomo-log-row:last-child{border-bottom:none}
+.pomo-log-empty{font-size:12px;color:var(--cinza);padding:8px 0}
 
 /* legado: pomo-circle sem arc (fallback) */
 .pomo-circle{display:none}
@@ -949,6 +958,17 @@ body.dark .mais-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
 /* ========================================================
    KICKOFF SCREEN
    ======================================================== */
+.kickoff-screen{display:none;position:fixed;inset:0;background:var(--roxo);z-index:1000;overflow-y:auto;flex-direction:column}
+.kickoff-inner{padding:calc(48px + env(safe-area-inset-top)) 24px calc(48px + env(safe-area-inset-bottom))}
+.kickoff-eyebrow{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+.kickoff-title{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;line-height:1.25;margin-bottom:10px}
+.kickoff-sub{font-size:14px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:20px}
+.kickoff-areas{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.kickoff-card{background:rgba(255,255,255,.12);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:14px}
+.kickoff-card-label{font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.kickoff-q1-text{font-size:13px;color:rgba(255,255,255,.88);line-height:1.8}
+.kickoff-cta{width:100%;padding:16px;border-radius:var(--radius-card);border:none;background:#fff;color:var(--roxo);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.2px;margin-top:14px}
+.kickoff-footnote{text-align:center;font-size:11px;color:rgba(255,255,255,.45);margin-top:12px}
 .kickoff-area-chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:6px 14px;border-radius:20px;

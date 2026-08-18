@@ -189,7 +189,7 @@ export async function renderDashboard() {
       const gastoSemana = sumGastosInPeriod(getPeriodDates('semana'), logMap);
       const fmtR$ = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
       finEl.innerHTML = `
-        <div class="dash-focus">
+        <div class="dash-focus" role="button" tabindex="0" aria-label="Financeiro — toque para ver a tela completa" onclick="nav('financeiro',null)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();nav('financeiro',null)}" style="cursor:pointer">
           <div class="dash-focus-label">Financeiro</div>
           <div class="dc-card">
             ${metaPct !== null ? `

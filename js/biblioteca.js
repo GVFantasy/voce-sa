@@ -215,8 +215,8 @@ export async function renderBiblioteca(searchTerm) {
   const stats = document.getElementById('bib-stats');
   if (stats) {
     const counts = {}; bibCache.forEach(i => { counts[i.tipo] = (counts[i.tipo] || 0) + 1; });
-    stats.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap">${Object.entries(counts).map(([t, c]) =>
-      `<div style="background:var(--card);border:1px solid var(--borda);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:500">${TIPO_ICONS[t] || '📄'} ${c} ${TIPO_NOMES[t] || t}</div>`
+    stats.innerHTML = `<div class="bib-stats-row">${Object.entries(counts).map(([t, c]) =>
+      `<div class="bib-stat-chip">${TIPO_ICONS[t] || '📄'} ${c} ${TIPO_NOMES[t] || t}</div>`
     ).join('')}</div>`;
   }
   if (!data.length) {
@@ -232,8 +232,8 @@ export async function renderBiblioteca(searchTerm) {
         <div class="bib-date">${fmtDate(i.created_at?.slice(0, 10) || todayKey())}</div>
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0">
-        <button aria-label="Editar item" onclick="editLivro('${i.id}')" style="background:none;border:none;cursor:pointer;padding:4px;opacity:.5;line-height:1;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
-        <button aria-label="Excluir item" onclick="deleteLivro('${i.id}')" style="background:none;border:none;cursor:pointer;padding:4px;opacity:.5;line-height:1;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        <button aria-label="Editar item" onclick="editLivro('${i.id}')" class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
+        <button aria-label="Excluir item" onclick="deleteLivro('${i.id}')" class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
       </div>
     </div>
   </div>`).join('');

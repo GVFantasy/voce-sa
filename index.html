@@ -195,24 +195,24 @@
 </div>
 
 <!-- KICKOFF -->
-<div id="pg-kickoff" style="display:none;position:fixed;inset:0;background:var(--roxo);z-index:1000;overflow-y:auto;flex-direction:column">
-  <div style="padding:calc(48px + env(safe-area-inset-top)) 24px calc(48px + env(safe-area-inset-bottom))">
-    <div style="font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px">Você S.A. · Plano de 12 meses</div>
-    <div id="kickoff-title" style="font-family:'DM Serif Display',serif;font-size:28px;color:#fff;line-height:1.25;margin-bottom:10px"></div>
-    <div id="kickoff-sub" style="font-size:14px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:20px"></div>
-    <div id="kickoff-areas" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px"></div>
-    <div style="background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;margin-bottom:14px">
-      <div style="font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Q1 — Primeiros 3 meses</div>
-      <div id="kickoff-q1" style="font-size:13px;color:rgba(255,255,255,.88);line-height:1.8"></div>
+<div id="pg-kickoff" class="kickoff-screen">
+  <div class="kickoff-inner">
+    <div class="kickoff-eyebrow">Você S.A. · Plano de 12 meses</div>
+    <div id="kickoff-title" class="kickoff-title"></div>
+    <div id="kickoff-sub" class="kickoff-sub"></div>
+    <div id="kickoff-areas" class="kickoff-areas"></div>
+    <div class="kickoff-card">
+      <div class="kickoff-card-label">Q1 — Primeiros 3 meses</div>
+      <div id="kickoff-q1" class="kickoff-q1-text"></div>
     </div>
-    <div style="background:rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;margin-bottom:28px">
-      <div style="font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Seus hábitos base</div>
+    <div class="kickoff-card">
+      <div class="kickoff-card-label">Seus hábitos base</div>
       <div id="kickoff-habits"></div>
     </div>
-    <button onclick="startFromKickoff()" style="width:100%;padding:16px;border-radius:14px;border:none;background:#fff;color:var(--roxo);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.2px">
+    <button onclick="startFromKickoff()" class="kickoff-cta">
       Começar minha jornada →
     </button>
-    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.45);margin-top:12px">Ajuste qualquer detalhe em Perfil → Ajustes táticos</div>
+    <div class="kickoff-footnote">Ajuste qualquer detalhe em Perfil → Ajustes táticos</div>
   </div>
 </div>
 
@@ -364,6 +364,11 @@
   <div id="okr-habit-notif"></div>
     <div id="user-mission" style="font-size:13px;color:var(--cinza);margin-bottom:14px;font-style:italic;line-height:1.5"></div>
     <div id="pillar-list"></div>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div id="pg-financeiro" class="page" style="display:none">
+    <div id="fin-hero-wrap"></div>
     <div id="fin-tracker"></div>
   </div>
 
@@ -436,24 +441,26 @@
       <div class="prof-row"><div class="prof-label">Trimestre ativo</div><div class="prof-val" id="prof-trimestre"></div></div>
     </div>
 
-    <div class="prof-section">
-      <div class="prof-section-title">Segurança</div>
-      <div class="prof-row"><div class="prof-label">Novo email</div><input class="prof-input" id="prof-new-email" type="email" placeholder="novo@email.com"></div>
-      <div class="field-err" id="prof-new-email-err"></div>
-      <button class="btn-ghost" style="margin-top:6px;margin-bottom:14px" onclick="changeEmail()">Alterar email</button>
-      <div class="prof-row"><div class="prof-label">Nova senha</div><input class="prof-input" id="prof-new-pass" type="password" placeholder="mín. 6 caracteres"></div>
-      <div class="field-err" id="prof-new-pass-err"></div>
-      <button class="btn-ghost" style="margin-top:6px" onclick="changePassword()">Alterar senha</button>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Segurança" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Segurança</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
+        <div class="prof-row"><div class="prof-label">Novo email</div><input class="prof-input" id="prof-new-email" type="email" placeholder="novo@email.com"></div>
+        <div class="field-err" id="prof-new-email-err"></div>
+        <button class="btn-ghost" style="margin-top:6px;margin-bottom:14px" onclick="changeEmail()">Alterar email</button>
+        <div class="prof-row"><div class="prof-label">Nova senha</div><input class="prof-input" id="prof-new-pass" type="password" placeholder="mín. 6 caracteres"></div>
+        <div class="field-err" id="prof-new-pass-err"></div>
+        <button class="btn-ghost" style="margin-top:6px" onclick="changePassword()">Alterar senha</button>
+      </div>
     </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Zona de perigo</div>
-      <div style="font-size:13px;color:var(--cinza);margin-bottom:10px">Excluir sua conta apaga permanentemente seu login, check-ins, biblioteca e configurações. Essa ação não pode ser desfeita.</div>
-      <div class="prof-row"><div class="prof-label">Digite "excluir" para confirmar</div><input class="prof-input" id="prof-delete-confirm" type="text" placeholder="excluir" autocomplete="off"></div>
-      <div class="field-err" id="prof-delete-err"></div>
-      <button class="btn-danger" id="prof-delete-btn" style="margin-top:6px" onclick="deleteAccount()">Excluir minha conta</button>
-    </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Ajustes táticos</div>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Ajustes táticos" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Ajustes táticos</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
       <div class="prof-pref-label">Meta de sono</div>
       <div class="ob-chips" id="sono-chips">
         <button class="ob-chip" data-val="6" onclick="toggleSonoMeta(6)">6h</button>
@@ -510,10 +517,14 @@
         </div>
       </div>
       <div class="tactical-note">Ajustes táticos não alteram seu plano de 12 meses. O destino continua o mesmo.</div>
+      </div>
     </div>
-    <div id="fin-pref-section" style="display:none">
-      <div class="prof-section">
-        <div class="prof-section-title">Finanças</div>
+    <div id="fin-pref-section" style="display:none" class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Finanças" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Finanças</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
         <div class="prof-pref-label">Perfil financeiro</div>
         <div class="ob-chips" id="fin-perfil-chips">
           <button class="ob-chip" data-val="iniciante" onclick="toggleFinPerfil('iniciante')">Iniciante</button>
@@ -524,8 +535,12 @@
         <div class="fin-input-wrap" style="margin-top:4px"><span>R$</span><input class="fin-input" id="pref-fin-meta" type="number" min="0" step="50" placeholder="500" onchange="saveFinMeta()"></div>
       </div>
     </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Hábito personalizado</div>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Hábito personalizado" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Hábito personalizado</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
       <div id="custom-habits-list"></div>
       <input class="prof-input" id="custom-habit-name" type="text" placeholder="Nome do hábito" style="width:100%;text-align:left;margin-top:8px">
       <div class="ob-chips" id="custom-habit-icon-chips" style="margin-top:8px">
@@ -539,29 +554,57 @@
         <button class="ob-chip" data-val="💊" onclick="obSingle('custom-habit-icon',this)">💊</button>
       </div>
       <button class="btn-ghost" style="margin-top:8px" onclick="addCustomHabit()">+ Adicionar hábito</button>
+      </div>
     </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Idiomas ativos</div>
-      <div id="idiom-toggles"></div>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Idiomas ativos" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Idiomas ativos</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
+        <div id="idiom-toggles"></div>
+      </div>
     </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Lembrete diário</div>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Lembrete diário" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Lembrete diário</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
       <div class="prof-row"><div class="prof-label">Horário</div><input class="prof-input" id="pref-lembrete" type="time" value="19:30" onchange="saveReminder()"></div>
       <div class="field-err" id="pref-lembrete-err"></div>
       <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" role="switch" aria-checked="false" aria-label="Lembrete diário ativo" tabindex="0" onclick="toggleReminder(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReminder(this)}"></div></div>
       <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
+      </div>
     </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Aparência</div>
-      <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" role="switch" aria-checked="false" aria-label="Tema escuro" tabindex="0" onclick="toggleDark()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDark()}"></div></div>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Aparência" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Aparência</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
+        <div class="prof-row"><div class="prof-label">Tema escuro</div><div class="toggle-switch" id="dark-toggle" role="switch" aria-checked="false" aria-label="Tema escuro" tabindex="0" onclick="toggleDark()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDark()}"></div></div>
+      </div>
     </div>
-    <div class="prof-section">
-      <div class="prof-section-title">Dados</div>
+    <div class="pillar-card">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="false" aria-label="Dados" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
+        <div class="pillar-title">Dados</div>
+        <div class="pillar-chev">›</div>
+      </div>
+      <div class="pillar-body">
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <button class="btn-primary" style="background:var(--verde)" onclick="exportCSV()">Exportar CSV</button>
         <button class="btn-primary" style="background:var(--verde)" onclick="exportJSON()">Exportar JSON</button>
       </div>
       <button class="btn-primary" style="background:var(--dan-solid)" onclick="signOut()">Sair da conta</button>
+      </div>
+    </div>
+    <div class="prof-section">
+      <div class="prof-section-title">Zona de perigo</div>
+      <div style="font-size:13px;color:var(--cinza);margin-bottom:10px">Excluir sua conta apaga permanentemente seu login, check-ins, biblioteca e configurações. Essa ação não pode ser desfeita.</div>
+      <div class="prof-row"><div class="prof-label">Digite "excluir" para confirmar</div><input class="prof-input" id="prof-delete-confirm" type="text" placeholder="excluir" autocomplete="off"></div>
+      <div class="field-err" id="prof-delete-err"></div>
+      <button class="btn-danger" id="prof-delete-btn" style="margin-top:6px" onclick="deleteAccount()">Excluir minha conta</button>
     </div>
   </div>
 
@@ -661,6 +704,7 @@
     <button class="mais-item" onclick="navFromMais('perfil')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="mais-item-label">Perfil</span></button>
     <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="mais-item-label">Manual</span></button>
     <button class="mais-item" onclick="navFromMais('retrospectiva')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></span><span class="mais-item-label">Retrospectiva</span></button>
+    <button class="mais-item" onclick="navFromMais('conquistas')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.5 13.5 7 22 12 19 17 22 15.5 13.5"/></svg></span><span class="mais-item-label">Conquistas</span></button>
   </div>
 </div>
 
@@ -680,9 +724,9 @@
     </div>
     <span class="nav-btn-label">Hoje</span>
   </button>
-  <button class="nav-btn" onclick="nav('conquistas',this)">
-    <span class="nav-btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.5 13.5 7 22 12 19 17 22 15.5 13.5"/></svg></span>
-    <span class="nav-btn-label">Conquistas</span>
+  <button class="nav-btn" onclick="nav('financeiro',this)">
+    <span class="nav-btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 10h18M7 14h3"/></svg></span>
+    <span class="nav-btn-label">Financeiro</span>
   </button>
   <button class="nav-btn" id="navbtn-mais" onclick="openMaisDrawer()">
     <span class="nav-btn-icon">

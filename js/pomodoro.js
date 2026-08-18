@@ -230,8 +230,8 @@ export function renderPomodoroLog() {
   const el = document.getElementById('pomo-log-list');
   if (!el) return;
   const log = (state.userCfg.pomodoroLog || []).slice(0, 8);
-  if (!log.length) { el.innerHTML = '<div style="font-size:12px;color:var(--cinza)">Nenhuma sessão concluída ainda.</div>'; return; }
-  el.innerHTML = log.map(s => `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);padding:4px 0;border-bottom:1px solid var(--borda)">
+  if (!log.length) { el.innerHTML = '<div class="pomo-log-empty">Nenhuma sessão concluída ainda.</div>'; return; }
+  el.innerHTML = log.map(s => `<div class="pomo-log-row">
     <span>${fmtDate(s.date)}${subjectLabel(s.subject) ? ' · ' + sanitize(subjectLabel(s.subject)) : ''}</span><span>${s.durationMin}min</span>
   </div>`).join('');
 }

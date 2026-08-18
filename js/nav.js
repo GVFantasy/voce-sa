@@ -10,6 +10,7 @@ import { renderOKRs } from './okrs.js';
 import { renderBiblioteca } from './biblioteca.js';
 import { renderPomodoroTime, renderPomodoroSessions, restorePomodoro, renderPomodoroDuration, renderPomodoroLog, renderPomodoroStats, renderPomoSubjectChips } from './pomodoro.js';
 import { renderRetrospectiva } from './retrospectiva.js';
+import { renderFinanceiro } from './financeiro.js';
 
 export function startApp() {
   document.getElementById('app').style.display = 'block';
@@ -70,7 +71,7 @@ export async function loadLog() {
 const MAIS_PAGES = ['historico', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'];
 
 export function nav(id, el) {
-  ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
+  ['checkin', 'dashboard', 'okrs', 'financeiro', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
     const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
   });
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
@@ -85,6 +86,7 @@ export function nav(id, el) {
   if (id === 'checkin') renderCheckin();
   if (id === 'dashboard') renderDashboard();
   if (id === 'okrs') renderOKRs();
+  if (id === 'financeiro') renderFinanceiro();
   if (id === 'historico') renderHistorico();
   if (id === 'conquistas') renderConquistas();
   if (id === 'perfil') renderPerfil();
@@ -106,7 +108,7 @@ export function closeMaisDrawer() {
 export function navFromMais(id) {
   closeMaisDrawer(null);
   setTimeout(() => {
-    ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
+    ['checkin', 'dashboard', 'okrs', 'financeiro', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
       const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
     });
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));

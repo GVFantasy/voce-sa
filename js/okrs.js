@@ -1,7 +1,7 @@
 import { state, META_LABELS } from './state.js';
 import { getActiveQ, getPeriodDates, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter, quarterMonthsSoFar } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
-import { defaultOKR, finOKR, finDicas, QUARTERLY_TASKS } from './okrs-data.js';
+import { defaultOKR, finOKR, QUARTERLY_TASKS } from './okrs-data.js';
 import { fetchBibConcluidosCount } from './biblioteca.js';
 
 const areaIcons = { corpo: '🏃', mente: '🧠', financas: '💰', tempo: '⏱', relacoes: '❤️' };
@@ -117,67 +117,6 @@ function getDefaultMap(area) {
 
 function esc(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function fmtBRL(val) {
-  return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-function renderFinTracker() {
-  const el = document.getElementById('fin-tracker');
-  if (!el) return;
-  const areas = state.userCfg.areas || [];
-  if (!areas.includes('financas')) { el.innerHTML = ''; return; }
-
-  const meta = state.userCfg.finMeta || 0;
-  const perfil = state.userCfg.finPerfil || 'iniciante';
-  const now = new Date();
-  const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const finLog = [...(state.userCfg.finLog || [])].sort((a, b) => b.mes.localeCompare(a.mes));
-  const mesData = finLog.find(x => x.mes === mesAtual) || { guardado: 0, investido: 0 };
-  const total = (mesData.guardado || 0) + (mesData.investido || 0);
-  const pct = meta > 0 ? Math.max(0, Math.min(100, Math.round(total / meta * 100))) : 0;
-  const mesNome = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-  const perfilLabels = { iniciante: 'Iniciante', transicao: 'Em transição', investidor: 'Investidor' };
-
-  const history = finLog.filter(m => m.mes !== mesAtual).slice(0, 3).map(m => {
-    const [y, mo] = m.mes.split('-');
-    const nome = new Date(parseInt(y), parseInt(mo) - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
-    const tot = (m.guardado || 0) + (m.investido || 0);
-    const mpct = meta > 0 ? Math.max(0, Math.min(100, Math.round(tot / meta * 100))) : 0;
-    return `<div class="fin-hist-row">
-      <span class="fin-hist-mes">${nome}</span>
-      <div class="fin-hist-bar-bg"><div class="fin-hist-bar-fill" style="width:${mpct}%"></div></div>
-      <span class="fin-hist-val">R$ ${fmtBRL(tot)}</span>
-    </div>`;
-  }).join('');
-
-  el.innerHTML = `<div class="fin-tracker-card">
-    <div class="fin-tracker-hdr">
-      <span class="fin-tracker-title">Tracker financeiro</span>
-      <span class="fin-perfil-badge">${perfilLabels[perfil]}</span>
-    </div>
-    <div class="fin-tracker-mes">${mesNome}</div>
-    ${meta > 0 ? `<div class="fin-meta-label">Meta: R$ ${fmtBRL(meta)}/mês</div>` : '<div class="fin-meta-label" style="color:var(--ambar)">Defina sua meta em Perfil → Finanças</div>'}
-    <div class="fin-inputs-row">
-      <div class="fin-field">
-        <label class="fin-field-label" for="fin-guardado">Guardado 🏦</label>
-        <div class="fin-input-wrap"><span>R$</span><input type="number" id="fin-guardado" class="fin-input" value="${mesData.guardado || ''}" placeholder="0" min="0"></div>
-      </div>
-      <div class="fin-field">
-        <label class="fin-field-label" for="fin-investido">Investido 📈</label>
-        <div class="fin-input-wrap"><span>R$</span><input type="number" id="fin-investido" class="fin-input" value="${mesData.investido || ''}" placeholder="0" min="0"></div>
-      </div>
-    </div>
-    <button class="save-btn" style="margin-top:10px" onclick="saveFinMes()">Registrar mês</button>
-    ${meta > 0 ? `<div class="okr-progress-wrap" style="margin-top:12px">
-      <div class="okr-progress-bg"><div class="okr-progress-fill fin-fill" style="width:${pct}%"></div></div>
-      <span class="okr-progress-label">R$ ${fmtBRL(total)} / R$ ${fmtBRL(meta)} · ${pct}%</span>
-    </div>` : ''}
-    ${history ? `<div class="fin-history"><div class="fin-history-title">Meses anteriores</div>${history}</div>` : ''}
-    <div class="fin-dica">${finDicas[perfil]}</div>
-  </div>`;
 }
 
 // 10 itens do checklist tem proxy honesto direto no que o check-in/Biblioteca ja grava (mesmo
@@ -390,8 +329,6 @@ export function renderOKRs() {
     </div>`;
   }).join('') || '<div class="empty-state"><strong>Nenhum OKR ainda</strong>Escolha suas áreas de foco em Configurações para gerar objetivos do trimestre.</div>';
 
-  renderFinTracker();
-
   const habitIds = new Set(state.userHabits.map(h => h.id));
   const missing = [];
   if (areas.includes('corpo') && !habitIds.has('treino'))
@@ -475,24 +412,6 @@ export async function toggleKR(area, q, krIdx, progressKey) {
 
   saveCfgLocal();
 
-  const { renderDashboard } = await import('./dashboard.js');
-  renderDashboard();
-  await saveCfgRemote();
-}
-
-export async function saveFinMes() {
-  const guardado = Math.max(0, parseFloat(document.getElementById('fin-guardado')?.value || '0') || 0);
-  const investido = Math.max(0, parseFloat(document.getElementById('fin-investido')?.value || '0') || 0);
-  const now = new Date();
-  const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  if (!state.userCfg.finLog) state.userCfg.finLog = [];
-  const idx = state.userCfg.finLog.findIndex(x => x.mes === mesAtual);
-  const entry = { mes: mesAtual, guardado, investido };
-  if (idx >= 0) state.userCfg.finLog[idx] = entry;
-  else state.userCfg.finLog.unshift(entry);
-  state.userCfg.finLog = state.userCfg.finLog.slice(0, 24); // keep 2 years
-  saveCfgLocal();
-  renderFinTracker();
   const { renderDashboard } = await import('./dashboard.js');
   renderDashboard();
   await saveCfgRemote();

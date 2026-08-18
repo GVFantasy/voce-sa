@@ -1,6 +1,6 @@
 {
   "name": "voce-sa",
-  "version": "5.0.0-fase4",
+  "version": "5.0.0-fase5",
   "description": "Aplicativo web de desenvolvimento pessoal com check-in diario, dashboard, OKRs, biblioteca, pomodoro, perfil e sincronizacao via Supabase.",
   "main": "server.js",
   "scripts": {

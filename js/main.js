@@ -5,7 +5,7 @@ import { toggleAuthMode, submitAuth, signOut, afterLogin, forgotPassword, showRe
 import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
 import { renderCheckin, toggleHabit, setHabitDetail, expandHabitDetail, setEnergy, saveDay, renderWeeklyReview, renderMonthlyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, saveMonthlyReview, showBoom, hideBoom, onNotaInput } from './checkin.js';
 import { renderDashboard, setPeriod, renderEnergyChart } from './dashboard.js';
-import { renderOKRs, togglePillar, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
+import { renderOKRs, togglePillar, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth, filterHistorico, setHistoricoHabitFilter } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, exportJSON, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleRelacoesDia, toggleFinancasDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit, toggleCustomHabitDia, deleteAccount } from './profile.js';
@@ -14,6 +14,7 @@ import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessio
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
 import { setRetroTab, retroPrevQ, retroNextQ } from './retrospectiva.js';
+import { saveFinMes } from './financeiro.js';
 
 // Expõe ao window para os onclick inline no HTML
 window.clearFieldErr = clearFieldErr;

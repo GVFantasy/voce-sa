@@ -87,7 +87,7 @@ export function renderPerfil() {
       return `<div style="margin-bottom:12px">
         <div class="idiom-row">
           <div class="idiom-info"><div style="font-size:18px">${sanitize(h.icon)}</div><div><div class="idiom-name">${sanitize(h.name)}</div></div></div>
-          <button aria-label="Excluir hábito" onclick="deleteCustomHabit('${h.id}')" style="background:none;border:none;cursor:pointer;padding:4px;opacity:.5;line-height:1;display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          <button aria-label="Excluir hábito" onclick="deleteCustomHabit('${h.id}')" class="icon-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
         </div>
         <div class="ob-days-grid" style="margin-bottom:8px">${DAY_LETTERS.map((l, i) =>
           `<button class="ob-day-btn ${dias.includes(i) ? 'on' : ''}" onclick="toggleCustomHabitDia('${h.id}',${i})">${l}</button>`

@@ -1,5 +1,16 @@
 # Changelog — Você S.A.
 
+## v5.0.0-fase5 — 2026-08-18
+
+Mega atualização v5 (Fase 5 de 6): Financeiro em destaque + redesign de Biblioteca, Foco e Perfil.
+
+- **Financeiro vira página própria**, substituindo Conquistas no menu inferior (que passa a viver no drawer "Mais") — hero em bloco de cor sólida mostrando o status da meta do mês, tracker de guardado/investido embaixo. Card do dashboard agora leva direto pra essa tela
+- **Perfil reorganizado em acordeão** — 8 seções que ficavam sempre abertas (Segurança, Ajustes táticos, Finanças, Hábito personalizado, Idiomas, Lembrete, Aparência, Dados) agora começam recolhidas, reduzindo bastante o scroll. Conta e Zona de perigo continuam sempre visíveis
+- Biblioteca: chips de estatística por tipo saem de estilo inline pra classes reais
+- Pomodoro: histórico de sessões sai de estilo inline pra classes reais
+- Tela de Kickoff (boas-vindas pós-onboarding) sai de 100% inline pra classes reais
+- Botões de editar/excluir de Biblioteca, Perfil e Planos passam a reaproveitar um único componente visual em vez de repetir o mesmo estilo 5 vezes
+
 ## v5.0.0-fase4 — 2026-08-18
 
 Mega atualização v5 (Fase 4 de 6): Retrospectiva do trimestre e do ano + insights automáticos.
