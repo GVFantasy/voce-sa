@@ -162,11 +162,11 @@ function renderFinTracker() {
     ${meta > 0 ? `<div class="fin-meta-label">Meta: R$ ${fmtBRL(meta)}/mês</div>` : '<div class="fin-meta-label" style="color:var(--ambar)">Defina sua meta em Perfil → Finanças</div>'}
     <div class="fin-inputs-row">
       <div class="fin-field">
-        <div class="fin-field-label">Guardado 🏦</div>
+        <label class="fin-field-label" for="fin-guardado">Guardado 🏦</label>
         <div class="fin-input-wrap"><span>R$</span><input type="number" id="fin-guardado" class="fin-input" value="${mesData.guardado || ''}" placeholder="0" min="0"></div>
       </div>
       <div class="fin-field">
-        <div class="fin-field-label">Investido 📈</div>
+        <label class="fin-field-label" for="fin-investido">Investido 📈</label>
         <div class="fin-input-wrap"><span>R$</span><input type="number" id="fin-investido" class="fin-input" value="${mesData.investido || ''}" placeholder="0" min="0"></div>
       </div>
     </div>

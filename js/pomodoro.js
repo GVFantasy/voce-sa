@@ -126,7 +126,7 @@ function completePhase() {
     state.pomodoro.isLongBreak = isLong;
     state.pomodoro.seconds = isLong ? LONG_BREAK_SECONDS : SHORT_BREAK_SECONDS;
     const label = document.getElementById('pomo-label'); if (label) label.textContent = isLong ? 'Pausa longa' : 'Pausa';
-    const complete = document.getElementById('pomo-complete'); if (complete) complete.style.display = 'block';
+    const complete = document.getElementById('pomo-complete'); if (complete) complete.style.display = 'flex';
     renderPomodoroSessions();
   } else {
     state.pomodoro.isBreak = false;

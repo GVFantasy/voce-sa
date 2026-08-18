@@ -141,7 +141,7 @@ export async function renderDashboard() {
   const insight = generateDashboardInsight();
   document.getElementById('dash-hero-wrap').innerHTML = `
     <div class="dash-hero ${insight.color}">
-      ${insight.streak > 0 ? `<div class="dash-hero-streak">🔥 ${insight.streak}d${insight.isRecord ? ' <span class="dash-hero-record">★</span>' : ''}</div>` : ''}
+      ${insight.streak > 0 ? `<div class="dash-hero-streak"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${insight.streak}d${insight.isRecord ? ' <span class="dash-hero-record">★</span>' : ''}</div>` : ''}
       <div class="dash-hero-label">${insight.label}</div>
       <div class="dash-hero-msg">${insight.msg}</div>
       <div class="dash-hero-sub">${insight.sub}</div>
@@ -262,7 +262,8 @@ export async function renderDashboard() {
           : `No ritmo — ${krPct}% dos KRs concluídos, perto dos ${insight.trimPct}% do trimestre já passado.`;
       paceHtml = `<div class="dash-pace ${paceCls}">${paceTxt}</div>`;
     }
-    dashOkrEl.innerHTML = `<div class="dash-okr-card" onclick="nav('okrs',null)">
+    const okrAriaLabel = `Q${insight.aq}, ${insight.ql[insight.aq]}${obj ? `, ${sanitize(obj.areaName)}, ${sanitize(obj.label)}, ${obj.doneCnt} de ${obj.totalCnt} KRs` : ''} — toque para ver a tela de OKRs`;
+    dashOkrEl.innerHTML = `<div class="dash-okr-card" role="button" tabindex="0" aria-label="${okrAriaLabel}" onclick="nav('okrs',null)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();nav('okrs',null)}">
       <div class="dash-okr-top">Q${insight.aq} — ${insight.ql[insight.aq]}${obj ? ` · ${sanitize(obj.areaName)}` : ''}</div>
       <div class="trim-bar-bg"><div class="trim-bar-fill" style="width:${insight.trimPct}%"></div></div>
       <div class="trim-days"><span>${insight.trimPassed} ${insight.trimPassed === 1 ? 'dia passado' : 'dias passados'}</span><span>${insight.trimTotal - insight.trimPassed} ${insight.trimTotal - insight.trimPassed === 1 ? 'dia restante' : 'dias restantes'}</span></div>

@@ -48,7 +48,7 @@ export function openPlanModal() {
   const plans = getPlans(); const active = getActivePlanId();
   document.getElementById('plan-list').innerHTML = plans.map(p => `
     <div class="plan-row ${p.id === active ? 'active' : ''}">
-      <div class="plan-row-left" style="cursor:pointer" onclick="switchPlan('${p.id}')">
+      <div class="plan-row-left" role="button" tabindex="0" aria-label="Trocar para o plano ${sanitize(p.name)}${p.id === active ? ', ativo' : ''}" style="cursor:pointer" onclick="switchPlan('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPlan('${p.id}')}">
         <span style="font-size:18px">${sanitize(p.emoji)}</span>
         <div><div>${sanitize(p.name)}</div><div style="font-size:11px;color:var(--cinza);font-weight:400">${planActivityLabel(p.id)}</div></div>
       </div>

@@ -368,7 +368,9 @@ export async function saveMonthlyReview() {
 
 export function showBoom(streak) {
   const el = document.getElementById('streak-boom');
-  document.getElementById('streak-boom-num').textContent = '🔥 ' + streak;
+  // mesmo icone do streak-pill do topo do check-in (SVG, nao emoji) - consistencia entre os dois
+  document.getElementById('streak-boom-num').innerHTML =
+    `<span style="display:inline-flex;align-items:center;gap:8px;justify-content:center"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>${streak}</span>`;
   document.getElementById('streak-boom-label').textContent =
     streak === 1 ? 'primeiro dia!' : streak < 7 ? 'dias seguidos!' : streak < 30 ? 'dias! Continue!' : 'dias! Incrível!';
   el.classList.add('show');

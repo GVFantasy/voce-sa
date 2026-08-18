@@ -1,5 +1,15 @@
 # Changelog — Você S.A.
 
+## v5.0.0-fase3 — 2026-08-18
+
+Mega atualização v5 (Fase 3 de 6): nova identidade visual + limpeza técnica.
+
+- **Nova paleta "Fintech ousado"**: roxo mais saturado, fundo com leve tom lavanda, cantos mais arredondados, cards em bloco de cor sólida (dashboard e financeiro) — direção escolhida entre 3 mockups visuais
+- Acessibilidade: card de OKR do dashboard, campos do tracker financeiro e linha de troca de plano ganham navegação por teclado/leitor de tela
+- Dark mode: badges de status, alertas e avisos agora têm cor correta no tema escuro (antes ficavam claros demais)
+- Consistência: ícone de sequência (🔥) trocado por SVG nos lugares que ainda usavam emoji, igual ao resto do app
+- Limpeza: removidos ~15 blocos de CSS sem nenhum uso no app
+
 ## v5.0.0-fase2 — 2026-08-18
 
 Mega atualização v5 (Fase 2 de 6): revisão mensal.
