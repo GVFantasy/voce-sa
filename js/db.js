@@ -79,6 +79,32 @@ export async function flushPendingCheckins() {
   }
 }
 
+// Config pendente que falhou ao sincronizar (offline) — reenviada quando a conexão volta, mesmo
+// padrão já usado pra checkins. Como userCfg é um blob único por usuário (não por data), a fila
+// aqui é só o último blob pendente, não uma lista.
+export function queuePendingCfg(cfg) {
+  try { localStorage.setItem(lsKey('pending_cfg'), JSON.stringify(cfg)); } catch (e) {}
+}
+export function getPendingCfg() {
+  try { const raw = localStorage.getItem(lsKey('pending_cfg')); return raw ? JSON.parse(raw) : null; }
+  catch (e) { return null; }
+}
+export function clearPendingCfg() {
+  try { localStorage.removeItem(lsKey('pending_cfg')); } catch (e) {}
+}
+export async function flushPendingCfg() {
+  if (!state.currentUser) return;
+  const pending = getPendingCfg();
+  if (!pending) return;
+  try {
+    const { error } = await sb.from('user_config').upsert(
+      { user_id: state.currentUser.id, config: pending },
+      { onConflict: 'user_id' }
+    );
+    if (!error) clearPendingCfg();
+  } catch (e) { /* ainda offline, mantém na fila */ }
+}
+
 export async function saveCfgRemote() {
   if (!state.currentUser) return false;
   try {
@@ -87,8 +113,10 @@ export async function saveCfgRemote() {
       { onConflict: 'user_id' }
     );
     if (error) throw error;
+    clearPendingCfg();
     return true;
   } catch (e) {
+    queuePendingCfg(state.userCfg);
     setSyncStatus('err', 'Sem conexão');
     return false;
   }

@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { sb, getCfg, loadCfgRemote, flushPendingCheckins } from './db.js';
+import { sb, getCfg, loadCfgRemote, flushPendingCheckins, flushPendingCfg } from './db.js';
 import { showToast, showFieldErr, clearFieldErr, isValidEmail } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
@@ -93,9 +93,10 @@ export async function submitAuth() {
 }
 
 export async function signOut() {
-  // Tenta sincronizar check-ins pendentes antes de invalidar a sessão — evita perder dados
-  // que ainda não foram confirmados no servidor (ver js/db.js queuePendingCheckin).
+  // Tenta sincronizar check-ins e config pendentes antes de invalidar a sessão — evita perder
+  // dados que ainda não foram confirmados no servidor (ver js/db.js queuePendingCheckin/queuePendingCfg).
   try { await flushPendingCheckins(); } catch (e) {}
+  try { await flushPendingCfg(); } catch (e) {}
   await sb.auth.signOut();
   clearInterval(state.pomodoro.timer);
   state.pomodoro = { timer: null, seconds: 25 * 60, isRunning: false, isBreak: false, sessions: 0, subject: '' };
@@ -114,6 +115,9 @@ export async function afterLogin() {
 
   document.getElementById('pg-auth').style.display = 'none';
 
+  // envia qualquer edição de config que ficou pendente de uma sessão offline anterior antes de
+  // buscar a versão do servidor — senão a busca sobrescreveria a edição não sincronizada.
+  try { await flushPendingCfg(); } catch (e) {}
   const result = await loadCfgRemote();
 
   if (result === 'found') {

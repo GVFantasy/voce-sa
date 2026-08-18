@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { sb } from './db.js';
+import { sb, flushPendingCfg } from './db.js';
 import { clearFieldErr } from './utils.js';
 import { toggleAuthMode, submitAuth, signOut, afterLogin, forgotPassword, showRecoveryForm, confirmRecovery } from './auth.js';
 import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
@@ -153,7 +153,7 @@ async function init() {
   } else if (!session && !state.currentUser && !window._recovering) {
     document.getElementById('pg-auth').style.display = 'block';
   }
-  window.addEventListener('online', () => { if (state.currentUser) loadLog(); });
+  window.addEventListener('online', () => { if (state.currentUser) { flushPendingCfg(); loadLog(); } });
 }
 
 init();
