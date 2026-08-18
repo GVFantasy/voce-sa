@@ -1,5 +1,38 @@
 # Changelog — Você S.A.
 
+## v4.0.0 — 2026-08-18
+
+Mega atualização: nova auditoria completa (funcionalidades, design/visual, saúde técnica) seguida de 6 fases de entrega.
+
+### Segurança (achado durante a Fase 0, corrigido antes de qualquer outra coisa)
+- `checkins`, `user_config` e `biblioteca` estavam com RLS desativado e acesso liberado pra chave pública — qualquer requisição conseguia ler/alterar/apagar dados de qualquer usuário. RLS ativado, policies por dono criadas, acesso da chave anônima revogado.
+
+### Saúde técnica
+- Migrations retroativas: schema de `checkins`/`user_config`/`biblioteca` agora versionado no repo (só `push_subscriptions` tinha antes)
+- Fila de retry offline pra configurações (`userCfg`), mesmo padrão que os check-ins já tinham
+- `js/okrs.js` (maior arquivo do projeto) dividido: dados estáticos de OKRs/Ações do trimestre isolados em `js/okrs-data.js`
+
+### Streak freeze
+- 1 dia perdido por mês-calendário não quebra mais a sequência (mas também não conta como cumprido) — automático, sem UI nova
+
+### Design e visual
+- Cores soltas consolidadas em tokens existentes; ícones de navegação e ações migrados de emoji pra SVG
+- Elementos das últimas rodadas ganharam suporte a teclado/leitor de tela
+- Biblioteca ganhou cards individuais; página Manual saiu do estilo 100% inline
+
+### Biblioteca
+- Status de leitura (quero ler / lendo / concluído), avaliação por estrelas, ordenação por título/tipo/status
+- KR e Ação do trimestre de "concluir 1 livro" fecham sozinhos com base no status real; nova conquista de leitura
+
+### Histórico e Pomodoro
+- Histórico: busca por palavra-chave nas notas + filtro por hábito
+- Pomodoro: notificação do sistema ao fim de cada fase, estatísticas de horas (7/30 dias), assunto da sessão ligado aos hábitos reais
+
+### Perfil, Onboarding e Notificações
+- Exportação em JSON além de CSV
+- Onboarding: idioma deixa de ser obrigatório se a área "mente" não foi escolhida; campos nunca usados removidos
+- Notificações novas: conquista desbloqueada, e aviso de "sequência em risco" tarde da noite pra quem ainda não fez check-in
+
 ## v3.4.0 — 2026-08-17
 
 Simplificação das telas de Check-in e OKRs, depois de 3 rodadas seguidas adicionando automação.
