@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { lsKey, saveCfgAll } from './db.js';
-import { todayKey, fmtDate } from './utils.js';
+import { todayKey, fmtDate, dateKey, sanitize } from './utils.js';
 
 // Raio do arco SVG (deve coincidir com o r="68" no HTML)
 const ARC_RADIUS = 68;
@@ -53,6 +53,9 @@ function updateArc() {
 
 // Toca um bipe curto (Web Audio API, sem depender de arquivo externo — funciona offline)
 // e vibra se o dispositivo suportar, para avisar o fim do ciclo mesmo com a aba em segundo plano.
+// Complementa (nao substitui) com uma notificacao do sistema quando a permissao ja foi concedida
+// antes (ex: pro lembrete de check-in) — nao pede permissao aqui, so aproveita se ja existir,
+// pra nao interromper o fluxo do Pomodoro com um prompt novo.
 function notifyPhaseEnd() {
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -69,6 +72,16 @@ function notifyPhaseEnd() {
     }
   } catch (e) {}
   if (navigator.vibrate) { try { navigator.vibrate(200); } catch (e) {} }
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      const wasBreak = state.pomodoro.isBreak;
+      new Notification(wasBreak ? 'Pausa concluída ⏱' : 'Foco concluído 🍅', {
+        body: wasBreak ? 'Hora de voltar ao foco.' : 'Hora da pausa.',
+        icon: 'icons/icon-192.png',
+        tag: 'pomodoro-phase',
+      });
+    }
+  } catch (e) {}
 }
 
 async function logCompletedSession() {
@@ -80,6 +93,7 @@ async function logCompletedSession() {
   });
   state.userCfg.pomodoroLog = state.userCfg.pomodoroLog.slice(0, 200);
   renderPomodoroLog();
+  renderPomodoroStats();
   await saveCfgAll(false);
 }
 
@@ -202,15 +216,48 @@ export function renderPomodoroDuration() {
   });
 }
 
+// Vocabulario fixo antigo do assunto do pomodoro (antes de virar ligado aos habitos reais) -
+// mantido so pra rotular corretamente sessoes ja registradas no historico com esses valores.
+const LEGACY_SUBJ_NAMES = { idioma: 'Idioma', habilidade: 'Habilidade', tecnico: 'Técnico', faculdade: 'Faculdade', leitura: 'Leitura' };
+
+function subjectLabel(subject) {
+  if (!subject) return '';
+  const habit = (state.userHabits || []).find(h => h.id === subject);
+  return habit ? habit.name : (LEGACY_SUBJ_NAMES[subject] || subject);
+}
+
 export function renderPomodoroLog() {
   const el = document.getElementById('pomo-log-list');
   if (!el) return;
   const log = (state.userCfg.pomodoroLog || []).slice(0, 8);
   if (!log.length) { el.innerHTML = '<div style="font-size:12px;color:var(--cinza)">Nenhuma sessão concluída ainda.</div>'; return; }
-  const subjNames = { idioma: 'Idioma', habilidade: 'Habilidade', tecnico: 'Técnico', faculdade: 'Faculdade', leitura: 'Leitura' };
   el.innerHTML = log.map(s => `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--cinza);padding:4px 0;border-bottom:1px solid var(--borda)">
-    <span>${fmtDate(s.date)}${s.subject ? ' · ' + (subjNames[s.subject] || s.subject) : ''}</span><span>${s.durationMin}min</span>
+    <span>${fmtDate(s.date)}${subjectLabel(s.subject) ? ' · ' + sanitize(subjectLabel(s.subject)) : ''}</span><span>${s.durationMin}min</span>
   </div>`).join('');
+}
+
+// Estatisticas agregadas (7/30 dias) a partir do mesmo pomodoroLog que ja alimenta o historico
+// de sessoes - nenhuma coleta nova.
+function fmtDurationH(min) {
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h > 0) return `${h}h${m > 0 ? m + 'min' : ''}`;
+  return `${m}min`;
+}
+
+export function renderPomodoroStats() {
+  const el = document.getElementById('pomo-stats');
+  if (!el) return;
+  const log = state.userCfg.pomodoroLog || [];
+  const today = new Date();
+  const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+  const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
+  const sumSince = fromKey => log.filter(s => s.date >= fromKey).reduce((sum, s) => sum + (s.durationMin || 0), 0);
+  const weekMin = sumSince(dateKey(weekAgo));
+  const monthMin = sumSince(dateKey(monthAgo));
+  el.innerHTML = `<div class="pomo-stats-row">
+    <div class="pomo-stat-tile"><div class="pomo-stat-val">${fmtDurationH(weekMin)}</div><div class="pomo-stat-label">últimos 7 dias</div></div>
+    <div class="pomo-stat-tile"><div class="pomo-stat-val">${fmtDurationH(monthMin)}</div><div class="pomo-stat-label">últimos 30 dias</div></div>
+  </div>`;
 }
 
 // Restaura um ciclo em andamento após reload/fechamento do app. Sempre reseta para um estado
@@ -258,10 +305,25 @@ export function restorePomodoro() {
   renderPomoSubjectChips();
 }
 
+// Assunto do pomodoro passa a ser um habito real do usuario (em vez de uma lista fixa
+// idioma/habilidade/tecnico/faculdade/leitura) - a sessao fica ligada a algo que ja existe no
+// check-in, sem inventar uma categoria paralela. Sessoes antigas continuam legiveis via
+// LEGACY_SUBJ_NAMES em subjectLabel().
 export function renderPomoSubjectChips() {
   const container = document.getElementById('pomo-subject');
   if (!container) return;
-  container.querySelectorAll('.ob-chip').forEach(chip => {
-    chip.classList.toggle('on', chip.dataset.val === state.pomodoro.subject);
-  });
+  const habits = state.userHabits || [];
+  if (!habits.length) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--cinza)">Configure hábitos em Perfil para ligar suas sessões a eles.</div>';
+    return;
+  }
+  container.innerHTML = habits.map(h =>
+    `<button class="ob-chip ${state.pomodoro.subject === h.id ? 'on' : ''}" onclick="setPomoSubject('${h.id}')">${sanitize(h.icon)} ${sanitize(h.name)}</button>`
+  ).join('');
+}
+
+export function setPomoSubject(habitId) {
+  state.pomodoro.subject = state.pomodoro.subject === habitId ? '' : habitId; // toca de novo desmarca
+  renderPomoSubjectChips();
+  persistPomodoro();
 }

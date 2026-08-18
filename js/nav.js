@@ -8,7 +8,7 @@ import { renderHistorico } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderOKRs } from './okrs.js';
 import { renderBiblioteca } from './biblioteca.js';
-import { renderPomodoroTime, renderPomodoroSessions, restorePomodoro, renderPomodoroDuration, renderPomodoroLog } from './pomodoro.js';
+import { renderPomodoroTime, renderPomodoroSessions, restorePomodoro, renderPomodoroDuration, renderPomodoroLog, renderPomodoroStats, renderPomoSubjectChips } from './pomodoro.js';
 
 export function startApp() {
   document.getElementById('app').style.display = 'block';
@@ -85,7 +85,7 @@ export function nav(id, el) {
   if (id === 'historico') renderHistorico();
   if (id === 'conquistas') renderConquistas();
   if (id === 'perfil') renderPerfil();
-  if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); }
+  if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); renderPomodoroStats(); renderPomoSubjectChips(); }
   if (id === 'biblioteca') renderBiblioteca();
 }
 
@@ -118,7 +118,7 @@ export function navFromMais(id) {
     if (id === 'historico') renderHistorico();
     if (id === 'conquistas') renderConquistas();
     if (id === 'perfil') renderPerfil();
-    if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); }
+    if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); renderPomodoroStats(); renderPomoSubjectChips(); }
     if (id === 'biblioteca') renderBiblioteca();
   }, 280);
 }

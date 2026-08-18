@@ -343,6 +343,8 @@
   <!-- HISTÓRICO -->
   <div id="pg-historico" class="page" style="display:none">
     <div class="sec-label">Registros</div>
+    <input id="hi-search" class="auth-input" type="text" placeholder="Buscar por palavra na nota..." style="margin-bottom:8px" oninput="filterHistorico(this.value)">
+    <select id="hi-habit-filter" class="auth-input" style="margin-bottom:10px" onchange="setHistoricoHabitFilter(this.value)"></select>
     <div class="card" style="padding:0 18px"><div id="history-list"></div></div>
   </div>
 
@@ -387,15 +389,11 @@
       <button class="ob-chip" data-val="45" onclick="setFocusDuration(45)">45min</button>
       <button class="ob-chip" data-val="60" onclick="setFocusDuration(60)">60min</button>
     </div>
-    <div class="sec-label">O que vai estudar?</div>
-    <div class="ob-chips" id="pomo-subject" style="margin-bottom:12px">
-      <button class="ob-chip" data-val="idioma" onclick="obSingle('pomo-sub',this)">Idioma</button>
-      <button class="ob-chip" data-val="habilidade" onclick="obSingle('pomo-sub',this)">Habilidade</button>
-      <button class="ob-chip" data-val="tecnico" onclick="obSingle('pomo-sub',this)">Técnico</button>
-      <button class="ob-chip" data-val="faculdade" onclick="obSingle('pomo-sub',this)">Faculdade</button>
-      <button class="ob-chip" data-val="leitura" onclick="obSingle('pomo-sub',this)">Leitura</button>
-    </div>
+    <div class="sec-label">Ligar sessão a qual hábito?</div>
+    <div class="ob-chips" id="pomo-subject" style="margin-bottom:12px"></div>
     <div class="alert alert-suc" id="pomo-complete" style="display:none">✅ Sessão concluída! Contabilizado no check-in de hoje.</div>
+    <div class="sec-label">Esta semana / este mês</div>
+    <div id="pomo-stats" style="margin-bottom:12px"></div>
     <div class="sec-label">Últimas sessões</div>
     <div class="card" id="pomo-log-list"></div>
   </div>

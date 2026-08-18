@@ -6,11 +6,11 @@ import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggle
 import { renderCheckin, toggleHabit, setHabitDetail, expandHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, onNotaInput } from './checkin.js';
 import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar, getActiveObjective, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
-import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth } from './historico.js';
+import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth, filterHistorico, setHistoricoHabitFilter } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit, deleteAccount } from './profile.js';
 import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca, toggleLivroStatus, setLivroRating, setBiblSort } from './biblioteca.js';
-import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions, setFocusDuration } from './pomodoro.js';
+import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions, setFocusDuration, setPomoSubject } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
 
@@ -70,6 +70,8 @@ window.saveOKREdit = saveOKREdit;
 
 window.renderHistorico = renderHistorico;
 window.loadMoreHistorico = loadMoreHistorico;
+window.filterHistorico = filterHistorico;
+window.setHistoricoHabitFilter = setHistoricoHabitFilter;
 window.navCalMonth = navCalMonth;
 window.showHiDay = showHiDay;
 window.renderConquistas = renderConquistas;
@@ -111,6 +113,7 @@ window.pomodoroReset = pomodoroReset;
 window.renderPomodoroTime = renderPomodoroTime;
 window.renderPomodoroSessions = renderPomodoroSessions;
 window.setFocusDuration = setFocusDuration;
+window.setPomoSubject = setPomoSubject;
 
 window.getPlans = getPlans;
 window.getActivePlanId = getActivePlanId;

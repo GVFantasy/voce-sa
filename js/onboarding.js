@@ -135,8 +135,6 @@ export function obSingle(group, btn) {
     const nb = document.getElementById('ob-next-1'); if (nb) nb.disabled = false;
   } else if (group === 'livro-tipo') {
     window._newLivroTipo = btn.dataset.val;
-  } else if (group === 'pomo-sub') {
-    state.pomodoro.subject = btn.dataset.val;
   } else if (group === 'custom-habit-icon') {
     window._newHabitIcon = btn.dataset.val;
   }

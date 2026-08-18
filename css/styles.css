@@ -651,6 +651,11 @@ body.dark .fin-perfil-badge{background:#2A2660}
 .pomo-sessions{display:flex;gap:6px;justify-content:center}
 .pomo-dot{width:10px;height:10px;border-radius:50%;background:var(--borda)}
 .pomo-dot.done{background:var(--verde)}
+.pomo-stats-row{display:flex;gap:8px}
+.pomo-stat-tile{flex:1;background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:12px;text-align:center;box-shadow:var(--shadow-sm)}
+.pomo-stat-val{font-size:18px;font-weight:700;color:var(--preto)}
+.pomo-stat-label{font-size:11px;color:var(--cinza);margin-top:2px}
+body.dark .pomo-stat-tile{box-shadow:none}
 
 /* legado: pomo-circle sem arc (fallback) */
 .pomo-circle{display:none}

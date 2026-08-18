@@ -4,6 +4,8 @@ import { fmtDate, isExpected, dateKey, sanitize } from './utils.js';
 let _hiLimit = 15;
 let _hiCalYear = new Date().getFullYear();
 let _hiCalMonth = new Date().getMonth();
+let _hiSearchTerm = '';
+let _hiHabitFilter = '';
 
 export function renderHistorico() {
   _hiLimit = 15;
@@ -12,12 +14,37 @@ export function renderHistorico() {
   const today = new Date();
   _hiCalYear = today.getFullYear();
   _hiCalMonth = today.getMonth();
+  const sel = document.getElementById('hi-habit-filter');
+  if (sel) {
+    sel.innerHTML = '<option value="">Todos os hábitos</option>' +
+      state.userHabits.map(h => `<option value="${h.id}">${sanitize(h.icon)} ${sanitize(h.name)}</option>`).join('');
+    sel.value = _hiHabitFilter;
+  }
   _renderHistoricoInner();
 }
 
 export function loadMoreHistorico() {
   _hiLimit += 15;
   _renderHistoricoInner();
+}
+
+export function filterHistorico(term) {
+  _hiSearchTerm = term.trim().toLowerCase();
+  _hiLimit = 15;
+  _renderHistoricoInner();
+}
+
+export function setHistoricoHabitFilter(habitId) {
+  _hiHabitFilter = habitId;
+  _hiLimit = 15;
+  _renderHistoricoInner();
+}
+
+function applyHistoricoFilters(log) {
+  let filtered = log;
+  if (_hiSearchTerm) filtered = filtered.filter(e => (e.nota || '').toLowerCase().includes(_hiSearchTerm));
+  if (_hiHabitFilter) filtered = filtered.filter(e => e.habits && e.habits[_hiHabitFilter]);
+  return filtered;
 }
 
 // state.log so guarda os check-ins mais recentes (limit 365 em nav.js loadLog) - navegar para
@@ -90,9 +117,12 @@ function _renderHistoricoInner() {
     <div id="hi-day-detail" class="hi-day-detail"></div>
   </div>`;
 
-  // --- Lista ---
-  const slice = state.log.slice(0, _hiLimit);
-  const listHTML = slice.map(e => {
+  // --- Lista (busca por nota / filtro por hábito aplicados antes da paginação) ---
+  const filteredLog = applyHistoricoFilters(state.log);
+  const slice = filteredLog.slice(0, _hiLimit);
+  const listHTML = !filteredLog.length
+    ? '<div class="empty-state"><strong>Nada encontrado</strong>Tente outro termo ou hábito.</div>'
+    : slice.map(e => {
     const done = state.userHabits.filter(h => e.habits && e.habits[h.id] && isExpected(h, e.date));
     const extras = state.userHabits.filter(h => e.habits && e.habits[h.id] && !isExpected(h, e.date));
     const miss = state.userHabits.filter(h => isExpected(h, e.date) && !(e.habits && e.habits[h.id]));
@@ -109,7 +139,7 @@ function _renderHistoricoInner() {
     </div>`;
   }).join('');
 
-  const moreBtn = state.log.length > _hiLimit
+  const moreBtn = filteredLog.length > _hiLimit
     ? `<button class="btn-secondary" onclick="loadMoreHistorico()" style="width:100%;margin-top:8px">Carregar mais</button>`
     : '';
 
