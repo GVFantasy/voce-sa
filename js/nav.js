@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { sb, setSyncStatus, saveCfgAll, flushPendingCheckins } from './db.js';
+import { sb, setSyncStatus, saveCfgAll, flushPendingCheckins, flushPendingBiblioteca, flushPendingPush } from './db.js';
 import { showToast } from './utils.js';
 import { applyDarkIfSaved, initReminder, renderPerfil } from './profile.js';
 import { renderCheckin } from './checkin.js';
@@ -41,6 +41,8 @@ export async function loadLog() {
   if (!state.currentUser) return;
   setSyncStatus('syncing', 'Sincronizando...');
   await flushPendingCheckins();
+  flushPendingBiblioteca();
+  flushPendingPush();
   const { data, error } = await sb.from('checkins')
     .select('*')
     .eq('user_id', state.currentUser.id)

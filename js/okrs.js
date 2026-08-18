@@ -27,6 +27,7 @@ function ensureBibConcluidosLoaded() {
   const dates = getPeriodDates('trimestre');
   const fromDate = dates[0];
   fetchBibConcluidosCount(fromDate).then(count => {
+    if (count === null) { bibConcluidosLoaded = false; return; } // erro - mantém o cache anterior, tenta de novo depois
     bibConcluidosCount = count;
     renderOKRs();
   });
@@ -34,35 +35,36 @@ function ensureBibConcluidosLoaded() {
 
 // Avalia uma regra "auto" e devolve { done, pct } (pct 0-100, so pra exibir progresso). As
 // métricas em si (habitPctInQuarter etc.) vivem em utils.js — reaproveitadas também pelas
-// Ações do trimestre em checkin.js.
-function evalAutoKR(auto, log) {
+// Ações do trimestre em checkin.js. `aq` e o trimestre sendo avaliado (nao necessariamente o
+// ativo - a timeline de OKRs avalia trimestres passados tambem, ver computeKRs/otherQs abaixo).
+function evalAutoKR(auto, log, aq) {
   switch (auto.type) {
     case 'habitPct': {
-      const pct = habitPctInQuarter(log, auto.habit);
+      const pct = habitPctInQuarter(log, auto.habit, aq);
       return { done: pct >= auto.min, pct: Math.round(pct * 100) };
     }
     case 'weeklyFreq': {
-      const freq = weeklyFreqInQuarter(log, auto.habit);
+      const freq = weeklyFreqInQuarter(log, auto.habit, aq);
       return { done: freq >= auto.min, pct: Math.round(Math.min(1, freq / auto.min) * 100) };
     }
     case 'habitStreak': {
-      const streak = habitStreakInQuarter(log, auto.habit);
+      const streak = habitStreakInQuarter(log, auto.habit, aq);
       return { done: streak >= auto.min, pct: Math.round(Math.min(1, streak / auto.min) * 100) };
     }
     case 'overallStreak': {
-      const streak = overallStreakInQuarter(log);
+      const streak = overallStreakInQuarter(log, aq);
       return { done: streak >= auto.min, pct: Math.round(Math.min(1, streak / auto.min) * 100) };
     }
     case 'overallPct': {
-      const pct = overallPctInQuarter(log);
+      const pct = overallPctInQuarter(log, aq);
       return { done: pct >= auto.min, pct: Math.round(pct * 100) };
     }
     case 'finLogConsistency': {
-      const { done, total } = finLogConsistencyInQuarter();
+      const { done, total } = finLogConsistencyInQuarter(aq);
       return { done: total > 0 && done >= total, pct: total > 0 ? Math.round(done / total * 100) : 0 };
     }
     case 'finLogGrowth': {
-      const g = finLogGrowthInQuarter();
+      const g = finLogGrowthInQuarter(aq);
       return { done: g, pct: g ? 100 : 0 };
     }
     case 'bibConcluidos': {
@@ -86,7 +88,7 @@ function computeKRs(area, q, krsRaw, log) {
   return krsRaw.map((raw, i) => {
     const kr = normalizeKR(raw);
     if (kr.auto) {
-      const { done, pct } = evalAutoKR(kr.auto, log);
+      const { done, pct } = evalAutoKR(kr.auto, log, q);
       return { ...kr, done, pct, isAuto: true, idx: i, progressKey: null };
     }
     const progressKey = `${area}_q${q}_${kr.id || i}`;
@@ -124,7 +126,7 @@ function fmtBRL(val) {
 function renderFinTracker() {
   const el = document.getElementById('fin-tracker');
   if (!el) return;
-  const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
+  const areas = state.userCfg.areas || [];
   if (!areas.includes('financas')) { el.innerHTML = ''; return; }
 
   const meta = state.userCfg.finMeta || 0;
@@ -265,7 +267,7 @@ export async function toggleQTask(taskId) {
 
 export function renderOKRs() {
   const aq = getActiveQ(state.userCfg.startDate);
-  const areas = (state.userCfg.areas || ['corpo', 'mente']).filter(a => a !== 'negocio');
+  const areas = state.userCfg.areas || [];
   const custom = state.userCfg.okrCustom || {};
 
   document.getElementById('q-badge').innerHTML =
@@ -482,7 +484,7 @@ export async function saveFinMes() {
 export function getActiveObjective(logOverride) {
   if (!state.userCfg.startDate) return null;
   const aq = getActiveQ(state.userCfg.startDate);
-  const areas = (state.userCfg.areas || []).filter(a => a !== 'negocio');
+  const areas = state.userCfg.areas || [];
   if (!areas.length) return null;
   const log = logOverride || state.log;
 

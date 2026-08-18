@@ -57,7 +57,13 @@ export function getActiveQ(s) {
   return Math.min(4, Math.max(1, q));
 }
 
-export function getPeriodDates(p) {
+// Cache do intervalo de datas de cada trimestre (chave = data de hoje + startDate + aq) - o
+// resultado é puramente função desses 3 valores, então dá pra reaproveitar entre todas as
+// chamadas de um mesmo render (ex: renderOkrFocusStrip roda a cada toque em hábito e antes
+// recomputava esse intervalo do zero pra cada KR automático de cada área).
+let _qDatesCache = new Map();
+
+export function getPeriodDates(p, aqOverride) {
   // ancorado ao meio-dia local (mesmo idioma de isExpected/fmtDate) - datas "AAAA-MM-DD" sem
   // hora sao interpretadas como meia-noite UTC pelo Date nativo, o que em fusos negativos (ex:
   // Brasil) pode empurrar o dia pro anterior e fazer o intervalo excluir o dia de hoje.
@@ -69,12 +75,21 @@ export function getPeriodDates(p) {
     const dim = new Date(y, m + 1, 0).getDate();
     for (let i = 1; i <= dim; i++) { days.push(dateKey(new Date(y, m, i))); }
   } else if (p === 'trimestre') {
-    const aq = getActiveQ(state.userCfg.startDate);
+    // aqOverride permite calcular o intervalo de um trimestre especifico (ex: passado, na
+    // timeline de OKRs) em vez de sempre o trimestre ativo - sem isso, metricas pedidas pra um
+    // trimestre passado acabavam avaliadas contra a janela de datas do trimestre atual.
+    const aq = aqOverride || getActiveQ(state.userCfg.startDate);
+    const cacheKey = `${todayKey()}|${state.userCfg.startDate}|${aq}`;
+    const cached = _qDatesCache.get(cacheKey);
+    if (cached) return cached;
+    if (_qDatesCache.size > 20) _qDatesCache.clear(); // limite simples, evita crescer sem fim numa sessão longa
     const start = new Date((state.userCfg.startDate || todayKey()) + 'T12:00:00');
     const qs = new Date(start); qs.setMonth(start.getMonth() + (aq - 1) * 3);
     const qe = new Date(qs); qe.setMonth(qs.getMonth() + 3);
     let d = new Date(qs);
     while (d <= today && d < qe) { days.push(dateKey(d)); d.setDate(d.getDate() + 1); }
+    _qDatesCache.set(cacheKey, days);
+    return days;
   } else {
     const start = new Date((state.userCfg.startDate || todayKey()) + 'T12:00:00');
     let d = new Date(start);
@@ -179,10 +194,10 @@ export function getBestStreak(lg) {
 // motor de KRs automáticos (okrs.js) quanto pelas Ações do trimestre (checkin.js). Leem só dado
 // já coletado (log de check-ins / state.userCfg.finLog), nenhuma coleta nova.
 
-export function habitPctInQuarter(log, habitId) {
+export function habitPctInQuarter(log, habitId, aq) {
   const h = (state.userHabits || []).find(x => x.id === habitId);
   if (!h) return 0;
-  const dates = getPeriodDates('trimestre');
+  const dates = getPeriodDates('trimestre', aq);
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
   let done = 0, possible = 0;
   dates.forEach(date => {
@@ -195,8 +210,8 @@ export function habitPctInQuarter(log, habitId) {
   return possible > 0 ? done / possible : 0;
 }
 
-export function weeklyFreqInQuarter(log, habitId) {
-  const dates = getPeriodDates('trimestre');
+export function weeklyFreqInQuarter(log, habitId, aq) {
+  const dates = getPeriodDates('trimestre', aq);
   if (!dates.length) return 0;
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
   let doneCount = 0;
@@ -204,20 +219,20 @@ export function weeklyFreqInQuarter(log, habitId) {
   return doneCount / (dates.length / 7);
 }
 
-export function habitStreakInQuarter(log, habitId) {
-  const dates = getPeriodDates('trimestre');
+export function habitStreakInQuarter(log, habitId, aq) {
+  const dates = getPeriodDates('trimestre', aq);
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
   return longestRunWithPardon(dates, date => { const e = logMap[date]; return !!(e && e.habits[habitId]); });
 }
 
-export function overallStreakInQuarter(log) {
-  const dates = getPeriodDates('trimestre');
+export function overallStreakInQuarter(log, aq) {
+  const dates = getPeriodDates('trimestre', aq);
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
   return longestRunWithPardon(dates, date => dayFulfilled(logMap[date], date, STREAK_THRESHOLD));
 }
 
-export function overallPctInQuarter(log) {
-  const dates = getPeriodDates('trimestre');
+export function overallPctInQuarter(log, aq) {
+  const dates = getPeriodDates('trimestre', aq);
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
   let done = 0, possible = 0;
   dates.forEach(date => {
@@ -228,9 +243,10 @@ export function overallPctInQuarter(log) {
   return possible > 0 ? done / possible : 0;
 }
 
-// meses do trimestre ativo já decorridos (inclui o atual), no formato "AAAA-MM" usado em finLog
-export function quarterMonthsSoFar() {
-  const aq = getActiveQ(state.userCfg.startDate);
+// meses do trimestre (default = ativo, ou o trimestre passado em aqOverride) ja decorridos
+// (inclui o atual), no formato "AAAA-MM" usado em finLog
+export function quarterMonthsSoFar(aqOverride) {
+  const aq = aqOverride || getActiveQ(state.userCfg.startDate);
   const start = new Date(state.userCfg.startDate || new Date());
   const qs = new Date(start.getFullYear(), start.getMonth() + (aq - 1) * 3, 1);
   const now = new Date();
@@ -243,8 +259,8 @@ export function quarterMonthsSoFar() {
   return months;
 }
 
-export function finLogConsistencyInQuarter() {
-  const months = quarterMonthsSoFar();
+export function finLogConsistencyInQuarter(aq) {
+  const months = quarterMonthsSoFar(aq);
   const finLog = state.userCfg.finLog || [];
   const withData = months.filter(m => {
     const entry = finLog.find(x => x.mes === m);
@@ -253,8 +269,8 @@ export function finLogConsistencyInQuarter() {
   return { done: withData.length, total: months.length };
 }
 
-export function finLogGrowthInQuarter() {
-  const months = quarterMonthsSoFar();
+export function finLogGrowthInQuarter(aq) {
+  const months = quarterMonthsSoFar(aq);
   if (months.length < 2) return false;
   const finLog = state.userCfg.finLog || [];
   const totalFor = m => { const e = finLog.find(x => x.mes === m); return e ? (e.guardado || 0) + (e.investido || 0) : 0; };

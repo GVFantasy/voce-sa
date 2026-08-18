@@ -1,11 +1,11 @@
 import { state } from './state.js';
 import { sb, flushPendingCfg } from './db.js';
-import { clearFieldErr } from './utils.js';
+import { clearFieldErr, showToast } from './utils.js';
 import { toggleAuthMode, submitAuth, signOut, afterLogin, forgotPassword, showRecoveryForm, confirmRecovery } from './auth.js';
 import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
 import { renderCheckin, toggleHabit, setHabitDetail, expandHabitDetail, setEnergy, saveDay, renderWeeklyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, showBoom, hideBoom, onNotaInput } from './checkin.js';
-import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart } from './dashboard.js';
-import { renderOKRs, togglePillar, getActiveObjective, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
+import { renderDashboard, setPeriod, renderEnergyChart } from './dashboard.js';
+import { renderOKRs, togglePillar, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth, filterHistorico, setHistoricoHabitFilter } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, exportJSON, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit, deleteAccount } from './profile.js';
@@ -57,12 +57,10 @@ window.onNotaInput = onNotaInput;
 
 window.renderDashboard = renderDashboard;
 window.setPeriod = setPeriod;
-window.generateDashboardInsight = generateDashboardInsight;
 window.renderEnergyChart = renderEnergyChart;
 
 window.renderOKRs = renderOKRs;
 window.togglePillar = togglePillar;
-window.getActiveObjective = getActiveObjective;
 window.toggleKR = toggleKR;
 window.openOKREdit = openOKREdit;
 window.cancelOKREdit = cancelOKREdit;
@@ -134,6 +132,14 @@ window.openMaisDrawer = openMaisDrawer;
 window.closeMaisDrawer = closeMaisDrawer;
 window.navFromMais = navFromMais;
 
+// Rede de segurança: qualquer Promise rejeitada sem catch (ex: falha de rede numa chamada que
+// não previu isso) não deve travar a UI em silêncio - loga e avisa de forma genérica em vez de
+// deixar o usuário sem feedback nenhum do que aconteceu.
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Erro não tratado:', event.reason);
+  showToast('Algo deu errado. Se persistir, recarregue a página.', 'err');
+});
+
 // Init
 async function init() {
   // registrado ANTES de getSession(): se o link de recuperacao de senha ja tiver sido
@@ -154,13 +160,19 @@ async function init() {
       state.currentUser = session.user; await afterLogin();
     }
   });
-  const { data: { session } } = await sb.auth.getSession();
-  if (session && !state.currentUser && !window._recovering) {
-    state.currentUser = session.user; await afterLogin();
-  } else if (!session && !state.currentUser && !window._recovering) {
-    document.getElementById('pg-auth').style.display = 'block';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && !state.currentUser && !window._recovering) {
+      state.currentUser = session.user; await afterLogin();
+    } else if (!session && !state.currentUser && !window._recovering) {
+      document.getElementById('pg-auth').style.display = 'block';
+    }
+  } catch (e) {
+    // sem sessão local/rede pra confirmar login - cai pra tela de entrada em vez de travar
+    // a página em branco pra sempre
+    if (!state.currentUser) document.getElementById('pg-auth').style.display = 'block';
   }
   window.addEventListener('online', () => { if (state.currentUser) { flushPendingCfg(); loadLog(); } });
 }
 
-init();
+init().catch(e => console.error('Falha ao iniciar o app:', e));

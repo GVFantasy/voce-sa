@@ -1,4 +1,4 @@
-import { state, ENERGY, ECLASS, REFLECTIONS } from './state.js';
+import { state, ECLASS, REFLECTIONS } from './state.js';
 import { getActiveObjective } from './okrs.js';
 import { sb, setSyncStatus, saveCfgAll, saveTsLocal, loadTsLocal, clearTsLocal, queuePendingCheckin, clearPendingCheckin, refreshPendingCheckinIfQueued } from './db.js';
 import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, sanitize } from './utils.js';

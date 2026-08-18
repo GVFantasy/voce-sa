@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { sb } from './db.js';
+import { sb, queuePendingPush } from './db.js';
 
 // Chave pública VAPID do projeto (não é secreta - vai no client de qualquer app Web Push).
 const VAPID_PUBLIC_KEY = 'BMT3PNO9Vg_IC4F8BGmf5PqaD7SmXrjDjfmFViUKBzUcstTpHiImOlwceVS2B3amzCVXtLdXHspWw7mZIHXtXYE';
@@ -15,6 +15,7 @@ function urlBase64ToUint8Array(base64String) {
 // não recebem push remoto, mas continuam com o lembrete local (Notification+setTimeout) normal.
 export async function subscribeToPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  let payload = null;
   try {
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
@@ -25,26 +26,32 @@ export async function subscribeToPush() {
       });
     }
     const json = sub.toJSON();
-    await sb.from('push_subscriptions').upsert({
-      user_id: state.currentUser.id,
-      endpoint: json.endpoint,
-      p256dh: json.keys.p256dh,
-      auth: json.keys.auth,
-    }, { onConflict: 'endpoint' });
+    payload = { user_id: state.currentUser.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth };
+    const { error } = await sb.from('push_subscriptions').upsert(payload, { onConflict: 'endpoint' });
+    if (error) console.warn('Não foi possível ativar push remoto:', error.message);
   } catch (e) {
+    // exceção de rede (diferente de erro retornado pelo servidor, tratado acima) - fica na fila
+    // pra reenviar quando a conexão voltar, mesmo padrão de checkins/config. Só sabemos o payload
+    // se a inscrição no navegador (Push API) já tinha sido resolvida antes da falha de rede.
+    if (payload) queuePendingPush({ type: 'subscribe', endpoint: payload.endpoint, payload });
     console.warn('Não foi possível ativar push remoto:', e.message);
   }
 }
 
 export async function unsubscribeFromPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  let endpoint = null;
   try {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
     if (!sub) return;
-    await sb.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+    endpoint = sub.endpoint;
+    const { error } = await sb.from('push_subscriptions').delete().eq('endpoint', endpoint).eq('user_id', state.currentUser.id);
+    if (error) console.warn('Não foi possível desativar push remoto:', error.message);
     await sub.unsubscribe();
   } catch (e) {
+    // exceção de rede - fica na fila pra reenviar quando a conexão voltar
+    if (endpoint) queuePendingPush({ type: 'unsubscribe', endpoint });
     console.warn('Não foi possível desativar push remoto:', e.message);
   }
 }

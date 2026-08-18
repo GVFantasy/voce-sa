@@ -1,5 +1,16 @@
 # Changelog — Você S.A.
 
+## v5.0.0-fase0 — 2026-08-18
+
+Mega atualização v5 (Fase 0 de 6): saúde técnica, fundação pras próximas fases.
+
+- **Correção**: métricas de trimestres passados na tela de OKRs (ex: KRs concluídos de um trimestre anterior na timeline) eram calculadas contra a janela de datas do trimestre **ativo**, não do trimestre exibido — números errados pra qualquer trimestre que não fosse o atual
+- Fila de retry offline adicionada pra Biblioteca e inscrição de notificação push (mesmo padrão que check-ins/configurações já tinham) — inclui novo `client_id` na Biblioteca pra permitir reenvio seguro de criação de item sem risco de duplicar
+- Erros de rede não tratados corrigidos (logout, push, inicialização do app) + rede de segurança global pra qualquer falha não prevista
+- Erro de conexão ao contar itens concluídos na Biblioteca não zera mais o progresso — mantém o último valor conhecido
+- Limpeza de código morto (imports, filtro de área legada, exposições globais não usadas) e padronização de como o app trata "nenhuma área escolhida"
+- Cálculo de datas do trimestre memoizado — menos recomputação a cada toque no check-in
+
 ## v4.2.0 — 2026-08-18
 
 Financeiro de verdade: registro diário com valor, dashboard e conquistas.

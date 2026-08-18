@@ -97,7 +97,7 @@ export async function signOut() {
   // dados que ainda não foram confirmados no servidor (ver js/db.js queuePendingCheckin/queuePendingCfg).
   try { await flushPendingCheckins(); } catch (e) {}
   try { await flushPendingCfg(); } catch (e) {}
-  await sb.auth.signOut();
+  try { await sb.auth.signOut(); } catch (e) {}
   clearInterval(state.pomodoro.timer);
   state.pomodoro = { timer: null, seconds: 25 * 60, isRunning: false, isBreak: false, sessions: 0, subject: '' };
   state.currentUser = null; state.log = []; state.userCfg = {}; state.userHabits = [];

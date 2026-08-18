@@ -1,4 +1,4 @@
-import { state, ENERGY, DLABELS, META_LABELS, SITUATION_START_HINTS } from './state.js';
+import { state, DLABELS, META_LABELS, SITUATION_START_HINTS } from './state.js';
 import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize, sumGastosInPeriod } from './utils.js';
 
 // % cumprido de cada habito num intervalo de datas, individual e agregado - usado pra comparar

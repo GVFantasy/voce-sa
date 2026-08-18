@@ -1,10 +1,10 @@
 import { state } from './state.js';
-import { sb, setSyncStatus } from './db.js';
+import { sb, setSyncStatus, queuePendingBiblioteca } from './db.js';
 import { showToast, fmtDate, todayKey, sanitize } from './utils.js';
 import { invalidateBibConcluidosCache } from './okrs.js';
 import { invalidateBibConcluidosAchievementCache } from './conquistas.js';
 
-export let newLivroTipo = 'livro';
+let newLivroTipo = 'livro';
 let newLivroStatus = null;
 let newLivroRating = null;
 let bibCache = [];
@@ -80,20 +80,31 @@ export function editLivro(id) {
 export async function deleteLivro(id) {
   if (!confirm('Excluir este item da biblioteca? Essa ação não pode ser desfeita.')) return;
   setSyncStatus('syncing', 'Excluindo...');
-  const { error } = await sb.from('biblioteca').delete().eq('id', id).eq('user_id', state.currentUser.id);
-  if (error) { setSyncStatus('err', 'Sem conexão'); showToast('Erro ao excluir: ' + error.message, 'err'); return; }
-  if (String(editingLivroId) === String(id)) {
-    // item excluido era o que estava aberto pra edicao - fecha o formulario, senao salvar
-    // continuaria mandando um update pra uma linha que nao existe mais
-    editingLivroId = null;
-    document.getElementById('add-livro-form').style.display = 'none';
-    const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
+  const finishLocal = () => {
+    if (String(editingLivroId) === String(id)) {
+      // item excluido era o que estava aberto pra edicao - fecha o formulario, senao salvar
+      // continuaria mandando um update pra uma linha que nao existe mais
+      editingLivroId = null;
+      document.getElementById('add-livro-form').style.display = 'none';
+      const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
+    }
+    bibCache = bibCache.filter(i => String(i.id) !== String(id));
+    invalidateBibConcluidosCache();
+    invalidateBibConcluidosAchievementCache();
+    renderBiblioteca();
+  };
+  try {
+    const { error } = await sb.from('biblioteca').delete().eq('id', id).eq('user_id', state.currentUser.id);
+    if (error) { setSyncStatus('err', 'Erro'); showToast('Erro ao excluir: ' + error.message, 'err'); return; }
+    setSyncStatus('ok', 'Sincronizado');
+    showToast('Item excluído.');
+    finishLocal();
+  } catch (e) {
+    queuePendingBiblioteca({ type: 'delete', id });
+    setSyncStatus('err', 'Sem conexão');
+    showToast('Sem conexão. Exclusão ficou na fila e será sincronizada automaticamente.', 'info');
+    finishLocal();
   }
-  setSyncStatus('ok', 'Sincronizado');
-  showToast('Item excluído.');
-  invalidateBibConcluidosCache();
-  invalidateBibConcluidosAchievementCache();
-  renderBiblioteca();
 }
 
 export async function saveLivro() {
@@ -110,17 +121,49 @@ export async function saveLivro() {
   const status = newLivroStatus;
   const rating = newLivroRating;
   setSyncStatus('syncing', 'Salvando...');
-  const error = editingLivroId
-    ? (await sb.from('biblioteca').update({ tipo, titulo, nota, status, rating }).eq('id', editingLivroId).eq('user_id', state.currentUser.id)).error
-    : (await sb.from('biblioteca').insert({ user_id: state.currentUser.id, tipo, titulo, nota, status, rating })).error;
-  if (error) { setSyncStatus('err', 'Sem conexão'); showToast('Erro ao salvar: ' + error.message, 'err'); return; }
-  setSyncStatus('ok', 'Sincronizado');
-  showToast(editingLivroId ? 'Item atualizado!' : 'Item adicionado à biblioteca!');
-  editingLivroId = null;
-  document.getElementById('livro-titulo').value = '';
-  document.getElementById('livro-nota').value = '';
-  document.getElementById('add-livro-form').style.display = 'none';
-  const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
+
+  const closeForm = () => {
+    editingLivroId = null;
+    document.getElementById('livro-titulo').value = '';
+    document.getElementById('livro-nota').value = '';
+    document.getElementById('add-livro-form').style.display = 'none';
+    const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
+  };
+
+  if (editingLivroId) {
+    const id = editingLivroId;
+    const payload = { tipo, titulo, nota, status, rating };
+    try {
+      const { error } = await sb.from('biblioteca').update(payload).eq('id', id).eq('user_id', state.currentUser.id);
+      if (error) { setSyncStatus('err', 'Erro'); showToast('Erro ao salvar: ' + error.message, 'err'); return; }
+      setSyncStatus('ok', 'Sincronizado');
+      showToast('Item atualizado!');
+    } catch (e) {
+      queuePendingBiblioteca({ type: 'update', id, payload });
+      setSyncStatus('err', 'Sem conexão');
+      showToast('Sem conexão. Edição ficou na fila e será sincronizada automaticamente.', 'info');
+    }
+    const idx = bibCache.findIndex(i => String(i.id) === String(id));
+    if (idx >= 0) bibCache[idx] = { ...bibCache[idx], ...payload };
+  } else {
+    // client_id gerado antes da chamada permite upsert(onConflict:'client_id') em vez de insert
+    // puro - torna o reenvio pela fila offline seguro (nunca duplica a linha).
+    const client_id = crypto.randomUUID();
+    const payload = { user_id: state.currentUser.id, tipo, titulo, nota, status, rating, client_id };
+    try {
+      const { data, error } = await sb.from('biblioteca').upsert(payload, { onConflict: 'client_id' }).select().single();
+      if (error) { setSyncStatus('err', 'Erro'); showToast('Erro ao salvar: ' + error.message, 'err'); return; }
+      setSyncStatus('ok', 'Sincronizado');
+      showToast('Item adicionado à biblioteca!');
+      bibCache.unshift(data);
+    } catch (e) {
+      queuePendingBiblioteca({ type: 'upsert', payload });
+      setSyncStatus('err', 'Sem conexão');
+      showToast('Sem conexão. Item ficou na fila e será sincronizado automaticamente.', 'info');
+      bibCache.unshift({ ...payload, id: client_id, created_at: new Date().toISOString() });
+    }
+  }
+  closeForm();
   invalidateBibConcluidosCache();
   invalidateBibConcluidosAchievementCache();
   renderBiblioteca();
@@ -133,6 +176,9 @@ export function filterBiblioteca(term) {
 // Usado pelo motor de KRs automaticos (okrs.js, escopado ao trimestre) e pela conquista de
 // leitura (conquistas.js, sem escopo de data) - unicas automacoes que exigem busca nova ao
 // Supabase, ja que a Biblioteca (ao contrario de state.log/userCfg) nao e carregada no login.
+// Retorna null em erro (rede/servidor) - nao 0, que seria indistinguivel de "genuinamente zero
+// itens concluidos" e regrediria visivelmente o KR/conquista que dependem desse numero. Quem
+// consome (okrs.js, conquistas.js) trata null como "sem dado ainda" e mantem o cache anterior.
 export async function fetchBibConcluidosCount(fromDate) {
   if (!state.currentUser) return 0;
   let query = sb.from('biblioteca')
@@ -141,7 +187,7 @@ export async function fetchBibConcluidosCount(fromDate) {
     .eq('status', 'concluido');
   if (fromDate) query = query.gte('created_at', fromDate);
   const { count, error } = await query;
-  return error ? 0 : (count || 0);
+  return error ? null : (count || 0);
 }
 
 export async function renderBiblioteca(searchTerm) {

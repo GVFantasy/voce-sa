@@ -32,7 +32,7 @@ export function buildHabitsFromCfg() {
     }
   });
 
-  const areas = state.userCfg.areas || ['corpo'];
+  const areas = state.userCfg.areas || [];
   if (areas.includes('corpo')) {
     const treinoDias = state.userCfg.treinoDias || [2, 4, 6];
     const daysLabel = treinoDias.map(d => ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][d]).join(', ');

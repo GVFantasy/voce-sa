@@ -11,6 +11,7 @@ function ensureBibConcluidosLoaded() {
   if (bibConcluidosLoaded || !state.currentUser) return;
   bibConcluidosLoaded = true;
   fetchBibConcluidosCount().then(count => {
+    if (count === null) { bibConcluidosLoaded = false; return; } // erro - mantém o cache anterior, tenta de novo depois
     state.bibConcluidosCount = count;
     renderConquistas();
   });

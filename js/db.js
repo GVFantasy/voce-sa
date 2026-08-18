@@ -122,6 +122,87 @@ export async function saveCfgRemote() {
   }
 }
 
+// Fila de operações da Biblioteca que falharam ao sincronizar (offline) — mesmo padrão de
+// checkins/config. Criação usa upsert(onConflict:'client_id') em vez de insert puro (client_id
+// é gerado no cliente antes da chamada, ver js/biblioteca.js) — sem isso, reenviar um insert que
+// falhou por rede arriscaria duplicar a linha se o insert original tivesse funcionado no servidor
+// mas a resposta se perdido. Update/delete já são seguros de reenviar (chave é o id existente).
+export function queuePendingBiblioteca(op) {
+  try {
+    const key = lsKey('pending_biblioteca');
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.push(op);
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {}
+}
+export function getPendingBiblioteca() {
+  try { return JSON.parse(localStorage.getItem(lsKey('pending_biblioteca')) || '[]'); }
+  catch (e) { return []; }
+}
+function removePendingBiblioteca(type, matchKey) {
+  try {
+    const key = lsKey('pending_biblioteca');
+    const list = JSON.parse(localStorage.getItem(key) || '[]')
+      .filter(op => !(op.type === type && (type === 'upsert' ? op.payload.client_id : op.id) === matchKey));
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {}
+}
+export async function flushPendingBiblioteca() {
+  if (!state.currentUser) return;
+  const pending = getPendingBiblioteca();
+  for (const op of pending) {
+    try {
+      let error;
+      if (op.type === 'delete') {
+        ({ error } = await sb.from('biblioteca').delete().eq('id', op.id).eq('user_id', state.currentUser.id));
+      } else if (op.type === 'update') {
+        ({ error } = await sb.from('biblioteca').update(op.payload).eq('id', op.id).eq('user_id', state.currentUser.id));
+      } else {
+        ({ error } = await sb.from('biblioteca').upsert(op.payload, { onConflict: 'client_id' }));
+      }
+      if (!error) removePendingBiblioteca(op.type, op.type === 'upsert' ? op.payload.client_id : op.id);
+    } catch (e) { /* ainda offline, mantém na fila */ }
+  }
+}
+
+// Fila de (in)/(un)subscribe de push que falharam ao sincronizar (offline). Ambas as operações
+// já são idempotentes por natureza: upsert(onConflict:'endpoint') e delete-por-endpoint podem ser
+// reenviados com segurança.
+export function queuePendingPush(op) {
+  try {
+    const key = lsKey('pending_push');
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.push(op);
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {}
+}
+export function getPendingPush() {
+  try { return JSON.parse(localStorage.getItem(lsKey('pending_push')) || '[]'); }
+  catch (e) { return []; }
+}
+function removePendingPush(type, endpoint) {
+  try {
+    const key = lsKey('pending_push');
+    const list = JSON.parse(localStorage.getItem(key) || '[]').filter(op => !(op.type === type && op.endpoint === endpoint));
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {}
+}
+export async function flushPendingPush() {
+  if (!state.currentUser) return;
+  const pending = getPendingPush();
+  for (const op of pending) {
+    try {
+      let error;
+      if (op.type === 'subscribe') {
+        ({ error } = await sb.from('push_subscriptions').upsert(op.payload, { onConflict: 'endpoint' }));
+      } else {
+        ({ error } = await sb.from('push_subscriptions').delete().eq('endpoint', op.endpoint).eq('user_id', state.currentUser.id));
+      }
+      if (!error) removePendingPush(op.type, op.endpoint);
+    } catch (e) { /* ainda offline, mantém na fila */ }
+  }
+}
+
 export async function saveCfgAll(showFeedback) {
   saveCfgLocal();
   setSyncStatus('syncing', 'Salvando...');

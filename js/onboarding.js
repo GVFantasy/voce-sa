@@ -1,5 +1,5 @@
-import { state, IDIOMA_MAP } from './state.js';
-import { sb, saveCfgLocal, saveCfgRemote, setSyncStatus } from './db.js';
+import { state } from './state.js';
+import { saveCfgLocal, saveCfgRemote, setSyncStatus } from './db.js';
 import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
@@ -158,7 +158,7 @@ export async function generatePlan() {
   // em vez de ganhar um Inglês forçado que não pediu.
   const wantsIdioma = state.obData.areas.includes('mente') || state.obData.idiomas.length > 0;
   const idiomasAtivos = state.obData.idiomas.length ? state.obData.idiomas.slice(0, 2) : (wantsIdioma ? ['ingles'] : []);
-  const areas = state.obData.areas.filter(a => a !== 'negocio');
+  const areas = state.obData.areas;
   const cfg = {
     name: state.obData.name,
     startDate: todayKey(),
@@ -195,7 +195,7 @@ export function showKickoff() {
     import('./nav.js').then(({ startApp }) => startApp());
     return;
   }
-  const areas = state.userCfg.areas || ['corpo'];
+  const areas = state.userCfg.areas || [];
   const AREA_ICONS = { corpo: '🏃', mente: '🧠', financas: '💰', tempo: '⏱', relacoes: '❤️' };
   const AREA_NAMES = { corpo: 'Corpo', mente: 'Mente', financas: 'Finanças', tempo: 'Tempo', relacoes: 'Relações' };
   const okrQ1 = {
