@@ -1,5 +1,5 @@
 import { state, META_LABELS } from './state.js';
-import { getActiveQ, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter } from './utils.js';
+import { getActiveQ, getPeriodDates, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
 
 const areaIcons = { corpo: '🏃', mente: '🧠', financas: '💰', tempo: '⏱', relacoes: '❤️' };
@@ -293,6 +293,177 @@ function renderFinTracker() {
   </div>`;
 }
 
+const QUARTERLY_TASKS = {
+  corpo: {
+    1: [
+      { id: 'corpo_q1_a', text: 'Definir horário fixo de treino na semana', hint: 'Trate como compromisso — bloqueie na agenda' },
+      { id: 'corpo_q1_b', text: 'Remover telas 30 min antes de dormir', hint: 'Configure modo foco automático no celular' },
+      { id: 'corpo_q1_c', text: 'Preparar roupa e material de treino na véspera', hint: 'Remove a fricção do dia seguinte' },
+    ],
+    2: [
+      { id: 'corpo_q2_a', text: 'Medir evolução: fotos, medidas ou performance', hint: 'Compare com o início do plano' },
+      { id: 'corpo_q2_b', text: 'Adicionar mais 1 dia de treino à semana', hint: 'Se já está no ritmo, hora de elevar' },
+    ],
+    3: [
+      { id: 'corpo_q3_a', text: 'Participar de evento esportivo ou desafio', hint: 'Corrida, campeonato, desafio de 30 dias' },
+      { id: 'corpo_q3_b', text: 'Revisar protocolo de recuperação', hint: 'Sono, hidratação, alimentação — o básico sustenta o avanço' },
+    ],
+    4: [
+      { id: 'corpo_q4_a', text: 'Registrar evolução física do ano', hint: 'Compare hoje com o início — a diferença vai te surpreender' },
+    ],
+  },
+  mente: {
+    1: [
+      { id: 'mente_q1_a', text: 'Configurar app de idioma com meta diária', hint: 'Duolingo, Anki, ou similar — 10 min já conta' },
+      { id: 'mente_q1_b', text: 'Escolher e comprar o próximo livro', hint: 'Tenha sempre um na fila' },
+      { id: 'mente_q1_c', text: 'Alcançar 30 dias seguidos de estudo', hint: 'O streak importa mais que a duração' },
+    ],
+    2: [
+      { id: 'mente_q2_a', text: 'Ter uma conversa básica no idioma escolhido', hint: 'App, sala de prática ou com nativo' },
+      { id: 'mente_q2_b', text: 'Consumir 30 min de conteúdo no idioma sem parar', hint: 'Série, podcast ou livro' },
+    ],
+    3: [
+      { id: 'mente_q3_a', text: 'Usar o idioma em situação real', hint: 'Email, reunião, viagem ou trabalho' },
+    ],
+    4: [
+      { id: 'mente_q4_a', text: 'Avaliar evolução no idioma — o que mudou?', hint: 'Reflita e ajuste para o próximo ano' },
+    ],
+  },
+  financas: {
+    1: [
+      { id: 'fin_q1_a', text: 'Mapear todas as despesas do mês atual', hint: 'Planilha, Notion ou app de finanças — qualquer um' },
+      { id: 'fin_q1_b', text: 'Definir % fixo do salário para guardar', hint: 'Comece com 10% — o hábito importa mais que o valor' },
+      { id: 'fin_q1_c', text: 'Abrir conta de investimento se ainda não tem', hint: 'Nubank, XP, NuInvest, Rico — todos gratuitos' },
+    ],
+    2: [
+      { id: 'fin_q2_a', text: 'Cortar ou renegociar 1 gasto desnecessário', hint: 'Assinatura esquecida? Serviço que não usa?' },
+      { id: 'fin_q2_b', text: 'Estudar um produto financeiro novo', hint: 'CDB, Tesouro, FII ou ações — entender o que é' },
+    ],
+    3: [
+      { id: 'fin_q3_a', text: 'Calcular patrimônio acumulado até agora', hint: 'Saldo + investimentos + ativos' },
+    ],
+    4: [
+      { id: 'fin_q4_a', text: 'Balanço financeiro do ano — meta atingida?', hint: 'Compare com janeiro e planeje o próximo ano' },
+    ],
+  },
+  tempo: {
+    1: [
+      { id: 'tempo_q1_a', text: 'Criar blocos fixos de foco na agenda', hint: 'Mínimo: 90 min de deep work pela manhã' },
+      { id: 'tempo_q1_b', text: 'Agendar revisão semanal toda sexta', hint: '30 min para planejar a semana seguinte' },
+      { id: 'tempo_q1_c', text: 'Eliminar 1 atividade que não gera retorno', hint: 'O que você faz por hábito sem resultado real?' },
+    ],
+    2: [
+      { id: 'tempo_q2_a', text: 'Experimentar a técnica Pomodoro por 2 semanas', hint: 'Use o timer do app — 25 min foco, 5 min pausa' },
+      { id: 'tempo_q2_b', text: 'Delegar ou terceirizar 1 tarefa operacional', hint: 'Seu tempo é para o que só você pode fazer' },
+    ],
+    3: [
+      { id: 'tempo_q3_a', text: 'Tirar 3–5 dias de férias reais sem trabalho', hint: 'Descanso intencional é produtividade a longo prazo' },
+    ],
+    4: [
+      { id: 'tempo_q4_a', text: 'Auditar onde foi o seu tempo este ano', hint: 'O que ganhou espaço? O que você abre mão para o próximo?' },
+    ],
+  },
+  relacoes: {
+    1: [
+      { id: 'rel_q1_a', text: 'Listar 3 pessoas que quer cultivar este trimestre', hint: 'Família, amigos próximos, mentores' },
+      { id: 'rel_q1_b', text: 'Agendar 1 encontro com cada uma delas', hint: 'Uma data marcada vale mais que boa intenção' },
+      { id: 'rel_q1_c', text: 'Reduzir scroll passivo em redes sociais em 30%', hint: 'Mais presença real, menos consumo automático' },
+    ],
+    2: [
+      { id: 'rel_q2_a', text: 'Entrar em grupo ou comunidade com propósito', hint: 'Esporte, estudo, trabalho voluntário' },
+      { id: 'rel_q2_b', text: 'Ter 1 conversa difícil que está adiando', hint: 'Resolver o que está travado libera energia' },
+    ],
+    3: [
+      { id: 'rel_q3_a', text: 'Retomar contato com alguém que se distanciou', hint: 'Uma mensagem simples já muda o suficiente' },
+    ],
+    4: [
+      { id: 'rel_q4_a', text: 'Celebrar o ano com as pessoas certas', hint: 'Compartilhe sua evolução com quem importa' },
+    ],
+  },
+};
+
+// 6 itens do checklist tem proxy honesto direto no que o check-in ja grava (mesmo principio do
+// motor de KRs automaticos acima) - fecham sozinhos, sem clique manual. O resto continua
+// exatamente como hoje (checkbox manual via tasksDone).
+const TASK_AUTO = {
+  mente_q1_c: () => habitStreakInQuarter(state.log, 'estudo') >= 30,
+  tempo_q1_b: () => {
+    const dates = new Set(getPeriodDates('trimestre'));
+    return Object.keys(state.userCfg.weeklyReviews || {}).some(d => dates.has(d));
+  },
+  tempo_q2_a: () => {
+    const quarterDates = getPeriodDates('trimestre');
+    if (!quarterDates.length) return false;
+    const qStart = new Date(quarterDates[0] + 'T12:00:00');
+    const dateSet = new Set(quarterDates);
+    const weeks = new Set();
+    (state.userCfg.pomodoroLog || []).forEach(s => {
+      if (!dateSet.has(s.date)) return;
+      const d = new Date(s.date + 'T12:00:00');
+      weeks.add(Math.floor((d - qStart) / (7 * 86400000)));
+    });
+    return weeks.size >= 2;
+  },
+  fin_q1_a: () => habitPctInQuarter(state.log, 'financas') >= 0.7,
+  fin_q1_b: () => (state.userCfg.finMeta || 0) > 0,
+  fin_q3_a: () => {
+    const now = new Date();
+    const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return (state.userCfg.finLog || []).some(m => m.mes === mesAtual && ((m.guardado || 0) + (m.investido || 0)) > 0);
+  },
+};
+
+// Renderiza as Acoes do trimestre so da area/trimestre desse pilar (antes ficava numa lista unica
+// no check-in, juntando todas as areas - agora mora dentro do card do trimestre a que pertence).
+function renderPillarTasks(area, aq) {
+  const tasks = QUARTERLY_TASKS[area]?.[aq] || [];
+  if (!tasks.length) return '';
+  const doneTasks = state.userCfg.tasksDone || {};
+  const isTaskDone = t => TASK_AUTO[t.id] ? TASK_AUTO[t.id]() : !!doneTasks[t.id];
+  const doneCount = tasks.filter(isTaskDone).length;
+  return `<div class="qtask-section-nested">
+    <div class="qtask-header"><span>Ações do trimestre</span><span class="qtask-count">${doneCount}/${tasks.length}</span></div>
+    ${tasks.map(t => {
+      const auto = !!TASK_AUTO[t.id];
+      const isDone = isTaskDone(t);
+      const interactiveAttrs = auto ? '' : ` role="checkbox" aria-checked="${isDone}" tabindex="0" onclick="toggleQTask('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQTask('${t.id}')}"`;
+      return `<div class="qtask ${isDone ? 'done' : ''}${auto ? ' auto' : ''}" id="qtask-${t.id}" aria-label="${esc(t.text)}"${interactiveAttrs}>
+        <div class="qtask-check-box">${isDone ? '✓' : ''}</div>
+        <div class="qtask-body">
+          <div class="qtask-text">${esc(t.text)}${auto ? '<span class="okr-kr-auto-tag">automático</span>' : ''}</div>
+          ${t.hint ? `<div class="qtask-hint">${esc(t.hint)}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+export async function toggleQTask(taskId) {
+  if (!state.userCfg.tasksDone) state.userCfg.tasksDone = {};
+  state.userCfg.tasksDone[taskId] = !state.userCfg.tasksDone[taskId];
+  const done = state.userCfg.tasksDone[taskId];
+
+  const el = document.getElementById(`qtask-${taskId}`);
+  if (el) {
+    el.classList.toggle('done', done);
+    el.setAttribute('aria-checked', done);
+    const check = el.querySelector('.qtask-check-box');
+    if (check) check.textContent = done ? '✓' : '';
+    const section = el.closest('.qtask-section-nested');
+    if (section) {
+      const cards = section.querySelectorAll('.qtask');
+      const doneCnt = section.querySelectorAll('.qtask.done').length;
+      const countEl = section.querySelector('.qtask-count');
+      if (countEl) countEl.textContent = `${doneCnt}/${cards.length}`;
+    }
+  }
+
+  saveCfgLocal();
+  const { renderDashboard } = await import('./dashboard.js');
+  renderDashboard();
+  await saveCfgRemote();
+}
+
 export function renderOKRs() {
   const aq = getActiveQ(state.userCfg.startDate);
   const areas = (state.userCfg.areas || ['corpo', 'mente']).filter(a => a !== 'negocio');
@@ -303,15 +474,28 @@ export function renderOKRs() {
 
   if (state.userCfg.meta) document.getElementById('user-mission').textContent = '"' + (META_LABELS[state.userCfg.meta] || state.userCfg.meta) + '"';
 
-  document.getElementById('pillar-list').innerHTML = areas.map(area => {
+  // 1a passada: monta o dado de cada pilar (mesmo calculo de sempre) pra descobrir qual area
+  // esta mais atrasada antes de renderizar - so essa comeca aberta, as outras ficam colapsadas
+  // (mostrando so nome+progresso) ate o usuario tocar. Mesmo criterio de "mais atrasada" de
+  // getActiveObjective() (menor % de KRs concluidos; empate mantem a ordem original).
+  const pillarData = areas.map(area => {
     const defMap = getDefaultMap(area);
-    if (!defMap.length) return '';
+    if (!defMap.length) return null;
     const qData = getQData(area, aq);
-    if (!qData) return '';
+    if (!qData) return null;
     const krs = computeKRs(area, aq, qData.krs, state.log);
     const totalCnt = krs.length;
     const doneCnt = krs.filter(k => k.done).length;
+    const pct = totalCnt > 0 ? doneCnt / totalCnt : 0;
+    return { area, defMap, qData, krs, totalCnt, doneCnt, pct };
+  }).filter(Boolean);
+
+  let mostBehindArea = null, worstPct = Infinity;
+  pillarData.forEach(p => { if (p.pct < worstPct) { worstPct = p.pct; mostBehindArea = p.area; } });
+
+  document.getElementById('pillar-list').innerHTML = pillarData.map(({ area, defMap, qData, krs, totalCnt, doneCnt }) => {
     const pct = totalCnt > 0 ? Math.round(doneCnt / totalCnt * 100) : 0;
+    const isOpen = area === mostBehindArea;
 
     const krItems = krs.map(kr => {
       if (kr.isAuto) {
@@ -353,10 +537,10 @@ export function renderOKRs() {
         <div class="pillar-title">${areaIcons[area] || '⭐'} ${areaNames[area] || area}</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="okr-mini-prog" id="okr-mini-${area}">${doneCnt}/${totalCnt}</span>
-          <div class="pillar-chev" style="transform:rotate(90deg)">›</div>
+          <div class="pillar-chev" style="transform:${isOpen ? 'rotate(90deg)' : ''}">›</div>
         </div>
       </div>
-      <div class="pillar-body open">
+      <div class="pillar-body${isOpen ? ' open' : ''}">
         <div class="okr-active-section">
           <div class="okr-active-hdr">
             <span class="qbadge ${qColors[aq]}">Q${aq}</span>
@@ -378,6 +562,7 @@ export function renderOKRs() {
             <div class="okr-progress-bg"><div class="okr-progress-fill" style="width:${pct}%"></div></div>
             <span class="okr-progress-label">${doneCnt}/${totalCnt} KRs</span>
           </div>
+          ${renderPillarTasks(area, aq)}
         </div>
         ${otherQs ? `<div class="okr-timeline">${otherQs}</div>` : ''}
       </div>

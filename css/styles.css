@@ -961,26 +961,19 @@ body.dark .mais-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .kickoff-habit-days{margin-left:auto;font-size:11px;color:rgba(255,255,255,.55)}
 
 /* ========================================================
-   OKR FOCUS STRIP (check-in)
+   OKR FOCUS COMPACT (check-in) — 1 linha, detalhe mora na tela de OKRs
    ======================================================== */
-.okr-focus-strip{
+.okr-focus-compact{
+  display:flex;align-items:center;gap:8px;
   background:var(--roxo-bg);border:1px solid var(--roxo-border);
-  border-radius:var(--radius-card);padding:12px 14px;
-  margin-bottom:12px;cursor:pointer;
+  border-radius:var(--radius-card);padding:11px 14px;
+  margin-bottom:12px;cursor:pointer;font-size:12px;
 }
-.okr-focus-top{
-  font-size:10px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.07em;color:var(--roxo);margin-bottom:4px;
-}
-.okr-focus-label{
-  font-size:14px;font-weight:600;color:var(--preto);margin-bottom:5px;
-}
-.okr-focus-krs{
-  display:flex;flex-direction:column;gap:2px;
-}
-.okr-focus-krs span{font-size:11px;color:var(--cinza)}
-body.dark .okr-focus-strip{background:#1e1b3a;border-color:var(--roxo)}
-body.dark .okr-focus-label{color:var(--preto)}
+.okr-focus-compact-q{font-weight:600;color:var(--roxo);flex-shrink:0}
+.okr-focus-compact-label{color:var(--preto);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.okr-focus-compact-prog{color:var(--cinza);font-weight:600;flex-shrink:0}
+body.dark .okr-focus-compact{background:#1e1b3a;border-color:var(--roxo)}
+body.dark .okr-focus-compact-label{color:var(--preto)}
 
 /* ========================================================
    OKR CARD (dashboard)
@@ -1010,7 +1003,7 @@ body.dark .dash-focus-text{color:var(--preto)}
 /* ========================================================
    TAREFAS DO TRIMESTRE (check-in)
    ======================================================== */
-.qtask-section{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:12px 14px;margin-bottom:16px}
+.qtask-section-nested{padding:10px 0 2px;border-top:1px solid var(--borda);margin-top:8px}
 .qtask-header{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--cinza);margin-bottom:10px}
 .qtask-count{font-size:11px;font-weight:600;color:var(--roxo);background:var(--roxo-bg);padding:2px 8px;border-radius:10px;text-transform:none;letter-spacing:0}
 .qtask{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--borda);cursor:pointer;transition:opacity .15s}
