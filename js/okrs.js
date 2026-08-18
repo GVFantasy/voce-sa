@@ -533,3 +533,21 @@ export function getActiveObjective(logOverride) {
   const { pct, ...obj } = best;
   return obj;
 }
+
+// Soma de KRs concluidos/total de TODAS as areas num trimestre especifico (nao so a mais
+// atrasada, como getActiveObjective) - usado pela Retrospectiva pra mostrar o resumo do
+// trimestre inteiro, inclusive trimestres passados.
+export function getQuarterSummary(aq, log) {
+  const areas = state.userCfg.areas || [];
+  let doneCnt = 0, totalCnt = 0;
+  areas.forEach(area => {
+    const defMap = getDefaultMap(area);
+    if (!defMap.length) return;
+    const qData = getQData(area, aq);
+    if (!qData) return;
+    const krs = computeKRs(area, aq, qData.krs, log);
+    doneCnt += krs.filter(k => k.done).length;
+    totalCnt += krs.length;
+  });
+  return { doneCnt, totalCnt };
+}

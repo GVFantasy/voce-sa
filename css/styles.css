@@ -1023,6 +1023,27 @@ body.dark .qtask-check-box{border-color:var(--borda-forte)}
 body.dark .qtask.done .qtask-check-box{background:var(--roxo);border-color:var(--roxo)}
 
 /* ========================================================
+   RETROSPECTIVA
+   ======================================================== */
+.retro-q-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.retro-q-arrow{width:36px;height:36px;border-radius:50%;border:1px solid var(--borda);background:var(--card);color:var(--preto);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.retro-q-arrow:disabled{opacity:.3;cursor:default}
+.retro-q-label{font-size:14px;font-weight:600;text-align:center}
+.retro-insight{font-size:13px;color:var(--preto);line-height:1.6;padding:8px 0;border-bottom:1px solid var(--borda)}
+.retro-insight:last-child{border-bottom:none;padding-bottom:0}
+.retro-insight:first-child{padding-top:0}
+.retro-year-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.retro-year-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:14px;box-shadow:var(--shadow-sm)}
+.retro-year-card.active{border-color:var(--roxo);background:var(--roxo-bg)}
+.retro-year-card.future{opacity:.5}
+.retro-year-q{font-family:'DM Serif Display',serif;font-size:20px;color:var(--roxo)}
+.retro-year-lbl{font-size:11px;color:var(--cinza);margin-bottom:10px}
+.retro-year-stat{font-size:12px;color:var(--cinza);margin-bottom:3px}
+.retro-year-stat span{font-weight:700;color:var(--preto)}
+.retro-year-empty{font-size:12px;color:var(--cinza);font-style:italic;margin-top:8px}
+body.dark .retro-year-card.active{background:var(--roxo-bg)}
+
+/* ========================================================
    RESPONSIVO — tablet/desktop
    Ajuste fluido leve sobre a mesma estrutura mobile-first, sem layout
    dedicado de desktop (sem sidebar). So da mais respiro e usa colunas

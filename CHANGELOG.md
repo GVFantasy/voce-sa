@@ -1,5 +1,13 @@
 # Changelog — Você S.A.
 
+## v5.0.0-fase4 — 2026-08-18
+
+Mega atualização v5 (Fase 4 de 6): Retrospectiva do trimestre e do ano + insights automáticos.
+
+- **Nova tela Retrospectiva** (drawer "Mais"): visão do trimestre selecionado (% geral, melhor/pior semana, sequência, KRs concluídos, comparação com o trimestre anterior, resumo financeiro e de peso quando aplicável) e visão do ano inteiro com os 4 trimestres lado a lado — nunca existiu antes (só havia heatmap de 84 dias e comparação semana-a-semana)
+- **Insights automáticos**: frases curtas que cruzam dado já coletado (energia em dias de sono cumprido, dia da semana mais consistente, hábito mais forte vs. mais fraco) — só aparecem com dado suficiente, nunca forçam uma correlação fraca
+- Não pede nada novo ao usuário — só lê o que já existe
+
 ## v5.0.0-fase3 — 2026-08-18
 
 Mega atualização v5 (Fase 3 de 6): nova identidade visual + limpeza técnica.

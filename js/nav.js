@@ -9,6 +9,7 @@ import { renderConquistas } from './conquistas.js';
 import { renderOKRs } from './okrs.js';
 import { renderBiblioteca } from './biblioteca.js';
 import { renderPomodoroTime, renderPomodoroSessions, restorePomodoro, renderPomodoroDuration, renderPomodoroLog, renderPomodoroStats, renderPomoSubjectChips } from './pomodoro.js';
+import { renderRetrospectiva } from './retrospectiva.js';
 
 export function startApp() {
   document.getElementById('app').style.display = 'block';
@@ -66,10 +67,10 @@ export async function loadLog() {
   notifyStreakRecalcOnce();
 }
 
-const MAIS_PAGES = ['historico', 'biblioteca', 'pomodoro', 'perfil', 'manual'];
+const MAIS_PAGES = ['historico', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'];
 
 export function nav(id, el) {
-  ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual'].forEach(p => {
+  ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
     const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
   });
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
@@ -89,6 +90,7 @@ export function nav(id, el) {
   if (id === 'perfil') renderPerfil();
   if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); renderPomodoroStats(); renderPomoSubjectChips(); }
   if (id === 'biblioteca') renderBiblioteca();
+  if (id === 'retrospectiva') renderRetrospectiva();
 }
 
 export function openMaisDrawer() {
@@ -104,7 +106,7 @@ export function closeMaisDrawer() {
 export function navFromMais(id) {
   closeMaisDrawer(null);
   setTimeout(() => {
-    ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual'].forEach(p => {
+    ['checkin', 'dashboard', 'okrs', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
       const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
     });
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
@@ -122,5 +124,6 @@ export function navFromMais(id) {
     if (id === 'perfil') renderPerfil();
     if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); renderPomodoroStats(); renderPomoSubjectChips(); }
     if (id === 'biblioteca') renderBiblioteca();
+    if (id === 'retrospectiva') renderRetrospectiva();
   }, 280);
 }

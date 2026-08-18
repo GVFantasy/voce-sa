@@ -13,6 +13,7 @@ import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filt
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions, setFocusDuration, setPomoSubject } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
+import { setRetroTab, retroPrevQ, retroNextQ } from './retrospectiva.js';
 
 // Expõe ao window para os onclick inline no HTML
 window.clearFieldErr = clearFieldErr;
@@ -136,6 +137,9 @@ window.loadLog = loadLog;
 window.openMaisDrawer = openMaisDrawer;
 window.closeMaisDrawer = closeMaisDrawer;
 window.navFromMais = navFromMais;
+window.setRetroTab = setRetroTab;
+window.retroPrevQ = retroPrevQ;
+window.retroNextQ = retroNextQ;
 
 // Rede de segurança: qualquer Promise rejeitada sem catch (ex: falha de rede numa chamada que
 // não previu isso) não deve travar a UI em silêncio - loga e avisa de forma genérica em vez de
