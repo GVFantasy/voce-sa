@@ -34,7 +34,7 @@ export function renderOkrFocusStrip() {
   if (!okrFocusEl) return;
   const obj = getActiveObjective(logWithTodayDraft());
   okrFocusEl.innerHTML = obj
-    ? `<div class="okr-focus-compact" onclick="nav('okrs',null)">
+    ? `<div class="okr-focus-compact" role="button" tabindex="0" aria-label="Q${obj.aq}, ${sanitize(obj.areaName)}, ${sanitize(obj.label)}, ${obj.doneCnt} de ${obj.totalCnt} KRs — toque para ver a tela de OKRs" onclick="nav('okrs',null)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();nav('okrs',null)}">
         <span class="okr-focus-compact-q">Q${obj.aq} · ${sanitize(obj.areaName)}</span>
         <span class="okr-focus-compact-label">${sanitize(obj.label)}</span>
         <span class="okr-focus-compact-prog">${obj.doneCnt}/${obj.totalCnt} KRs</span>
@@ -47,7 +47,7 @@ function renderDetailBlock(h, done) {
   const touched = !!(state.ts._detailTouched && state.ts._detailTouched[h.id]);
   const collapsed = val.time && val.method && !touched;
   if (collapsed) {
-    return `<div class="habit-detail-summary ${done ? 'open' : ''}" id="hdetail-${h.id}" onclick="expandHabitDetail('${h.id}')">
+    return `<div class="habit-detail-summary ${done ? 'open' : ''}" id="hdetail-${h.id}" role="button" tabindex="0" aria-label="Tempo e método: ${sanitize(val.time)}, ${sanitize(val.method)} — toque para editar" onclick="expandHabitDetail('${h.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandHabitDetail('${h.id}')}">
       <span>${sanitize(val.time)} · ${sanitize(val.method)}</span>
       <span class="hd-edit-link">editar</span>
     </div>`;

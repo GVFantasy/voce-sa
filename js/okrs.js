@@ -196,8 +196,10 @@ function renderPillarTasks(area, aq) {
     ${tasks.map(t => {
       const auto = !!TASK_AUTO[t.id];
       const isDone = isTaskDone(t);
-      const interactiveAttrs = auto ? '' : ` role="checkbox" aria-checked="${isDone}" tabindex="0" onclick="toggleQTask('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQTask('${t.id}')}"`;
-      return `<div class="qtask ${isDone ? 'done' : ''}${auto ? ' auto' : ''}" id="qtask-${t.id}" aria-label="${esc(t.text)}"${interactiveAttrs}>
+      const interactiveAttrs = auto
+        ? ` role="status" aria-label="${esc(t.text)} — ${isDone ? 'concluído automaticamente' : 'ainda não concluído automaticamente'}"`
+        : ` role="checkbox" aria-checked="${isDone}" aria-label="${esc(t.text)}" tabindex="0" onclick="toggleQTask('${t.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleQTask('${t.id}')}"`;
+      return `<div class="qtask ${isDone ? 'done' : ''}${auto ? ' auto' : ''}" id="qtask-${t.id}"${interactiveAttrs}>
         <div class="qtask-check-box">${isDone ? '✓' : ''}</div>
         <div class="qtask-body">
           <div class="qtask-text">${esc(t.text)}${auto ? '<span class="okr-kr-auto-tag">automático</span>' : ''}</div>
@@ -269,7 +271,8 @@ export function renderOKRs() {
 
     const krItems = krs.map(kr => {
       if (kr.isAuto) {
-        return `<div class="okr-kr-item auto ${kr.done ? 'done' : ''}">
+        const stateLabel = kr.done ? 'concluído automaticamente' : `em progresso automaticamente, ${kr.pct}%`;
+        return `<div class="okr-kr-item auto ${kr.done ? 'done' : ''}" role="status" aria-label="${esc(kr.text)} — ${stateLabel}">
           <div class="okr-kr-check">${kr.done ? '✓' : ''}</div>
           <div class="okr-kr-body">
             <div class="okr-kr-text">${esc(kr.text)}<span class="okr-kr-auto-tag">automático</span></div>
@@ -303,7 +306,7 @@ export function renderOKRs() {
       }).join('');
 
     return `<div class="pillar-card">
-      <div class="pillar-header" onclick="togglePillar(this)">
+      <div class="pillar-header" role="button" tabindex="0" aria-expanded="${isOpen}" aria-label="${areaNames[area] || area}, ${doneCnt} de ${totalCnt} KRs" onclick="togglePillar(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePillar(this)}">
         <div class="pillar-title">${areaIcons[area] || '⭐'} ${areaNames[area] || area}</div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="okr-mini-prog" id="okr-mini-${area}">${doneCnt}/${totalCnt}</span>
@@ -315,7 +318,7 @@ export function renderOKRs() {
           <div class="okr-active-hdr">
             <span class="qbadge ${qColors[aq]}">Q${aq}</span>
             <span class="okr-active-lbl">${esc(qData.label)}</span>
-            <button class="okr-edit-btn" aria-label="Editar objetivo e KRs" onclick="openOKREdit('${area}',${aq});event.stopPropagation()">✏️</button>
+            <button class="okr-edit-btn" aria-label="Editar objetivo e KRs" onclick="openOKREdit('${area}',${aq});event.stopPropagation()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
           </div>
           <div class="okr-edit-form" id="okr-edit-${area}-${aq}" style="display:none">
             <input class="ob-input" id="okr-obj-${area}-${aq}" value="${esc(qData.label)}" placeholder="Objetivo do trimestre" style="margin-bottom:6px">
@@ -359,7 +362,9 @@ export function togglePillar(hdr) {
   const body = hdr.nextElementSibling;
   const chev = hdr.querySelector('.pillar-chev');
   body.classList.toggle('open');
-  chev.style.transform = body.classList.contains('open') ? 'rotate(90deg)' : '';
+  const isOpen = body.classList.contains('open');
+  chev.style.transform = isOpen ? 'rotate(90deg)' : '';
+  hdr.setAttribute('aria-expanded', isOpen);
 }
 
 export function openOKREdit(area, q) {

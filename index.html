@@ -517,7 +517,7 @@
   <div id="pg-biblioteca" class="page" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div class="title-section" style="margin-bottom:0">Biblioteca</div>
-      <button onclick="showAddLivro()" id="btn-add-livro" style="padding:7px 14px;border-radius:8px;border:1px solid var(--borda);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--preto)">+ Adicionar</button>
+      <button class="btn-ghost" onclick="showAddLivro()" id="btn-add-livro" style="padding:7px 14px;font-size:13px;width:auto">+ Adicionar</button>
     </div>
     <div id="add-livro-form" style="display:none;margin-bottom:12px">
       <div class="card">
@@ -541,23 +541,23 @@
     </div>
     <div id="bib-stats" style="margin-bottom:10px"></div>
     <input id="bib-search" class="auth-input" type="text" placeholder="Buscar por título ou nota..." style="margin-bottom:10px" oninput="filterBiblioteca(this.value)">
-    <div class="card" style="padding:0 18px"><div id="biblioteca-list"></div></div>
+    <div id="biblioteca-list"></div>
   </div>
 
   <!-- MANUAL -->
   <div id="pg-manual" class="page" style="display:none">
     <div style="margin-bottom:22px">
       <div class="title-page">Você S.A.</div>
-      <div style="font-size:13px;color:var(--cinza)">Manual do sistema · 12 meses · 4 pilares</div>
+      <div class="manual-sub">Manual do sistema · 12 meses · 4 pilares</div>
     </div>
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:5px">01</div>
+    <div class="manual-num">01</div>
     <div class="title-section">4 fases de execução</div>
-    <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--info-txt);flex-shrink:0"></div>Fase 1 — Instalar (semanas 1–4)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Sono primeiro:</strong> alarme 22h30, celular fora do quarto.</li><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Idioma no deslocamento:</strong> BBC Learning English ou Huberman Lab.</li><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Treino nos dias escolhidos:</strong> 45 min já basta no início.</li></ul></div>
-    <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--suc-txt);flex-shrink:0"></div>Fase 2 — Manter (semanas 5–12)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Regra dos 2 dias:</strong> nunca pule 2 dias seguidos. Versão reduzida conta.</li><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Revisão toda sexta:</strong> dados reais, ajuste o que for necessário.</li></ul></div>
-    <div class="card" style="margin-bottom:8px"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--warn-txt);flex-shrink:0"></div>Fase 3 — Revisar (fim de cada mês)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span>60 min no último domingo: corpo, mente, finanças, tempo, relações. Proibido cancelar frequência mínima.</li></ul></div>
-    <div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:var(--dan-txt);flex-shrink:0"></div>Fase 4 — Escalar (Q2 em diante)</div><ul style="list-style:none;padding:0"><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;border-bottom:1px solid var(--borda);line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span>Adicione 1 hábito por vez — só quando o anterior estiver no piloto automático há 4 semanas.</li><li style="font-size:13px;color:var(--preto);padding:8px 0 8px 18px;position:relative;line-height:1.6"><span style="position:absolute;left:0;top:9px;font-size:10px;color:var(--cinza)">→</span><strong>Nunca 2 hábitos novos na mesma semana.</strong></li></ul></div>
+    <div class="card manual-phase"><div class="manual-phase-title"><div class="manual-phase-dot" style="background:var(--info-txt)"></div>Fase 1 — Instalar (semanas 1–4)</div><ul class="manual-list"><li class="manual-list-item"><strong>Sono primeiro:</strong> alarme 22h30, celular fora do quarto.</li><li class="manual-list-item"><strong>Idioma no deslocamento:</strong> BBC Learning English ou Huberman Lab.</li><li class="manual-list-item"><strong>Treino nos dias escolhidos:</strong> 45 min já basta no início.</li></ul></div>
+    <div class="card manual-phase"><div class="manual-phase-title"><div class="manual-phase-dot" style="background:var(--suc-txt)"></div>Fase 2 — Manter (semanas 5–12)</div><ul class="manual-list"><li class="manual-list-item"><strong>Regra dos 2 dias:</strong> nunca pule 2 dias seguidos. Versão reduzida conta.</li><li class="manual-list-item"><strong>Revisão toda sexta:</strong> dados reais, ajuste o que for necessário.</li></ul></div>
+    <div class="card manual-phase"><div class="manual-phase-title"><div class="manual-phase-dot" style="background:var(--warn-txt)"></div>Fase 3 — Revisar (fim de cada mês)</div><ul class="manual-list"><li class="manual-list-item">60 min no último domingo: corpo, mente, finanças, tempo, relações. Proibido cancelar frequência mínima.</li></ul></div>
+    <div class="card"><div class="manual-phase-title"><div class="manual-phase-dot" style="background:var(--dan-txt)"></div>Fase 4 — Escalar (Q2 em diante)</div><ul class="manual-list"><li class="manual-list-item">Adicione 1 hábito por vez — só quando o anterior estiver no piloto automático há 4 semanas.</li><li class="manual-list-item"><strong>Nunca 2 hábitos novos na mesma semana.</strong></li></ul></div>
     <div class="divider"></div>
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--roxo);margin-bottom:5px">02</div>
+    <div class="manual-num">02</div>
     <div class="title-section">Roadmap</div>
     <div class="tl">
       <div class="tl-item"><div class="tl-dot" style="background:var(--info-txt)"></div><div class="tl-per">Q1 · Fundação</div><div class="tl-foc">Instalar os hábitos base</div><div class="tl-desc">Sono, idioma, treino nos dias escolhidos. Mapear receita e definir meta anual.</div></div>
@@ -576,22 +576,22 @@
 <div id="mais-drawer" class="mais-drawer">
   <div class="mais-drawer-handle"></div>
   <div class="mais-grid">
-    <button class="mais-item" onclick="navFromMais('historico')"><span class="mais-item-icon">📋</span><span class="mais-item-label">Histórico</span></button>
-    <button class="mais-item" onclick="navFromMais('biblioteca')"><span class="mais-item-icon">📚</span><span class="mais-item-label">Biblioteca</span></button>
-    <button class="mais-item" onclick="navFromMais('pomodoro')"><span class="mais-item-icon">⏱</span><span class="mais-item-label">Foco</span></button>
-    <button class="mais-item" onclick="navFromMais('perfil')"><span class="mais-item-icon">⚙️</span><span class="mais-item-label">Perfil</span></button>
-    <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon">📖</span><span class="mais-item-label">Manual</span></button>
+    <button class="mais-item" onclick="navFromMais('historico')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="mais-item-label">Histórico</span></button>
+    <button class="mais-item" onclick="navFromMais('biblioteca')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span><span class="mais-item-label">Biblioteca</span></button>
+    <button class="mais-item" onclick="navFromMais('pomodoro')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span class="mais-item-label">Foco</span></button>
+    <button class="mais-item" onclick="navFromMais('perfil')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="mais-item-label">Perfil</span></button>
+    <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="mais-item-label">Manual</span></button>
   </div>
 </div>
 
 <!-- BOTTOM NAVIGATION -->
 <nav class="main-nav" style="display:none">
   <button class="nav-btn" onclick="nav('dashboard',this)">
-    <span class="nav-btn-icon">📊</span>
+    <span class="nav-btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
     <span class="nav-btn-label">Dashboard</span>
   </button>
   <button class="nav-btn" onclick="nav('okrs',this)">
-    <span class="nav-btn-icon">🎯</span>
+    <span class="nav-btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></span>
     <span class="nav-btn-label">OKRs</span>
   </button>
   <button class="nav-btn nav-btn-fab on" onclick="nav('checkin',this)">
@@ -601,7 +601,7 @@
     <span class="nav-btn-label">Hoje</span>
   </button>
   <button class="nav-btn" onclick="nav('conquistas',this)">
-    <span class="nav-btn-icon">🏆</span>
+    <span class="nav-btn-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.5 13.5 7 22 12 19 17 22 15.5 13.5"/></svg></span>
     <span class="nav-btn-label">Conquistas</span>
   </button>
   <button class="nav-btn" id="navbtn-mais" onclick="openMaisDrawer()">
