@@ -101,16 +101,51 @@ export function dayFulfilled(entry, date) {
   return expected.every(h => !!doneMap[h.id]);
 }
 
+// Chave de mês-calendário (ex: "2026-7" pra agosto/2026, mês 0-indexado como Date.getMonth())
+// usada pelo perdão de streak abaixo — 1 por mês, não reseta por streak, é do calendário real.
+const monthKeyOf = date => { const d = new Date(date + 'T12:00:00'); return `${d.getFullYear()}-${d.getMonth()}`; };
+
+// Sequência atual (streak "ao vivo"), andando pra trás a partir de ontem. 1 perdão automático
+// por mês-calendário: um dia não cumprido não soma à sequência, mas também não a quebra — a
+// menos que o perdão daquele mês já tenha sido usado, aí quebra normalmente. O limite de
+// iteração fica independente do contador de streak (que pode ficar "parado" em dias perdoados),
+// senão um histórico com meses inteiros sem dado nenhum faria o laço rodar indefinidamente.
 export function calcStreak(lg) {
   const map = Object.fromEntries(lg.map(e => [e.date, e]));
+  const pardonedMonths = new Set();
   let s = 0; let d = new Date(); d.setDate(d.getDate() - 1);
-  while (s < 365) {
+  for (let i = 0; i < 365; i++) {
     const k = dateKey(d);
-    if (!dayFulfilled(map[k], k)) break;
-    s++; d.setDate(d.getDate() - 1);
+    if (dayFulfilled(map[k], k)) {
+      s++;
+    } else {
+      const mk = monthKeyOf(k);
+      if (pardonedMonths.has(mk)) break;
+      pardonedMonths.add(mk);
+    }
+    d.setDate(d.getDate() - 1);
   }
   if (dayFulfilled(map[todayKey()], todayKey())) s++;
   return s;
+}
+
+// Maior sequência dentro de um intervalo de datas (ordem cronológica, mais antiga primeiro),
+// com o mesmo perdão de 1 dia por mês-calendário do calcStreak — usada por getBestStreak() e
+// pelas métricas de sequência do motor de KRs automáticos (habitStreakInQuarter/
+// overallStreakInQuarter), pra que toda medida de "sequência" do app siga o mesmo critério.
+export function longestRunWithPardon(dates, isFulfilledFn) {
+  const pardonedMonths = new Set();
+  let best = 0, cur = 0;
+  dates.forEach(date => {
+    if (isFulfilledFn(date)) {
+      cur++; if (cur > best) best = cur;
+    } else {
+      const mk = monthKeyOf(date);
+      if (pardonedMonths.has(mk)) cur = 0;
+      else pardonedMonths.add(mk);
+    }
+  });
+  return best;
 }
 
 export function sanitize(str) {
@@ -130,15 +165,9 @@ export function getBestStreak(lg) {
   if (!lg.length) return 0;
   const map = Object.fromEntries(lg.map(e => [e.date, e]));
   const firstDate = [...lg].map(e => e.date).sort()[0];
-  let d = new Date(firstDate + 'T12:00:00');
-  const end = new Date();
-  let best = 0, cur = 0;
-  while (d <= end) {
-    const k = dateKey(d);
-    if (dayFulfilled(map[k], k)) { cur++; if (cur > best) best = cur; } else { cur = 0; }
-    d.setDate(d.getDate() + 1);
-  }
-  return best;
+  const dates = []; let d = new Date(firstDate + 'T12:00:00'); const end = new Date();
+  while (d <= end) { dates.push(dateKey(d)); d.setDate(d.getDate() + 1); }
+  return longestRunWithPardon(dates, k => dayFulfilled(map[k], k));
 }
 
 // ---- Métricas escopadas ao trimestre ativo (getPeriodDates('trimestre')) — usadas tanto pelo
@@ -173,22 +202,13 @@ export function weeklyFreqInQuarter(log, habitId) {
 export function habitStreakInQuarter(log, habitId) {
   const dates = getPeriodDates('trimestre');
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let best = 0, cur = 0;
-  dates.forEach(date => {
-    const e = logMap[date];
-    if (e && e.habits[habitId]) { cur++; if (cur > best) best = cur; } else cur = 0;
-  });
-  return best;
+  return longestRunWithPardon(dates, date => { const e = logMap[date]; return !!(e && e.habits[habitId]); });
 }
 
 export function overallStreakInQuarter(log) {
   const dates = getPeriodDates('trimestre');
   const logMap = Object.fromEntries(log.map(e => [e.date, e]));
-  let best = 0, cur = 0;
-  dates.forEach(date => {
-    if (dayFulfilled(logMap[date], date)) { cur++; if (cur > best) best = cur; } else cur = 0;
-  });
-  return best;
+  return longestRunWithPardon(dates, date => dayFulfilled(logMap[date], date));
 }
 
 export function overallPctInQuarter(log) {
