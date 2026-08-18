@@ -1,13 +1,43 @@
 import { state } from './state.js';
 import { sb, setSyncStatus } from './db.js';
 import { showToast, fmtDate, todayKey, sanitize } from './utils.js';
+import { invalidateBibConcluidosCache } from './okrs.js';
+import { invalidateBibConcluidosAchievementCache } from './conquistas.js';
 
 export let newLivroTipo = 'livro';
+let newLivroStatus = null;
+let newLivroRating = null;
 let bibCache = [];
 let editingLivroId = null;
+let bibSort = 'recentes';
 
 const TIPO_ICONS = { livro: '📘', curso: '🎓', video: '▶️', podcast: '🎙️', artigo: '📄' };
 const TIPO_NOMES = { livro: 'Livro', curso: 'Curso', video: 'Vídeo', podcast: 'Podcast', artigo: 'Artigo' };
+const STATUS_LABELS = { quero_ler: 'Quero ler', lendo: 'Lendo', concluido: 'Concluído' };
+
+function renderRatingStars(rating) {
+  const el = document.getElementById('livro-rating-stars');
+  if (!el) return;
+  el.innerHTML = [1, 2, 3, 4, 5].map(n =>
+    `<button type="button" class="bib-star ${rating && n <= rating ? 'on' : ''}" onclick="setLivroRating(${n})" aria-label="${n} estrela${n > 1 ? 's' : ''}">★</button>`
+  ).join('');
+}
+
+export function setLivroRating(n) {
+  newLivroRating = newLivroRating === n ? null : n; // toca de novo na mesma estrela limpa a avaliação
+  renderRatingStars(newLivroRating);
+}
+
+export function toggleLivroStatus(btn) {
+  const val = btn.dataset.val;
+  newLivroStatus = newLivroStatus === val ? null : val; // toca de novo no mesmo chip limpa o status
+  document.querySelectorAll('#livro-status-chips .ob-chip').forEach(c => c.classList.toggle('on', c.dataset.val === newLivroStatus));
+}
+
+export function setBiblSort(val) {
+  bibSort = val;
+  renderBiblioteca();
+}
 
 export function showAddLivro() {
   const f = document.getElementById('add-livro-form');
@@ -21,6 +51,10 @@ export function showAddLivro() {
     window._newLivroTipo = 'livro';
     const chips = document.querySelectorAll('#livro-tipo-chips .ob-chip');
     chips.forEach((c, i) => c.classList.toggle('on', i === 0));
+    newLivroStatus = null;
+    document.querySelectorAll('#livro-status-chips .ob-chip').forEach(c => c.classList.remove('on'));
+    newLivroRating = null;
+    renderRatingStars(null);
     const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
   }
 }
@@ -34,6 +68,10 @@ export function editLivro(id) {
   newLivroTipo = item.tipo;
   window._newLivroTipo = item.tipo;
   document.querySelectorAll('#livro-tipo-chips .ob-chip').forEach(c => c.classList.toggle('on', c.dataset.val === item.tipo));
+  newLivroStatus = item.status || null;
+  document.querySelectorAll('#livro-status-chips .ob-chip').forEach(c => c.classList.toggle('on', c.dataset.val === newLivroStatus));
+  newLivroRating = item.rating || null;
+  renderRatingStars(newLivroRating);
   const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar edição';
   document.getElementById('add-livro-form').style.display = 'block';
   document.getElementById('livro-titulo').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -53,6 +91,8 @@ export async function deleteLivro(id) {
   }
   setSyncStatus('ok', 'Sincronizado');
   showToast('Item excluído.');
+  invalidateBibConcluidosCache();
+  invalidateBibConcluidosAchievementCache();
   renderBiblioteca();
 }
 
@@ -67,10 +107,12 @@ export async function saveLivro() {
   const nota = document.getElementById('livro-nota').value.trim();
   // usa window._newLivroTipo que é atualizado pelo obSingle('livro-tipo')
   const tipo = window._newLivroTipo || newLivroTipo;
+  const status = newLivroStatus;
+  const rating = newLivroRating;
   setSyncStatus('syncing', 'Salvando...');
   const error = editingLivroId
-    ? (await sb.from('biblioteca').update({ tipo, titulo, nota }).eq('id', editingLivroId).eq('user_id', state.currentUser.id)).error
-    : (await sb.from('biblioteca').insert({ user_id: state.currentUser.id, tipo, titulo, nota })).error;
+    ? (await sb.from('biblioteca').update({ tipo, titulo, nota, status, rating }).eq('id', editingLivroId).eq('user_id', state.currentUser.id)).error
+    : (await sb.from('biblioteca').insert({ user_id: state.currentUser.id, tipo, titulo, nota, status, rating })).error;
   if (error) { setSyncStatus('err', 'Sem conexão'); showToast('Erro ao salvar: ' + error.message, 'err'); return; }
   setSyncStatus('ok', 'Sincronizado');
   showToast(editingLivroId ? 'Item atualizado!' : 'Item adicionado à biblioteca!');
@@ -79,11 +121,27 @@ export async function saveLivro() {
   document.getElementById('livro-nota').value = '';
   document.getElementById('add-livro-form').style.display = 'none';
   const btn = document.getElementById('btn-save-livro'); if (btn) btn.textContent = 'Salvar';
+  invalidateBibConcluidosCache();
+  invalidateBibConcluidosAchievementCache();
   renderBiblioteca();
 }
 
 export function filterBiblioteca(term) {
   renderBiblioteca(term);
+}
+
+// Usado pelo motor de KRs automaticos (okrs.js, escopado ao trimestre) e pela conquista de
+// leitura (conquistas.js, sem escopo de data) - unicas automacoes que exigem busca nova ao
+// Supabase, ja que a Biblioteca (ao contrario de state.log/userCfg) nao e carregada no login.
+export async function fetchBibConcluidosCount(fromDate) {
+  if (!state.currentUser) return 0;
+  let query = sb.from('biblioteca')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', state.currentUser.id)
+    .eq('status', 'concluido');
+  if (fromDate) query = query.gte('created_at', fromDate);
+  const { count, error } = await query;
+  return error ? 0 : (count || 0);
 }
 
 export async function renderBiblioteca(searchTerm) {
@@ -103,7 +161,11 @@ export async function renderBiblioteca(searchTerm) {
     return;
   }
   const term = (searchTerm ?? document.getElementById('bib-search')?.value ?? '').trim().toLowerCase();
-  const data = term ? bibCache.filter(i => i.titulo.toLowerCase().includes(term) || (i.nota || '').toLowerCase().includes(term)) : bibCache;
+  let data = term ? bibCache.filter(i => i.titulo.toLowerCase().includes(term) || (i.nota || '').toLowerCase().includes(term)) : [...bibCache];
+  if (bibSort === 'titulo') data.sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR'));
+  else if (bibSort === 'tipo') data.sort((a, b) => (TIPO_NOMES[a.tipo] || a.tipo).localeCompare(TIPO_NOMES[b.tipo] || b.tipo, 'pt-BR'));
+  else if (bibSort === 'status') data.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
+  // 'recentes' já vem nessa ordem do Supabase (order created_at desc), sem precisar reordenar
   const stats = document.getElementById('bib-stats');
   if (stats) {
     const counts = {}; bibCache.forEach(i => { counts[i.tipo] = (counts[i.tipo] || 0) + 1; });
@@ -117,8 +179,9 @@ export async function renderBiblioteca(searchTerm) {
   list.innerHTML = data.map(i => `<div class="bib-item">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
       <div style="min-width:0;flex:1">
-        <div class="bib-tipo">${TIPO_ICONS[i.tipo] || '📄'} ${sanitize(TIPO_NOMES[i.tipo] || i.tipo)}</div>
+        <div class="bib-tipo">${TIPO_ICONS[i.tipo] || '📄'} ${sanitize(TIPO_NOMES[i.tipo] || i.tipo)}${i.status ? `<span class="bib-status-badge ${i.status}">${STATUS_LABELS[i.status]}</span>` : ''}</div>
         <div class="bib-titulo">${sanitize(i.titulo)}</div>
+        ${i.rating ? `<div class="bib-rating">${'★'.repeat(i.rating)}${'☆'.repeat(5 - i.rating)}</div>` : ''}
         ${i.nota ? `<div class="bib-nota">${sanitize(i.nota)}</div>` : ''}
         <div class="bib-date">${fmtDate(i.created_at?.slice(0, 10) || todayKey())}</div>
       </div>

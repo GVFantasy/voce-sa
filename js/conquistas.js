@@ -1,6 +1,20 @@
 import { state, ACHIEVEMENTS } from './state.js';
 import { saveCfgAll } from './db.js';
 import { calcStreak, getBestStreak } from './utils.js';
+import { fetchBibConcluidosCount } from './biblioteca.js';
+
+let bibConcluidosLoaded = false;
+export function invalidateBibConcluidosAchievementCache() {
+  bibConcluidosLoaded = false;
+}
+function ensureBibConcluidosLoaded() {
+  if (bibConcluidosLoaded || !state.currentUser) return;
+  bibConcluidosLoaded = true;
+  fetchBibConcluidosCount().then(count => {
+    state.bibConcluidosCount = count;
+    renderConquistas();
+  });
+}
 
 // Mapeamento de raridade por achievement id
 const RARITY = {
@@ -9,6 +23,7 @@ const RARITY = {
   treino10: 'comum',
   check30:  'comum',
   pomodoro10: 'comum',
+  leitor3:  'comum',
   mes1:     'raro',
   perfeito: 'raro',
   idioma30: 'raro',
@@ -33,6 +48,7 @@ function getProgress(a, log, streak) {
     case 'check100': return { cur: Math.min(log.length, 100), max: 100 };
     case 'idioma30': return { cur: Math.min(log.filter(e => e.habits && Object.keys(e.habits).some(k => IDIOMA_IDS.includes(k) && e.habits[k])).length, 30), max: 30 };
     case 'pomodoro10': return { cur: Math.min((state.userCfg.pomodoroLog || []).length, 10), max: 10 };
+    case 'leitor3': return { cur: Math.min(state.bibConcluidosCount || 0, 3), max: 3 };
     default: return null;
   }
 }
@@ -75,6 +91,7 @@ async function handleAchievementUnlocks(allUnlockedIds) {
 }
 
 export function renderConquistas() {
+  ensureBibConcluidosLoaded();
   const streak = calcStreak(state.log); const best = getBestStreak(state.log);
   document.getElementById('streak-big-num').textContent = streak;
   let bestLabel = '';

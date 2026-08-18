@@ -529,8 +529,16 @@
           <button class="ob-chip" data-val="podcast" onclick="obSingle('livro-tipo',this)">🎙️ Podcast</button>
           <button class="ob-chip" data-val="artigo" onclick="obSingle('livro-tipo',this)">📄 Artigo</button>
         </div>
+        <div class="sec-label">Status <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+        <div class="ob-chips" id="livro-status-chips" style="margin-bottom:12px">
+          <button class="ob-chip" data-val="quero_ler" onclick="toggleLivroStatus(this)">Quero ler</button>
+          <button class="ob-chip" data-val="lendo" onclick="toggleLivroStatus(this)">Lendo</button>
+          <button class="ob-chip" data-val="concluido" onclick="toggleLivroStatus(this)">Concluído</button>
+        </div>
         <div class="sec-label">Título</div>
         <input id="livro-titulo" class="auth-input" type="text" placeholder="Nome do livro, curso ou recurso" style="margin-bottom:10px">
+        <div class="sec-label">Avaliação <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
+        <div id="livro-rating-stars" style="margin-bottom:12px"></div>
         <div class="sec-label">O que você aprendeu? <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></div>
         <textarea id="livro-nota" class="nota-area" placeholder="Resumo, insight principal, algo que vai aplicar..."></textarea>
         <div style="display:flex;gap:8px;margin-top:10px">
@@ -541,6 +549,12 @@
     </div>
     <div id="bib-stats" style="margin-bottom:10px"></div>
     <input id="bib-search" class="auth-input" type="text" placeholder="Buscar por título ou nota..." style="margin-bottom:10px" oninput="filterBiblioteca(this.value)">
+    <select id="bib-sort" class="auth-input" style="margin-bottom:10px" onchange="setBiblSort(this.value)">
+      <option value="recentes">Mais recentes</option>
+      <option value="titulo">Título A-Z</option>
+      <option value="tipo">Tipo</option>
+      <option value="status">Status</option>
+    </select>
     <div id="biblioteca-list"></div>
   </div>
 

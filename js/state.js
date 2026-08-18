@@ -63,6 +63,9 @@ export const ACHIEVEMENTS = [
   { id: 'pomodoro10', icon: '🍅', name: '10 sessões de foco', desc: '10 pomodoros concluídos', check: () => {
     return (state.userCfg.pomodoroLog || []).length >= 10;
   }},
+  // state.bibConcluidosCount e um cache local (nao persistido) populado por conquistas.js -
+  // Biblioteca nao carrega no login, entao esse numero comeca em 0 e chega via busca assincrona.
+  { id: 'leitor3', icon: '📚', name: '3 itens concluídos', desc: '3 itens concluídos na Biblioteca', check: () => (state.bibConcluidosCount || 0) >= 3 },
 ];
 
 export const state = {

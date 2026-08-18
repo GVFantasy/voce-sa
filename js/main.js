@@ -9,7 +9,7 @@ import { renderOKRs, togglePillar, getActiveObjective, toggleKR, toggleQTask, op
 import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth } from './historico.js';
 import { renderConquistas } from './conquistas.js';
 import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit, deleteAccount } from './profile.js';
-import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca } from './biblioteca.js';
+import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca, toggleLivroStatus, setLivroRating, setBiblSort } from './biblioteca.js';
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions, setFocusDuration } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
@@ -102,6 +102,9 @@ window.saveLivro = saveLivro;
 window.editLivro = editLivro;
 window.deleteLivro = deleteLivro;
 window.filterBiblioteca = filterBiblioteca;
+window.toggleLivroStatus = toggleLivroStatus;
+window.setLivroRating = setLivroRating;
+window.setBiblSort = setBiblSort;
 
 window.pomodoroToggle = pomodoroToggle;
 window.pomodoroReset = pomodoroReset;

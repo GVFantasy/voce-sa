@@ -30,7 +30,7 @@ export const defaultOKR = {
     { q: 1, label: 'Hábito diário de aprendizado', krs: [
       { id: 'estudo_pct', text: 'Estudar nos dias escolhidos (≥80% do trimestre)', auto: { type: 'habitPct', habit: 'estudo', min: 0.8 } },
       { id: 'estudo_streak14', text: 'Sequência de 14+ dias estudando', auto: { type: 'habitStreak', habit: 'estudo', min: 14 } },
-      { id: null, text: 'Concluir 1 livro ou curso no trimestre' },
+      { id: 'bib_concluido1', text: 'Concluir 1 livro ou curso no trimestre', auto: { type: 'bibConcluidos', min: 1 } },
     ] },
     { q: 2, label: 'Conversação básica', krs: [
       { id: 'estudo_pct85', text: 'Estudar nos dias escolhidos (≥85% do trimestre)', auto: { type: 'habitPct', habit: 'estudo', min: 0.85 } },
@@ -166,7 +166,7 @@ export const QUARTERLY_TASKS = {
   mente: {
     1: [
       { id: 'mente_q1_a', text: 'Configurar app de idioma com meta diária', hint: 'Duolingo, Anki, ou similar — 10 min já conta' },
-      { id: 'mente_q1_b', text: 'Escolher e comprar o próximo livro', hint: 'Tenha sempre um na fila' },
+      { id: 'mente_q1_b', text: 'Concluir 1 livro ou curso no trimestre', hint: 'Marque como "Concluído" na Biblioteca quando terminar' },
       { id: 'mente_q1_c', text: 'Alcançar 30 dias seguidos de estudo', hint: 'O streak importa mais que a duração' },
     ],
     2: [

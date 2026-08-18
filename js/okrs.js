@@ -2,6 +2,7 @@ import { state, META_LABELS } from './state.js';
 import { getActiveQ, getPeriodDates, habitPctInQuarter, weeklyFreqInQuarter, habitStreakInQuarter, overallStreakInQuarter, overallPctInQuarter, finLogConsistencyInQuarter, finLogGrowthInQuarter } from './utils.js';
 import { saveCfgLocal, saveCfgRemote } from './db.js';
 import { defaultOKR, finOKR, finDicas, QUARTERLY_TASKS } from './okrs-data.js';
+import { fetchBibConcluidosCount } from './biblioteca.js';
 
 const areaIcons = { corpo: '🏃', mente: '🧠', financas: '💰', tempo: '⏱', relacoes: '❤️' };
 const areaNames = { corpo: 'Corpo', mente: 'Mente', financas: 'Finanças', tempo: 'Tempo', relacoes: 'Relações' };
@@ -9,6 +10,27 @@ const qColors = ['', 'q1b', 'q2b', 'q3b', 'q4b'];
 const qLabels = ['', 'Fundação', 'Aceleração', 'Escala', 'Colheita'];
 const bgColors = [, 'var(--info-bg)', 'var(--suc-bg)', 'var(--warn-bg)', 'var(--dan-bg)'];
 const txtColors = [, 'var(--info-txt)', 'var(--suc-txt)', 'var(--warn-txt)', 'var(--dan-txt)'];
+
+// Unica automacao que exige uma busca nova ao Supabase (Biblioteca nao e carregada no login,
+// ao contrario de state.log/userCfg) - cache simples em memoria, invalidado quando a Biblioteca
+// muda (ver invalidateBibConcluidosCache, chamado por biblioteca.js apos salvar/excluir).
+let bibConcluidosCount = 0;
+let bibConcluidosLoaded = false;
+
+export function invalidateBibConcluidosCache() {
+  bibConcluidosLoaded = false;
+}
+
+function ensureBibConcluidosLoaded() {
+  if (bibConcluidosLoaded || !state.userCfg.startDate) return;
+  bibConcluidosLoaded = true;
+  const dates = getPeriodDates('trimestre');
+  const fromDate = dates[0];
+  fetchBibConcluidosCount(fromDate).then(count => {
+    bibConcluidosCount = count;
+    renderOKRs();
+  });
+}
 
 // Avalia uma regra "auto" e devolve { done, pct } (pct 0-100, so pra exibir progresso). As
 // métricas em si (habitPctInQuarter etc.) vivem em utils.js — reaproveitadas também pelas
@@ -42,6 +64,10 @@ function evalAutoKR(auto, log) {
     case 'finLogGrowth': {
       const g = finLogGrowthInQuarter();
       return { done: g, pct: g ? 100 : 0 };
+    }
+    case 'bibConcluidos': {
+      ensureBibConcluidosLoaded();
+      return { done: bibConcluidosCount >= auto.min, pct: Math.round(Math.min(1, bibConcluidosCount / auto.min) * 100) };
     }
     default:
       return { done: false, pct: 0 };
@@ -152,10 +178,11 @@ function renderFinTracker() {
   </div>`;
 }
 
-// 6 itens do checklist tem proxy honesto direto no que o check-in ja grava (mesmo principio do
-// motor de KRs automaticos acima) - fecham sozinhos, sem clique manual. O resto continua
-// exatamente como hoje (checkbox manual via tasksDone).
+// 7 itens do checklist tem proxy honesto direto no que o check-in/Biblioteca ja grava (mesmo
+// principio do motor de KRs automaticos acima) - fecham sozinhos, sem clique manual. O resto
+// continua exatamente como hoje (checkbox manual via tasksDone).
 const TASK_AUTO = {
+  mente_q1_b: () => { ensureBibConcluidosLoaded(); return bibConcluidosCount >= 1; },
   mente_q1_c: () => habitStreakInQuarter(state.log, 'estudo') >= 30,
   tempo_q1_b: () => {
     const dates = new Set(getPeriodDates('trimestre'));
