@@ -1,5 +1,17 @@
 # Changelog — Você S.A.
 
+## v5.0.0 — 2026-08-18
+
+Mega atualização v5 (Fase 6 de 6, fechando a v5): exportação completa + onboarding.
+
+- **Exportação** (CSV e JSON): passam a incluir Pomodoro, Biblioteca, peso e revisões mensais — antes só tinham hábitos e finanças
+- **Onboarding**: pergunta o perfil financeiro (Iniciante/Em transição/Investidor) quando "Finanças" é escolhida como área, em vez de só descobrir isso depois em Perfil
+- **Kickoff**: oferece ativar o lembrete diário de check-in ali mesmo, antes de começar a usar o app, em vez de só em Perfil
+
+---
+
+**v5.0.0 completa** — 7 fases (0 a 6): correção de bug real de trimestre, nivelamento de Tempo/Relações/Corpo, revisão mensal, nova identidade visual "Fintech ousado", Retrospectiva de trimestre/ano com insights automáticos, Financeiro em destaque na navegação, e onboarding/exportação fechando as lacunas que restavam.
+
 ## v5.0.0-fase5 — 2026-08-18
 
 Mega atualização v5 (Fase 5 de 6): Financeiro em destaque + redesign de Biblioteca, Foco e Perfil.

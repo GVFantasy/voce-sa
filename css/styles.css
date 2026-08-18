@@ -969,6 +969,12 @@ body.dark .mais-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .kickoff-q1-text{font-size:13px;color:rgba(255,255,255,.88);line-height:1.8}
 .kickoff-cta{width:100%;padding:16px;border-radius:var(--radius-card);border:none;background:#fff;color:var(--roxo);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-0.2px;margin-top:14px}
 .kickoff-footnote{text-align:center;font-size:11px;color:rgba(255,255,255,.45);margin-top:12px}
+.kickoff-reminder-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+/* tela do kickoff nao segue o tema claro/escuro (sempre roxo solido) - o toggle padrao usa
+   tokens pensados pra fundo claro/card, aqui precisa da mesma logica em rgba(255,255,255,..) */
+.kickoff-card .toggle-switch{background:rgba(255,255,255,.25)}
+.kickoff-card .toggle-switch.on{background:#fff}
+.kickoff-card .toggle-switch.on::after{background:var(--roxo)}
 .kickoff-area-chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:6px 14px;border-radius:20px;

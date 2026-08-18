@@ -180,6 +180,15 @@
         </div>
       </div>
 
+      <div id="ob-financas-section-4" style="display:none">
+        <div style="font-size:13px;font-weight:600;color:var(--preto);margin:16px 0 8px">💰 Seu momento financeiro</div>
+        <div class="ob-chips" id="ob-fin-perfil-chips">
+          <button class="ob-chip on" data-val="iniciante" onclick="obSingle('fin-perfil',this)">Iniciante</button>
+          <button class="ob-chip" data-val="transicao" onclick="obSingle('fin-perfil',this)">Em transição</button>
+          <button class="ob-chip" data-val="investidor" onclick="obSingle('fin-perfil',this)">Investidor</button>
+        </div>
+      </div>
+
       <div class="ob-nav"><button class="ob-btn-back" onclick="obBack(4)">←</button><button class="ob-btn-next" onclick="obNext(4)">Criar meu plano →</button></div>
     </div>
 
@@ -208,6 +217,15 @@
     <div class="kickoff-card">
       <div class="kickoff-card-label">Seus hábitos base</div>
       <div id="kickoff-habits"></div>
+    </div>
+    <div class="kickoff-card">
+      <div class="kickoff-reminder-row">
+        <div>
+          <div class="kickoff-card-label" style="margin-bottom:2px">Lembrete diário</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7)">Um aviso às 19:30 se você ainda não fez o check-in</div>
+        </div>
+        <div class="toggle-switch" id="kickoff-reminder-toggle" role="switch" aria-checked="false" aria-label="Ativar lembrete diário" tabindex="0" onclick="kickoffToggleReminder(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();kickoffToggleReminder(this)}"></div>
+      </div>
     </div>
     <button onclick="startFromKickoff()" class="kickoff-cta">
       Começar minha jornada →

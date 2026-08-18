@@ -102,7 +102,7 @@ export const state = {
     areas: [], exercicios: [], idiomas: [], idiomasAtivos: [], aprender: [],
     horario: '', tempoLivre: '', corpoNivel: '', treinoDias: [2, 4, 6],
     idiomaDias: [0, 1, 2, 3, 4, 5, 6], estudoDias: [1, 3, 5],
-    situation: '', meta: '', metas: [], sonoMeta: 7, estudoMeta: 30,
+    situation: '', meta: '', metas: [], sonoMeta: 7, estudoMeta: 30, finPerfil: '',
   },
   pomodoro: { timer: null, seconds: 25 * 60, isRunning: false, isBreak: false, sessions: 0, subject: '' },
   reviewData: { semana: { feel: '', adjust: [] }, mes: { feel: '', adjust: [] } },

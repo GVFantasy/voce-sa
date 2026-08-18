@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { sb, flushPendingCfg } from './db.js';
 import { clearFieldErr, showToast } from './utils.js';
 import { toggleAuthMode, submitAuth, signOut, afterLogin, forgotPassword, showRecoveryForm, confirmRecovery } from './auth.js';
-import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff } from './onboarding.js';
+import { startOnboarding, renderObProgress, showObStep, obNext, obBack, obToggleArea, obToggleChip, obToggleDay, obSingle, obSingleMeta, checkObStep2, generatePlan, obToggleIdioma, obSonoMeta, obEstudoMeta, showKickoff, startFromKickoff, kickoffToggleReminder } from './onboarding.js';
 import { renderCheckin, toggleHabit, setHabitDetail, expandHabitDetail, setEnergy, saveDay, renderWeeklyReview, renderMonthlyReview, setReviewFeel, toggleReviewAdjust, saveWeeklyReview, saveMonthlyReview, showBoom, hideBoom, onNotaInput } from './checkin.js';
 import { renderDashboard, setPeriod, renderEnergyChart } from './dashboard.js';
 import { renderOKRs, togglePillar, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit } from './okrs.js';
@@ -41,6 +41,7 @@ window.obSonoMeta = obSonoMeta;
 window.obEstudoMeta = obEstudoMeta;
 window.showKickoff = showKickoff;
 window.startFromKickoff = startFromKickoff;
+window.kickoffToggleReminder = kickoffToggleReminder;
 
 window.renderCheckin = renderCheckin;
 window.toggleHabit = toggleHabit;

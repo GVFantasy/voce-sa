@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { saveCfgLocal, saveCfgRemote, setSyncStatus } from './db.js';
+import { saveCfgLocal, saveCfgRemote, saveCfgAll, setSyncStatus } from './db.js';
 import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
@@ -37,8 +37,10 @@ export function showObStep(n) {
   if (n === 4) {
     const treinoSec = document.getElementById('ob-treino-section-4');
     const estudoSec = document.getElementById('ob-estudo-section-4');
+    const financasSec = document.getElementById('ob-financas-section-4');
     if (treinoSec) treinoSec.style.display = state.obData.areas.includes('corpo') ? 'block' : 'none';
     if (estudoSec) estudoSec.style.display = state.obData.areas.includes('mente') ? 'block' : 'none';
+    if (financasSec) financasSec.style.display = state.obData.areas.includes('financas') ? 'block' : 'none';
   }
 }
 
@@ -141,6 +143,8 @@ export function obSingle(group, btn) {
   if (group === 'situation') {
     state.obData.situation = btn.dataset.val;
     const nb = document.getElementById('ob-next-1'); if (nb) nb.disabled = false;
+  } else if (group === 'fin-perfil') {
+    state.obData.finPerfil = btn.dataset.val;
   } else if (group === 'livro-tipo') {
     window._newLivroTipo = btn.dataset.val;
   } else if (group === 'custom-habit-icon') {
@@ -174,6 +178,7 @@ export async function generatePlan() {
     sonoMeta: state.obData.sonoMeta || 7,
     inglesMeta: state.obData.estudoMeta || 30,
     seenStreakRecalcNotice: true,
+    ...(areas.includes('financas') ? { finPerfil: state.obData.finPerfil || 'iniciante' } : {}),
   };
   setTimeout(async () => {
     clearInterval(iv);
@@ -222,6 +227,36 @@ export function showKickoff() {
     `<div class="kickoff-habit-row"><span>${sanitize(h.icon)}</span><span>${sanitize(h.name)}</span><span class="kickoff-habit-days">${h.days}</span></div>`
   ).join('');
   pg.style.display = 'flex';
+}
+
+// Opt-in de lembrete direto no Kickoff, em vez de só em Perfil (reduz a chance de quem quer
+// notificação nunca voltar pra ativar). Mesma lógica de toggleReminder() (profile.js), mas sem
+// referenciar elementos que só existem na tela de Perfil.
+export async function kickoffToggleReminder(el) {
+  if (Notification.permission === 'denied') {
+    showToast('Notificações bloqueadas no navegador. Dá pra ativar depois em Perfil.', 'err'); return;
+  }
+  if (Notification.permission !== 'granted') {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { showToast('Permissão de notificação negada.', 'err'); return; }
+  }
+  state.userCfg.lembreteAtivo = !state.userCfg.lembreteAtivo;
+  if (state.userCfg.lembreteAtivo && !state.userCfg.lembreteHora) state.userCfg.lembreteHora = '19:30';
+  if (state.userCfg.lembreteAtivo) state.userCfg.tzOffsetMin = new Date().getTimezoneOffset();
+  el.classList.toggle('on', state.userCfg.lembreteAtivo);
+  el.setAttribute('aria-checked', state.userCfg.lembreteAtivo);
+  await saveCfgAll(false);
+  if (state.userCfg.lembreteAtivo) {
+    const { scheduleReminder } = await import('./profile.js');
+    const { subscribeToPush } = await import('./push.js');
+    scheduleReminder();
+    subscribeToPush();
+    showToast('Lembrete ativado! Você recebe um aviso às 19:30 se ainda não fez o check-in.');
+  } else {
+    const { unsubscribeFromPush } = await import('./push.js');
+    unsubscribeFromPush();
+    showToast('Lembrete desativado.');
+  }
 }
 
 export function startFromKickoff() {

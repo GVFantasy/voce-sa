@@ -4,6 +4,7 @@ import { showToast, getActiveQ, todayKey, calcStreak, getBestStreak, isExpected,
 import { buildHabitsFromCfg } from './habits.js';
 import { getPlans, getActivePlanId } from './plans.js';
 import { subscribeToPush, unsubscribeFromPush } from './push.js';
+import { fetchAllBiblioteca } from './biblioteca.js';
 
 export function renderPerfil() {
   const aq = getActiveQ(state.userCfg.startDate);
@@ -262,7 +263,7 @@ export function applyDarkIfSaved() {
   if (toggle) { toggle.classList.toggle('on', isDark); toggle.setAttribute('aria-checked', isDark); }
 }
 
-export function exportCSV() {
+export async function exportCSV() {
   const temFinancas = state.userHabits.some(h => h.id === 'financas');
   const headers = ['Data', ...state.userHabits.map(h => h.name), 'Energia', 'Nota', ...(temFinancas ? ['Gasto do dia (R$)'] : [])].map(csvField).join(',');
   const rows = state.log.map(e => {
@@ -270,19 +271,48 @@ export function exportCSV() {
     return [e.date, ...habits, e.energy ? ENERGY[e.energy] : '', e.nota || '', ...(temFinancas ? [gastoDoDia(e) || ''] : [])].map(csvField).join(',');
   });
   let csv = [headers, ...rows].join('\n');
+
   const finLog = state.userCfg.finLog || [];
   if (finLog.length) {
     const finRows = [...finLog].sort((a, b) => a.mes.localeCompare(b.mes))
       .map(f => [f.mes, f.guardado || 0, f.investido || 0].map(csvField).join(','));
     csv += '\n\n' + ['Mês', 'Guardado (R$)', 'Investido (R$)'].map(csvField).join(',') + '\n' + finRows.join('\n');
   }
+
+  const pesoLog = state.userCfg.pesoLog || [];
+  if (pesoLog.length) {
+    const pesoRows = [...pesoLog].sort((a, b) => a.data.localeCompare(b.data))
+      .map(p => [p.data, p.peso].map(csvField).join(','));
+    csv += '\n\n' + ['Data', 'Peso (kg)'].map(csvField).join(',') + '\n' + pesoRows.join('\n');
+  }
+
+  const monthlyReviews = Object.values(state.userCfg.monthlyReviews || {});
+  if (monthlyReviews.length) {
+    const mrRows = monthlyReviews.sort((a, b) => a.mes.localeCompare(b.mes))
+      .map(r => [r.mes, r.feel || '', (r.adjust || []).join(';'), r.peso ?? ''].map(csvField).join(','));
+    csv += '\n\n' + ['Mês', 'Sensação', 'Ajustes desejados', 'Peso (kg)'].map(csvField).join(',') + '\n' + mrRows.join('\n');
+  }
+
+  const pomodoroLog = state.userCfg.pomodoroLog || [];
+  if (pomodoroLog.length) {
+    const pomoRows = [...pomodoroLog].sort((a, b) => a.date.localeCompare(b.date))
+      .map(s => [s.date, s.durationMin || '', s.subject || ''].map(csvField).join(','));
+    csv += '\n\n' + ['Data', 'Duração (min)', 'Assunto'].map(csvField).join(',') + '\n' + pomoRows.join('\n');
+  }
+
+  const bibItems = await fetchAllBiblioteca();
+  if (bibItems.length) {
+    const bibRows = bibItems.map(i => [i.titulo, i.tipo || '', i.status || '', i.rating ?? '', (i.created_at || '').slice(0, 10)].map(csvField).join(','));
+    csv += '\n\n' + ['Título', 'Tipo', 'Status', 'Avaliação', 'Criado em'].map(csvField).join(',') + '\n' + bibRows.join('\n');
+  }
+
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = 'voce_sa_historico.csv'; a.click(); URL.revokeObjectURL(url);
 }
 
 // Mesmo dado do exportCSV(), em formato alternativo (mais fácil de reprocessar programaticamente).
-export function exportJSON() {
+export async function exportJSON() {
   const temFinancas = state.userHabits.some(h => h.id === 'financas');
   const checkins = state.log.map(e => ({
     data: e.date,
@@ -291,7 +321,15 @@ export function exportJSON() {
     nota: e.nota || '',
     ...(temFinancas ? { gasto: gastoDoDia(e) } : {}),
   }));
-  const data = { checkins, financas_mensal: state.userCfg.finLog || [] };
+  const bibItems = await fetchAllBiblioteca();
+  const data = {
+    checkins,
+    financas_mensal: state.userCfg.finLog || [],
+    peso: state.userCfg.pesoLog || [],
+    revisoes_mensais: Object.values(state.userCfg.monthlyReviews || {}),
+    pomodoro: state.userCfg.pomodoroLog || [],
+    biblioteca: bibItems,
+  };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = 'voce_sa_historico.json'; a.click(); URL.revokeObjectURL(url);

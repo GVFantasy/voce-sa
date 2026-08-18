@@ -179,6 +179,14 @@ export function filterBiblioteca(term) {
 // Retorna null em erro (rede/servidor) - nao 0, que seria indistinguivel de "genuinamente zero
 // itens concluidos" e regrediria visivelmente o KR/conquista que dependem desse numero. Quem
 // consome (okrs.js, conquistas.js) trata null como "sem dado ainda" e mantem o cache anterior.
+// Lista completa da Biblioteca do usuário - usado só pela exportação (profile.js), que precisa
+// dos itens de verdade, não só a contagem de concluídos que fetchBibConcluidosCount devolve.
+export async function fetchAllBiblioteca() {
+  if (!state.currentUser) return [];
+  const { data, error } = await sb.from('biblioteca').select('*').eq('user_id', state.currentUser.id).order('created_at', { ascending: false });
+  return error ? [] : (data || []);
+}
+
 export async function fetchBibConcluidosCount(fromDate) {
   if (!state.currentUser) return 0;
   let query = sb.from('biblioteca')
