@@ -37,7 +37,12 @@ Deno.serve(async (req) => {
     return new Date(localMs).toISOString().slice(0, 10);
   }
 
-  const due: { userId: string; localDate: string }[] = [];
+  function localDateStrDaysAgo(tzOffsetMin: number, daysAgo: number) {
+    const localMs = Date.now() - tzOffsetMin * 60000 - daysAgo * 86400000;
+    return new Date(localMs).toISOString().slice(0, 10);
+  }
+
+  const due: { userId: string; localDate: string; tzOffsetMin: number; localHour: number }[] = [];
   for (const row of configs || []) {
     const cfg = row.config || {};
     if (!cfg.lembreteAtivo || !cfg.lembreteHora) continue;
@@ -47,7 +52,9 @@ Deno.serve(async (req) => {
     const tzOffsetMin = cfg.tzOffsetMin || 0;
     const localNow = localMinutesNow(tzOffsetMin);
     const diff = Math.min(Math.abs(localNow - targetMin), 1440 - Math.abs(localNow - targetMin));
-    if (diff <= WINDOW_MIN) due.push({ userId: row.user_id, localDate: localDateStr(tzOffsetMin) });
+    if (diff <= WINDOW_MIN) {
+      due.push({ userId: row.user_id, localDate: localDateStr(tzOffsetMin), tzOffsetMin, localHour: Math.floor(localNow / 60) });
+    }
   }
   if (!due.length) return new Response(JSON.stringify({ sent: 0 }), { status: 200 });
 
@@ -59,8 +66,29 @@ Deno.serve(async (req) => {
     .in("user_id", due.map(d => d.userId))
     .in("date", distinctDates);
   const doneSet = new Set((doneToday || []).map(c => `${c.user_id}|${c.date}`));
-  const targets = due.filter(d => !doneSet.has(`${d.userId}|${d.localDate}`)).map(d => d.userId);
-  if (!targets.length) return new Response(JSON.stringify({ sent: 0 }), { status: 200 });
+  const pending = due.filter(d => !doneSet.has(`${d.userId}|${d.localDate}`));
+  if (!pending.length) return new Response(JSON.stringify({ sent: 0 }), { status: 200 });
+  const targets = pending.map(d => d.userId);
+
+  // "Streak em risco": aviso diferente pra quem, tarde da noite (≥21h local), ainda não fez
+  // check-in hoje E tem pelo menos os últimos 3 dias anteriores registrados. É uma aproximação
+  // simples de "streak ativo" (checa presença de registro, não se cumpriu 100% dos hábitos como
+  // o cálculo completo do client faz) — suficiente pra um aviso, não precisa ser exato.
+  const lateCandidates = pending.filter(d => d.localHour >= 21);
+  const streakRiskUserIds = new Set<string>();
+  if (lateCandidates.length) {
+    const checkDates = [...new Set(lateCandidates.flatMap(d => [1, 2, 3].map(n => localDateStrDaysAgo(d.tzOffsetMin, n))))];
+    const { data: recentRows } = await admin
+      .from("checkins")
+      .select("user_id, date")
+      .in("user_id", lateCandidates.map(d => d.userId))
+      .in("date", checkDates);
+    const recentSet = new Set((recentRows || []).map(c => `${c.user_id}|${c.date}`));
+    for (const d of lateCandidates) {
+      const has3 = [1, 2, 3].every(n => recentSet.has(`${d.userId}|${localDateStrDaysAgo(d.tzOffsetMin, n)}`));
+      if (has3) streakRiskUserIds.add(d.userId);
+    }
+  }
 
   const { data: subs, error: subsErr } = await admin
     .from("push_subscriptions")
@@ -68,9 +96,14 @@ Deno.serve(async (req) => {
     .in("user_id", targets);
   if (subsErr) return new Response(JSON.stringify({ error: subsErr.message }), { status: 500 });
 
-  const payload = JSON.stringify({
+  const defaultPayload = JSON.stringify({
     title: "Você S.A. 🔥",
     body: "Hora do seu check-in! Não deixe o streak quebrar.",
+    url: "./",
+  });
+  const riskPayload = JSON.stringify({
+    title: "Sua sequência está em risco! ⚠️",
+    body: "Faltam poucas horas pro dia acabar e você ainda não fez o check-in de hoje.",
     url: "./",
   });
 
@@ -80,7 +113,7 @@ Deno.serve(async (req) => {
     try {
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-        payload
+        streakRiskUserIds.has(sub.user_id) ? riskPayload : defaultPayload
       );
       sent++;
     } catch (e) {

@@ -506,8 +506,11 @@
     </div>
     <div class="prof-section">
       <div class="prof-section-title">Dados</div>
-      <button class="btn-primary" style="background:var(--verde);margin-bottom:8px" onclick="exportCSV()">Exportar histórico CSV</button>
-      <button class="btn-primary" style="background:#E24B4A" onclick="signOut()">Sair da conta</button>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn-primary" style="background:var(--verde)" onclick="exportCSV()">Exportar CSV</button>
+        <button class="btn-primary" style="background:var(--verde)" onclick="exportJSON()">Exportar JSON</button>
+      </div>
+      <button class="btn-primary" style="background:var(--dan-solid)" onclick="signOut()">Sair da conta</button>
     </div>
   </div>
 

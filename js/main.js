@@ -8,7 +8,7 @@ import { renderDashboard, setPeriod, generateDashboardInsight, renderEnergyChart
 import { renderOKRs, togglePillar, getActiveObjective, toggleKR, toggleQTask, openOKREdit, cancelOKREdit, saveOKREdit, saveFinMes } from './okrs.js';
 import { renderHistorico, loadMoreHistorico, showHiDay, navCalMonth, filterHistorico, setHistoricoHabitFilter } from './historico.js';
 import { renderConquistas } from './conquistas.js';
-import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit, deleteAccount } from './profile.js';
+import { renderPerfil, savePerfil, toggleIdioma, toggleDark, applyDarkIfSaved, exportCSV, exportJSON, saveReminder, toggleReminder, scheduleReminder, initReminder, toggleSonoMeta, toggleTreinoDia, toggleEstudoDia, toggleFinPerfil, saveFinMeta, changeEmail, changePassword, addCustomHabit, deleteCustomHabit, deleteAccount } from './profile.js';
 import { renderBiblioteca, showAddLivro, saveLivro, editLivro, deleteLivro, filterBiblioteca, toggleLivroStatus, setLivroRating, setBiblSort } from './biblioteca.js';
 import { pomodoroToggle, pomodoroReset, renderPomodoroTime, renderPomodoroSessions, setFocusDuration, setPomoSubject } from './pomodoro.js';
 import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, addPlan, deletePlan, startRenamePlan, cancelPlanForm, openNewPlanForm } from './plans.js';
@@ -82,6 +82,7 @@ window.toggleIdioma = toggleIdioma;
 window.toggleDark = toggleDark;
 window.applyDarkIfSaved = applyDarkIfSaved;
 window.exportCSV = exportCSV;
+window.exportJSON = exportJSON;
 window.saveReminder = saveReminder;
 window.toggleReminder = toggleReminder;
 window.scheduleReminder = scheduleReminder;

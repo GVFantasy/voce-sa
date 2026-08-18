@@ -28,6 +28,12 @@ export function showObStep(n) {
     html += `<div class="ob-prog-dot ${i <= n ? 'done' : ''}"></div>`;
   }
   document.getElementById('ob-progress').innerHTML = html;
+  if (n === 3) {
+    // idioma so e obrigatorio quando a area "mente" foi escolhida no passo 2 - quem nao marcou
+    // mente pode seguir sem selecionar idioma nenhum
+    const nb3 = document.getElementById('ob-next-3');
+    if (nb3) nb3.disabled = state.obData.areas.includes('mente') && state.obData.idiomas.length === 0;
+  }
   if (n === 4) {
     const treinoSec = document.getElementById('ob-treino-section-4');
     const estudoSec = document.getElementById('ob-estudo-section-4');
@@ -46,7 +52,9 @@ export function obNext(step) {
     if (!state.obData.metas || !state.obData.metas.length) { showToast('Selecione sua maior prioridade em 12 meses.', 'info', 3000); return; }
     showObStep(3);
   } else if (step === 3) {
-    if (!state.obData.idiomas.length) { showToast('Selecione pelo menos um idioma.', 'info', 3000); return; }
+    if (state.obData.areas.includes('mente') && !state.obData.idiomas.length) {
+      showToast('Selecione pelo menos um idioma.', 'info', 3000); return;
+    }
     showObStep(4);
   } else if (step === 4) {
     state.obData.meta = (state.obData.metas || []).join(', ');
@@ -89,7 +97,7 @@ export function obToggleIdioma(btn) {
   if (idx >= 0) state.obData.idiomas.splice(idx, 1);
   else state.obData.idiomas.push(val);
   const nb = document.getElementById('ob-next-3');
-  if (nb) nb.disabled = state.obData.idiomas.length === 0;
+  if (nb) nb.disabled = state.obData.areas.includes('mente') && state.obData.idiomas.length === 0;
 }
 
 export function obSonoMeta(btn) {
@@ -145,7 +153,11 @@ export async function generatePlan() {
   let i = 0;
   const el = document.getElementById('ob-generating');
   const iv = setInterval(() => { if (i < msgs.length) { if (el) el.textContent = msgs[i]; i++; } }, 600);
-  const idiomasAtivos = state.obData.idiomas.length ? state.obData.idiomas.slice(0, 2) : ['ingles'];
+  // idioma so tem fallback pra 'ingles' quando a area "mente" foi escolhida (idioma obrigatorio
+  // nesse caso) - quem pulou o passo 3 por nao ter marcado "mente" fica sem habito de idioma,
+  // em vez de ganhar um Inglês forçado que não pediu.
+  const wantsIdioma = state.obData.areas.includes('mente') || state.obData.idiomas.length > 0;
+  const idiomasAtivos = state.obData.idiomas.length ? state.obData.idiomas.slice(0, 2) : (wantsIdioma ? ['ingles'] : []);
   const areas = state.obData.areas.filter(a => a !== 'negocio');
   const cfg = {
     name: state.obData.name,
@@ -153,13 +165,9 @@ export async function generatePlan() {
     areas,
     meta: state.obData.meta,
     situation: state.obData.situation,
-    exercicios: ['Academia', 'Corrida', 'Ciclismo', 'HIIT'],
     idiomasAtivos,
-    idiomasPlano: state.obData.idiomas.length ? state.obData.idiomas : ['ingles'],
+    idiomasPlano: state.obData.idiomas.length ? state.obData.idiomas : idiomasAtivos,
     aprender: state.obData.aprender || [],
-    horario: 'comercial',
-    tempoLivre: '1h',
-    corpoNivel: 'irregular',
     treinoDias: state.obData.treinoDias.length ? state.obData.treinoDias : [2, 4, 6],
     idiomaDias: state.obData.idiomaDias.length ? state.obData.idiomaDias : [0, 1, 2, 3, 4, 5, 6],
     estudoDias: state.obData.estudoDias.length ? state.obData.estudoDias : [1, 3, 5],

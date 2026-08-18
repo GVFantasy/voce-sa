@@ -72,6 +72,15 @@ async function handleAchievementUnlocks(allUnlockedIds) {
   if (!newlyUnlocked.length) return;
   state.userCfg.seenAchievements = allUnlockedIds;
   await saveCfgAll(false);
+  // notificacao do sistema (so se a permissao ja foi concedida antes, ex: lembrete de check-in -
+  // nao pede permissao nova aqui, mesmo criterio ja usado pro aviso de fim de fase do Pomodoro)
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      newlyUnlocked.forEach(a => {
+        new Notification('Nova conquista desbloqueada! ' + a.icon, { body: a.name + ' — ' + a.desc, icon: 'icons/icon-192.png', tag: 'achievement-' + a.id });
+      });
+    }
+  } catch (e) {}
   const el = document.getElementById('streak-boom');
   if (!el) return;
   const a = newlyUnlocked[0];

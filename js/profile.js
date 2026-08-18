@@ -213,6 +213,19 @@ export function exportCSV() {
   a.href = url; a.download = 'voce_sa_historico.csv'; a.click(); URL.revokeObjectURL(url);
 }
 
+// Mesmo dado do exportCSV(), em formato alternativo (mais fácil de reprocessar programaticamente).
+export function exportJSON() {
+  const data = state.log.map(e => ({
+    data: e.date,
+    habitos: Object.fromEntries(state.userHabits.map(h => [h.name, !!(e.habits && e.habits[h.id])])),
+    energia: e.energy ? ENERGY[e.energy] : null,
+    nota: e.nota || '',
+  }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'voce_sa_historico.json'; a.click(); URL.revokeObjectURL(url);
+}
+
 export async function saveReminder() {
   const val = document.getElementById('pref-lembrete').value;
   if (!val) {
