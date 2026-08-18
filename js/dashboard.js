@@ -1,18 +1,59 @@
 import { state, ENERGY, DLABELS, META_LABELS, SITUATION_START_HINTS } from './state.js';
 import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize } from './utils.js';
 
+// % cumprido de cada habito num intervalo de datas, individual e agregado - usado pra comparar
+// a semana atual com a anterior (generateDashboardInsight) sem duplicar o loop duas vezes.
+function habitStatsForDates(dates, logMap) {
+  let done = 0, possible = 0;
+  const perHabit = {};
+  dates.forEach(date => {
+    const entry = logMap[date];
+    state.userHabits.forEach(h => {
+      if (isExpected(h, date)) {
+        possible++;
+        const hs = perHabit[h.id] || (perHabit[h.id] = { done: 0, possible: 0 });
+        hs.possible++;
+        if (entry && entry.habits[h.id]) { done++; hs.done++; }
+      }
+    });
+  });
+  return { pct: possible > 0 ? Math.round(done / possible * 100) : 0, possible, perHabit };
+}
+
 export function generateDashboardInsight() {
   const today = todayKey(); const streak = calcStreak(state.log);
   const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   const dates7 = getPeriodDates('semana');
-  let done7 = 0, possible7 = 0;
-  dates7.forEach(date => {
-    const entry = logMap[date];
-    state.userHabits.forEach(h => {
-      if (isExpected(h, date)) { possible7++; if (entry && entry.habits[h.id]) done7++; }
+  const prevDates7 = dates7.map(dt => { const d = new Date(dt + 'T12:00:00'); d.setDate(d.getDate() - 7); return dateKey(d); });
+  const cur7 = habitStatsForDates(dates7, logMap);
+  const prev7 = habitStatsForDates(prevDates7, logMap);
+  const pct7 = cur7.pct;
+  // só compara com a semana anterior se ela existe de fato dentro da vida da conta - senão uma
+  // conta nova mostraria uma "queda de 100%" enganosa por não ter nada pra comparar ainda.
+  const hasPrevWeek = prev7.possible > 0 && prevDates7[0] >= (state.userCfg.startDate || prevDates7[0]);
+  const pct7Delta = hasPrevWeek ? pct7 - prev7.pct : null;
+
+  // hábito que mais melhorou e o que mais caiu esta semana vs a anterior (só conta se o
+  // intervalo for relevante - 20 pontos - pra não citar ruído estatístico de poucos dias)
+  let worstHabit = null, worstPct = 100, improvedHabit = null, declinedHabit = null;
+  const habitDeltas = state.userHabits
+    .filter(h => cur7.perHabit[h.id] && cur7.perHabit[h.id].possible > 0)
+    .map(h => {
+      const c = cur7.perHabit[h.id];
+      const p = prev7.perHabit[h.id];
+      const pctNow = Math.round(c.done / c.possible * 100);
+      const pctPrev = hasPrevWeek && p && p.possible > 0 ? Math.round(p.done / p.possible * 100) : null;
+      return { habit: h, pctNow, delta: pctPrev === null ? null : pctNow - pctPrev };
     });
-  });
-  const pct7 = possible7 > 0 ? Math.round(done7 / possible7 * 100) : 0;
+  habitDeltas.forEach(hd => { if (hd.pctNow < worstPct) { worstPct = hd.pctNow; worstHabit = hd.habit; } });
+  if (habitDeltas.length > 1) {
+    const withDelta = habitDeltas.filter(hd => hd.delta !== null);
+    const best = withDelta.reduce((a, b) => (a === null || b.delta > a.delta ? b : a), null);
+    const worst = withDelta.reduce((a, b) => (a === null || b.delta < a.delta ? b : a), null);
+    if (best && best.delta >= 20) improvedHabit = best;
+    if (worst && worst.delta <= -20 && worst.habit !== (improvedHabit && improvedHabit.habit)) declinedHabit = worst;
+  }
+
   const aq = getActiveQ(state.userCfg.startDate);
   const ql = ['', 'Fundação', 'Aceleração', 'Escala', 'Colheita'];
   const start = new Date(state.userCfg.startDate || today);
@@ -21,15 +62,14 @@ export function generateDashboardInsight() {
   const trimTotal = Math.round((qe - qs) / 86400000);
   const trimPassed = Math.min(Math.round((new Date() - qs) / 86400000), trimTotal);
   const trimPct = Math.round(trimPassed / trimTotal * 100);
-  let worstHabit = null, worstPct = 100;
-  state.userHabits.forEach(h => {
-    let hd = 0, hp = 0;
-    dates7.forEach(date => {
-      if (isExpected(h, date)) { hp++; const e = logMap[date]; if (e && e.habits[h.id]) hd++; }
-    });
-    const p = hp > 0 ? Math.round(hd / hp * 100) : 0;
-    if (hp > 0 && p < worstPct) { worstPct = p; worstHabit = h; }
-  });
+
+  // recorde pessoal - getBestStreak já inclui a sequência atual na varredura, então bestStreak
+  // nunca é menor que streak; a diferença entre os dois é quanto falta pra empatar/bater o recorde.
+  const bestStreak = getBestStreak(state.log);
+  const recordGap = bestStreak - streak;
+  const isRecord = streak > 0 && recordGap === 0 && bestStreak >= 14;
+  const nearRecord = recordGap > 0 && recordGap <= 3 && streak >= 3;
+
   let msg, sub, color, label;
   if (streak === 0) {
     const hint = SITUATION_START_HINTS[state.userCfg.situation];
@@ -65,6 +105,14 @@ export function generateDashboardInsight() {
     sub = 'Faça seu primeiro check-in hoje. O plano de 12 meses começa com um único dia.';
     color = 'roxo'; label = 'Pronto para começar';
   }
+  // recorde pessoal tem prioridade sobre a faixa genérica - é o momento mais motivador possível
+  if (isRecord) {
+    msg = `${streak} dias — esse é o seu recorde pessoal.`;
+    sub = 'Você nunca tinha chegado tão longe. Mais um dia e você bate esse número.';
+    color = 'verde'; label = 'Novo recorde';
+  } else if (nearRecord) {
+    sub += ` Faltam ${recordGap} ${recordGap === 1 ? 'dia' : 'dias'} pra bater seu recorde de ${bestStreak}.`;
+  }
   // revisão semanal recente ("pesada") deixa de ser write-only e complementa a mensagem
   if (streak > 0) {
     const reviews = state.userCfg.weeklyReviews || {};
@@ -79,7 +127,12 @@ export function generateDashboardInsight() {
       }
     }
   }
-  return { msg, sub, color, label, streak, pct7, worstHabit, worstPct, trimPct, trimPassed, trimTotal, aq, ql };
+  return {
+    msg, sub, color, label, streak, pct7, pct7Prev: prev7.pct, pct7Delta, hasPrevWeek,
+    worstHabit, worstPct, improvedHabit, declinedHabit,
+    bestStreak, recordGap, isRecord,
+    trimPct, trimPassed, trimTotal, aq, ql,
+  };
 }
 
 export async function renderDashboard() {
@@ -88,74 +141,114 @@ export async function renderDashboard() {
   const insight = generateDashboardInsight();
   document.getElementById('dash-hero-wrap').innerHTML = `
     <div class="dash-hero ${insight.color}">
+      ${insight.streak > 0 ? `<div class="dash-hero-streak">🔥 ${insight.streak}d${insight.isRecord ? ' <span class="dash-hero-record">★</span>' : ''}</div>` : ''}
       <div class="dash-hero-label">${insight.label}</div>
       <div class="dash-hero-msg">${insight.msg}</div>
       <div class="dash-hero-sub">${insight.sub}</div>
       ${state.userCfg.meta ? `<div class="dash-hero-focus">Seu foco: ${sanitize(META_LABELS[state.userCfg.meta] || state.userCfg.meta)}</div>` : ''}
     </div>`;
-  if (insight.worstHabit && insight.worstPct < 80) {
-    document.getElementById('dash-focus-wrap').innerHTML = `
+
+  // comparação com a semana anterior - substitui a antiga tira de 3 números soltos
+  // (streak já está no hero; "registros totais" já aparece no Perfil)
+  const compareEl = document.getElementById('dash-compare-wrap');
+  if (compareEl) {
+    if (insight.hasPrevWeek) {
+      const dirCls = insight.pct7Delta > 0 ? 'dc-up' : insight.pct7Delta < 0 ? 'dc-down' : 'dc-same';
+      const deltaTxt = insight.pct7Delta === 0
+        ? 'Igual'
+        : `${insight.pct7Delta > 0 ? '↑' : '↓'} ${Math.abs(insight.pct7Delta)}pp`;
+      compareEl.innerHTML = `
+        <div class="dash-compare">
+          <div class="dc-card">
+            <div class="dc-label">Essa semana</div>
+            <div class="dc-row"><span class="dc-name">Cumprido</span><span class="dc-val ${dirCls}">${insight.pct7}%</span></div>
+            <div class="dc-row"><span class="dc-name">Variação</span><span class="dc-val ${dirCls}">${deltaTxt}</span></div>
+          </div>
+          <div class="dc-card">
+            <div class="dc-label">Semana passada</div>
+            <div class="dc-row"><span class="dc-name">Cumprido</span><span class="dc-val">${insight.pct7Prev}%</span></div>
+          </div>
+        </div>`;
+    } else {
+      compareEl.innerHTML = '';
+    }
+  }
+
+  // hábito que mais melhorou / mais caiu vs semana passada - sempre com os dois lados quando dá,
+  // nunca só o negativo. Sem dado de comparação suficiente, cai pro antigo "hábito mais fraco".
+  const focusEl = document.getElementById('dash-focus-wrap');
+  const habitCard = (hd, dirCls, arrow) => `
+    <div class="dc-card">
+      <div class="dc-label">${sanitize(hd.habit.icon)} ${sanitize(hd.habit.name)}</div>
+      <div class="dc-row"><span class="dc-name">Essa semana</span><span class="dc-val ${dirCls}">${hd.pctNow}%</span></div>
+      <div class="dc-row"><span class="dc-name">Variação</span><span class="dc-val ${dirCls}">${arrow} ${Math.abs(hd.delta)}pp</span></div>
+    </div>`;
+  if (insight.improvedHabit && insight.declinedHabit) {
+    focusEl.innerHTML = `
+      <div class="dash-focus">
+        <div class="dash-focus-label">Comparado à semana passada</div>
+        <div class="dash-compare">
+          ${habitCard(insight.improvedHabit, 'dc-up', '↑')}
+          ${habitCard(insight.declinedHabit, 'dc-down', '↓')}
+        </div>
+      </div>`;
+  } else if (insight.improvedHabit) {
+    focusEl.innerHTML = `
+      <div class="dash-focus">
+        <div class="dash-focus-label">Comparado à semana passada</div>
+        <div class="dash-focus-text dc-up">${sanitize(insight.improvedHabit.habit.icon)} ${sanitize(insight.improvedHabit.habit.name)} subiu pra ${insight.improvedHabit.pctNow}% (↑ ${insight.improvedHabit.delta}pp)</div>
+      </div>`;
+  } else if (insight.declinedHabit) {
+    focusEl.innerHTML = `
+      <div class="dash-focus">
+        <div class="dash-focus-label">Comparado à semana passada</div>
+        <div class="dash-focus-text dc-down">${sanitize(insight.declinedHabit.habit.icon)} ${sanitize(insight.declinedHabit.habit.name)} caiu pra ${insight.declinedHabit.pctNow}% (↓ ${Math.abs(insight.declinedHabit.delta)}pp)</div>
+      </div>`;
+  } else if (insight.worstHabit && insight.worstPct < 80) {
+    focusEl.innerHTML = `
       <div class="dash-focus">
         <div class="dash-focus-label">Foco desta semana</div>
         <div class="dash-focus-text">${sanitize(insight.worstHabit.icon)} ${sanitize(insight.worstHabit.name)} — ${insight.worstPct}% concluído. Está abaixo da meta.</div>
       </div>`;
   } else {
-    document.getElementById('dash-focus-wrap').innerHTML = '';
+    focusEl.innerHTML = '';
   }
-  // OKR do trimestre ativo
+
+  // trimestre + OKR ativo num card só: calendário do trimestre + ritmo real (KRs concluídos vs
+  // % de calendário já passado) + a lista de KRs, em vez de 2 cards separados dizendo coisas parecidas
   const { getActiveObjective } = await import('./okrs.js');
   const obj = getActiveObjective();
   const dashOkrEl = document.getElementById('dash-okr-wrap');
-  if (dashOkrEl && obj) {
-    const pct = obj.totalCnt > 0 ? Math.round(obj.doneCnt / obj.totalCnt * 100) : 0;
+  if (dashOkrEl) {
+    const krPct = obj && obj.totalCnt > 0 ? Math.round(obj.doneCnt / obj.totalCnt * 100) : null;
+    let paceHtml = '';
+    if (krPct !== null) {
+      const diff = krPct - insight.trimPct;
+      const paceCls = diff >= 15 ? 'dc-up' : diff <= -15 ? 'dc-down' : 'dc-same';
+      const paceTxt = diff >= 15
+        ? `À frente do ritmo — ${krPct}% dos KRs concluídos com ${insight.trimPct}% do trimestre passado.`
+        : diff <= -15
+          ? `Abaixo do ritmo — ${krPct}% dos KRs concluídos com ${insight.trimPct}% do trimestre já passado.`
+          : `No ritmo — ${krPct}% dos KRs concluídos, perto dos ${insight.trimPct}% do trimestre já passado.`;
+      paceHtml = `<div class="dash-pace ${paceCls}">${paceTxt}</div>`;
+    }
     dashOkrEl.innerHTML = `<div class="dash-okr-card" onclick="nav('okrs',null)">
-      <div class="dash-okr-top">Q${obj.aq} · ${obj.areaName} · Foco do trimestre</div>
-      <div class="dash-okr-label">${obj.label}</div>
-      <div class="okr-progress-wrap" style="margin:6px 0 8px">
-        <div class="okr-progress-bg"><div class="okr-progress-fill" style="width:${pct}%"></div></div>
-        <span class="okr-progress-label">${obj.doneCnt}/${obj.totalCnt} KRs</span>
-      </div>
-      <div class="dash-okr-krs">${obj.krs.map(k => `<span>${k.done ? '✓' : '→'} ${sanitize(k.text)}</span>`).join('')}</div>
-    </div>`;
-  } else if (dashOkrEl) {
-    dashOkrEl.innerHTML = '';
-  }
-
-  document.getElementById('dash-trim-wrap').innerHTML = `
-    <div class="trim-bar-wrap">
-      <div class="trim-label">
-        <span>Q${insight.aq} — ${insight.ql[insight.aq]}</span>
-        <span>${insight.trimPct}% do trimestre</span>
-      </div>
+      <div class="dash-okr-top">Q${insight.aq} — ${insight.ql[insight.aq]}${obj ? ` · ${sanitize(obj.areaName)}` : ''}</div>
       <div class="trim-bar-bg"><div class="trim-bar-fill" style="width:${insight.trimPct}%"></div></div>
       <div class="trim-days"><span>${insight.trimPassed} ${insight.trimPassed === 1 ? 'dia passado' : 'dias passados'}</span><span>${insight.trimTotal - insight.trimPassed} ${insight.trimTotal - insight.trimPassed === 1 ? 'dia restante' : 'dias restantes'}</span></div>
+      ${paceHtml}
+      ${obj ? `
+        <div class="dash-okr-label">${obj.label}</div>
+        <div class="okr-progress-wrap" style="margin:6px 0 8px">
+          <div class="okr-progress-bg"><div class="okr-progress-fill" style="width:${krPct}%"></div></div>
+          <span class="okr-progress-label">${obj.doneCnt}/${obj.totalCnt} KRs</span>
+        </div>
+        <div class="dash-okr-krs">${obj.krs.map(k => `<span>${k.done ? '✓' : '→'} ${sanitize(k.text)}</span>`).join('')}</div>
+      ` : ''}
     </div>`;
-  const streak2 = calcStreak(state.log);
-  const thisWeekQS = getPeriodDates('semana');
-  let qsDone = 0, qsPoss = 0;
-  thisWeekQS.forEach(date => {
-    const entry = logMap[date];
-    state.userHabits.forEach(h => {
-      if (isExpected(h, date)) { qsPoss++; if (entry && entry.habits[h.id]) qsDone++; }
-    });
-  });
-  const qsPct = qsPoss > 0 ? Math.round(qsDone / qsPoss * 100) : 0;
-  const qsEl = document.getElementById('dash-quick-stats');
-  if (qsEl) qsEl.innerHTML = `
-    <div class="dqs-item"><div class="dqs-val">${streak2}d</div><div class="dqs-label">streak</div></div>
-    <div class="dqs-sep"></div>
-    <div class="dqs-item"><div class="dqs-val">${qsPct}%</div><div class="dqs-label">semana</div></div>
-    <div class="dqs-sep"></div>
-    <div class="dqs-item"><div class="dqs-val">${state.log.length}</div><div class="dqs-label">registros</div></div>`;
-  const dates = getPeriodDates(state.period); let td = 0, tp = 0;
-  dates.forEach(date => {
-    const entry = logMap[date];
-    state.userHabits.forEach(h => { if (isExpected(h, date)) { tp++; if (entry && entry.habits[h.id]) td++; } });
-  });
-  const pct = tp > 0 ? Math.round(td / tp * 100) : 0;
-  const streak = calcStreak(state.log); const best = getBestStreak(state.log);
-  const eVals = state.log.filter(e => e.energy > 0).map(e => e.energy);
-  const avgE = eVals.length ? Math.round(eVals.reduce((a, b) => a + b, 0) / eVals.length * 10) / 10 : 0;
+  }
+
+  const dates = getPeriodDates(state.period);
   const hDays = []; for (let i = 83; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); hDays.push(dateKey(d)); }
 
   // labels de mês acima do heatmap

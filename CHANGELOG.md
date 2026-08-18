@@ -1,5 +1,16 @@
 # Changelog — Você S.A.
 
+## v4.1.0 — 2026-08-18
+
+Dashboard redesenhado: menos cartões, mais sensação de evolução.
+
+- **Comparação com a semana passada**: novo cartão mostra % cumprido desta semana vs. anterior, com variação em pontos percentuais
+- **Recorde pessoal**: mensagem principal avisa quando você bate ou está perto de bater seu streak recorde
+- **Contraste de hábitos**: cartão de foco mostra o hábito que mais melhorou ao lado do que mais caiu (nunca só o lado negativo)
+- **Ritmo do trimestre**: card de OKR e trimestre virou um só, comparando % do calendário já passado com % de KRs já concluídos ("à frente do ritmo" / "no ritmo" / "abaixo do ritmo")
+- Removida a tira de 3 números soltos (streak/semana/registros) — streak passa a aparecer direto no cartão principal; registros totais já existiam no Perfil
+- Limpeza de CSS/JS órfãos deixados por uma simplificação de dashboard anterior (variáveis nunca lidas, classes nunca usadas)
+
 ## v4.0.1 — 2026-08-18
 
 - **Correção**: sequência (streak) exigia 100% dos hábitos esperados no dia desde a v3.0.0 — com vários hábitos simultâneos (idioma, treino, estudo, finanças, bloco de foco), faltar 1 único já derrubava o dia inteiro. Passa a exigir 80% dos hábitos do dia (mantendo o perdão de 1 dia/mês). A conquista "Semana perfeita" continua exigindo 100%, sem mudança.

@@ -31,7 +31,6 @@ body.dark .habit-card.done{border-color:var(--verde)}
 body.dark .kr{color:var(--cinza)}
 body.dark .tl-desc{color:var(--cinza)}
 body.dark .dash-hero{background:var(--card)}
-body.dark .dqs-sep{background:var(--borda-forte)}
 /* dark: mais drawer */
 body.dark .mais-drawer{background:var(--card)}
 body.dark .mais-item{background:var(--card-elevado);color:var(--preto)}
@@ -439,8 +438,6 @@ body.dark .g-toast.err{background:#2d1010;color:#fca5a5}
 .dc-name{color:var(--cinza)}
 .dc-val{font-weight:600}
 .dc-up{color:var(--verde)}.dc-down{color:var(--dan-solid)}.dc-same{color:var(--ambar)}
-.trim-bar-wrap{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:14px 16px;margin-bottom:12px}
-.trim-label{font-size:11px;color:var(--cinza);font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between}
 .trim-bar-bg{height:8px;background:var(--borda);border-radius:4px;overflow:hidden;margin-bottom:4px}
 .trim-bar-fill{height:100%;border-radius:4px;background:var(--roxo);transition:width .6s}
 .trim-days{font-size:11px;color:var(--cinza);display:flex;justify-content:space-between}
@@ -682,13 +679,10 @@ body.dark .pomo-stat-tile{box-shadow:none}
 .prof-pref-label{font-size:12px;font-weight:500;color:var(--cinza);margin-bottom:6px;margin-top:14px}
 .prof-pref-label:first-of-type{margin-top:2px}
 
-/* DASHBOARD QUICK STATS */
-.dash-quick-stats{display:flex;align-items:center;justify-content:center;gap:0;background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);padding:10px 16px;margin-bottom:12px}
-.dqs-item{flex:1;text-align:center}
-.dqs-val{font-size:18px;font-weight:700;color:var(--preto);line-height:1.1}
-.dqs-label{font-size:10px;color:var(--cinza);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
-.dqs-sep{width:1px;height:32px;background:var(--borda);margin:0 8px;flex-shrink:0}
 .dash-divider{border:none;border-top:1px solid var(--borda);margin:12px 0 16px}
+.dash-hero-streak{position:absolute;top:16px;right:18px;font-size:13px;font-weight:700;color:var(--preto);background:var(--fundo);border:1px solid var(--borda);border-radius:20px;padding:3px 10px}
+.dash-hero-record{color:var(--ambar)}
+.dash-pace{font-size:12px;font-weight:500;margin:8px 0;line-height:1.4}
 
 /* SKELETON — placeholder de carregamento generico, evita flash de conteudo vazio
    enquanto os dados ainda nao chegaram do servidor (ex: primeiro load apos login) */
@@ -883,11 +877,11 @@ body.dark .cal-cell.cal-warn{background:#251a05;color:#FBB040}
 /* --- SOMBRAS REMOVIDAS NO DARK --- */
 body.dark .card,body.dark .habit-card,body.dark .dash-hero,
 body.dark .heatmap-wrap,body.dark .chart-wrap,body.dark .energy-chart-wrap,
-body.dark .cal-wrap,body.dark .trim-bar-wrap,body.dark .review-card,
+body.dark .cal-wrap,body.dark .review-card,
 body.dark .pillar-card,body.dark .bib-item{box-shadow:none}
 
 /* --- SOMBRAS ADICIONAIS EM ELEMENTOS CARD-LIKE --- */
-.heatmap-wrap,.chart-wrap,.energy-chart-wrap,.cal-wrap,.trim-bar-wrap,.review-card{box-shadow:var(--shadow-sm)}
+.heatmap-wrap,.chart-wrap,.energy-chart-wrap,.cal-wrap,.review-card{box-shadow:var(--shadow-sm)}
 
 /* --- HEADER: SOMBRA SUTIL --- */
 .app-header-compact{box-shadow:0 1px 8px rgba(0,0,0,.05)}
@@ -932,7 +926,7 @@ body.dark .nota-area:focus,body.dark .ob-textarea:focus{
 
 /* --- NÚMEROS DE DESTAQUE EM SERIF --- */
 .stat-val{font-family:'DM Serif Display',serif;font-weight:400}
-.dqs-val{font-family:'DM Serif Display',serif;font-weight:400;font-size:20px}
+.dc-val{font-family:'DM Serif Display',serif;font-weight:400;font-size:18px}
 
 /* --- HOVER INTERATIVO --- */
 .achiev-card{transition:transform .15s,box-shadow .15s,border-color .15s}
