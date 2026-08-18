@@ -105,5 +105,5 @@ export const state = {
     situation: '', meta: '', metas: [], sonoMeta: 7, estudoMeta: 30,
   },
   pomodoro: { timer: null, seconds: 25 * 60, isRunning: false, isBreak: false, sessions: 0, subject: '' },
-  reviewData: { feel: '', adjust: [] },
+  reviewData: { semana: { feel: '', adjust: [] }, mes: { feel: '', adjust: [] } },
 };

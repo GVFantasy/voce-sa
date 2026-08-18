@@ -276,18 +276,45 @@
         <div id="review-impact" class="impact-box" style="display:none"></div>
         <div class="review-q">Como foi a semana no geral?</div>
         <div class="review-options" id="review-feel">
-          <button class="review-opt" onclick="setReviewFeel('facil',this)">😊 Fácil</button>
-          <button class="review-opt" onclick="setReviewFeel('ok',this)">😐 Ok</button>
-          <button class="review-opt" onclick="setReviewFeel('pesada',this)">😰 Pesada</button>
+          <button class="review-opt" onclick="setReviewFeel('semana','facil',this)">😊 Fácil</button>
+          <button class="review-opt" onclick="setReviewFeel('semana','ok',this)">😐 Ok</button>
+          <button class="review-opt" onclick="setReviewFeel('semana','pesada',this)">😰 Pesada</button>
         </div>
         <div class="review-q" style="margin-top:10px">Quer ajustar algo na próxima semana?</div>
         <div class="review-options" id="review-adjust">
-          <button class="review-opt" onclick="toggleReviewAdjust('treinos',this)">Treinos</button>
-          <button class="review-opt" onclick="toggleReviewAdjust('estudo',this)">Estudo</button>
-          <button class="review-opt" onclick="toggleReviewAdjust('sono',this)">Sono</button>
-          <button class="review-opt" onclick="toggleReviewAdjust('nada',this)">Tudo certo ✓</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('semana','treinos',this)">Treinos</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('semana','estudo',this)">Estudo</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('semana','sono',this)">Sono</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('semana','nada',this)">Tudo certo ✓</button>
         </div>
         <button class="btn-primary" style="margin-top:12px" onclick="saveWeeklyReview()">Salvar revisão</button>
+      </div>
+    </div>
+    <div id="monthly-review-banner" style="display:none">
+      <div class="review-card">
+        <div class="review-title">Revisão do mês 🗓️</div>
+        <div class="review-sub">O mês tá fechando. Um resumo rápido antes de virar a página.</div>
+        <div id="review-stats-m"></div>
+        <div id="review-fin-summary-m" class="review-sub" style="display:none;margin-top:6px"></div>
+        <div id="review-impact-m" class="impact-box" style="display:none"></div>
+        <div class="review-q">Como foi o mês no geral?</div>
+        <div class="review-options" id="review-feel-m">
+          <button class="review-opt" onclick="setReviewFeel('mes','facil',this)">😊 Fácil</button>
+          <button class="review-opt" onclick="setReviewFeel('mes','ok',this)">😐 Ok</button>
+          <button class="review-opt" onclick="setReviewFeel('mes','pesada',this)">😰 Pesada</button>
+        </div>
+        <div class="review-q" style="margin-top:10px">Quer ajustar algo no próximo mês?</div>
+        <div class="review-options" id="review-adjust-m">
+          <button class="review-opt" onclick="toggleReviewAdjust('mes','treinos',this)">Treinos</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('mes','estudo',this)">Estudo</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('mes','sono',this)">Sono</button>
+          <button class="review-opt" onclick="toggleReviewAdjust('mes','nada',this)">Tudo certo ✓</button>
+        </div>
+        <div id="review-peso-wrap-m" style="display:none;margin-top:10px">
+          <div class="review-q">Peso hoje (opcional)</div>
+          <div class="fin-input-wrap" style="margin-top:4px"><span>kg</span><input class="fin-input" id="review-peso-m" type="number" min="0" step="0.1" placeholder="—"></div>
+        </div>
+        <button class="btn-primary" style="margin-top:12px" onclick="saveMonthlyReview()">Salvar revisão</button>
       </div>
     </div>
     <div class="sec-label">Hábitos de hoje</div>

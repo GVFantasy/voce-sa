@@ -124,6 +124,15 @@ export function renderCheckin() {
   } else {
     document.getElementById('weekly-review-banner').style.display = 'none';
   }
+  const now = new Date();
+  const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  if (now.getDate() >= lastDayOfMonth - 2 && state.userCfg.lastReviewedMonth !== mesAtual) {
+    document.getElementById('monthly-review-banner').style.display = 'block';
+    renderMonthlyReview();
+  } else {
+    document.getElementById('monthly-review-banner').style.display = 'none';
+  }
   if (!state.userHabits.length) {
     document.getElementById('habit-list').innerHTML =
       '<div class="empty-state"><strong>Nenhum hábito configurado</strong>Vá em Configurações (⚙️) para definir suas áreas e hábitos do plano de 12 meses.</div>';
@@ -251,8 +260,10 @@ export async function saveDay() {
   renderDashboard(); renderHistorico(); renderConquistas();
 }
 
-export function renderWeeklyReview() {
-  const dates = getPeriodDates('semana'); let html = '';
+// Estatisticas por habito no periodo (semana ou mes) - mesmo calculo pras duas revisoes, so
+// muda o intervalo de datas e o elemento onde renderiza.
+function renderReviewStats(period, elId) {
+  const dates = getPeriodDates(period); let html = '';
   const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   state.userHabits.forEach(h => {
     let done = 0, possible = 0;
@@ -267,37 +278,91 @@ export function renderWeeklyReview() {
     const cls = pct >= 80 ? 'rs-ok' : pct >= 50 ? 'rs-warn' : 'rs-bad';
     html += `<div class="review-stat"><div class="rs-label">${sanitize(h.icon)} ${sanitize(h.name)}</div><div class="rs-val ${cls}">${done}/${possible}</div></div>`;
   });
-  document.getElementById('review-stats').innerHTML = html;
+  document.getElementById(elId).innerHTML = html;
 }
 
-export function setReviewFeel(val, btn) {
-  state.reviewData.feel = val;
-  document.querySelectorAll('#review-feel .review-opt').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  const box = document.getElementById('review-impact');
-  if (val === 'pesada') {
-    box.style.display = 'block';
-    box.textContent = '⚠️ Semanas pesadas são normais. O importante é não pular 2 dias seguidos do mesmo hábito. Reduza a intensidade, não a frequência.';
+export function renderWeeklyReview() {
+  renderReviewStats('semana', 'review-stats');
+}
+
+// Sem coleta nova: cita o resultado financeiro do mes corrente (userCfg.finLog), que o usuario
+// ja lanca por conta propria na tela de OKRs - a revisao so junta o que ja existe.
+export function renderMonthlyReview() {
+  renderReviewStats('mes', 'review-stats-m');
+  const finEl = document.getElementById('review-fin-summary-m');
+  if (!finEl) return;
+  if ((state.userCfg.areas || []).includes('financas')) {
+    const now = new Date();
+    const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const entry = (state.userCfg.finLog || []).find(m => m.mes === mesAtual);
+    const total = entry ? (entry.guardado || 0) + (entry.investido || 0) : 0;
+    finEl.style.display = 'block';
+    finEl.textContent = total > 0
+      ? `💰 Você guardou/investiu R$ ${total.toLocaleString('pt-BR')} este mês.`
+      : '💰 Você ainda não lançou o resultado financeiro deste mês.';
   } else {
-    box.style.display = 'none';
+    finEl.style.display = 'none';
   }
+  const pesoWrap = document.getElementById('review-peso-wrap-m');
+  if (pesoWrap) pesoWrap.style.display = (state.userCfg.areas || []).includes('corpo') ? 'block' : 'none';
 }
 
-export function toggleReviewAdjust(val, btn) {
+export function setReviewFeel(period, val, btn) {
+  state.reviewData[period].feel = val;
+  const groupId = period === 'semana' ? 'review-feel' : 'review-feel-m';
+  const boxId = period === 'semana' ? 'review-impact' : 'review-impact-m';
+  document.querySelectorAll('#' + groupId + ' .review-opt').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const box = document.getElementById(boxId);
+  const msg = period === 'semana'
+    ? '⚠️ Semanas pesadas são normais. O importante é não pular 2 dias seguidos do mesmo hábito. Reduza a intensidade, não a frequência.'
+    : '⚠️ Meses pesados são normais. Olhe o trimestre inteiro, não só este mês, antes de decidir mudar algo.';
+  if (val === 'pesada') { box.style.display = 'block'; box.textContent = msg; }
+  else { box.style.display = 'none'; }
+}
+
+export function toggleReviewAdjust(period, val, btn) {
   btn.classList.toggle('on');
-  const idx = state.reviewData.adjust.indexOf(val);
-  if (idx >= 0) state.reviewData.adjust.splice(idx, 1); else state.reviewData.adjust.push(val);
+  const arr = state.reviewData[period].adjust;
+  const idx = arr.indexOf(val);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(val);
 }
 
 export async function saveWeeklyReview() {
   const today = todayKey();
   if (!state.userCfg.weeklyReviews) state.userCfg.weeklyReviews = {};
-  state.userCfg.weeklyReviews[today] = { date: today, feel: state.reviewData.feel, adjust: [...state.reviewData.adjust] };
+  state.userCfg.weeklyReviews[today] = { date: today, feel: state.reviewData.semana.feel, adjust: [...state.reviewData.semana.adjust] };
   state.userCfg.lastReviewedWeek = today;
   document.getElementById('weekly-review-banner').style.display = 'none';
   const t = document.getElementById('toast'); if (t) { t.textContent = '✓ Revisão salva!'; setTimeout(() => { t.textContent = ''; }, 2000); }
   showToast('Revisão da semana salva!');
-  state.reviewData = { feel: '', adjust: [] };
+  state.reviewData.semana = { feel: '', adjust: [] };
+  await saveCfgAll(false);
+}
+
+// Unico ponto ativo (pede pra parar e responder) do plano de peso/revisao mensal - so 1x/mes,
+// e o peso e um campo opcional dentro desse mesmo momento, nunca um lembrete separado.
+export async function saveMonthlyReview() {
+  const now = new Date();
+  const mes = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (!state.userCfg.monthlyReviews) state.userCfg.monthlyReviews = {};
+  const entry = { mes, feel: state.reviewData.mes.feel, adjust: [...state.reviewData.mes.adjust] };
+  const pesoEl = document.getElementById('review-peso-m');
+  const pesoVal = pesoEl && pesoEl.value ? parseFloat(pesoEl.value) : null;
+  if (pesoVal) {
+    entry.peso = pesoVal;
+    if (!state.userCfg.pesoLog) state.userCfg.pesoLog = [];
+    const today = todayKey();
+    const idx = state.userCfg.pesoLog.findIndex(p => p.data === today);
+    const logEntry = { data: today, peso: pesoVal };
+    if (idx >= 0) state.userCfg.pesoLog[idx] = logEntry; else state.userCfg.pesoLog.push(logEntry);
+  }
+  state.userCfg.monthlyReviews[mes] = entry;
+  state.userCfg.lastReviewedMonth = mes;
+  document.getElementById('monthly-review-banner').style.display = 'none';
+  showToast('Revisão do mês salva!');
+  state.reviewData.mes = { feel: '', adjust: [] };
+  if (pesoEl) pesoEl.value = '';
   await saveCfgAll(false);
 }
 

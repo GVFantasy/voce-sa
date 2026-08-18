@@ -1,5 +1,12 @@
 # Changelog — Você S.A.
 
+## v5.0.0-fase2 — 2026-08-18
+
+Mega atualização v5 (Fase 2 de 6): revisão mensal.
+
+- Nova revisão mensal (banner nos últimos dias do mês, mesmo espírito da revisão semanal) — mostra o desempenho do mês por hábito e, pra quem tem Finanças ativa, o resultado financeiro já lançado
+- Peso vira um campo opcional dentro desse mesmo momento (só pra quem tem Corpo ativo) — sem tracker separado, sem lembrete próprio, só uma pergunta a mais dentro de algo que já ia acontecer
+
 ## v5.0.0-fase1 — 2026-08-18
 
 Mega atualização v5 (Fase 1 de 6): nivelando Tempo, Relações e Corpo com o resto do app.
