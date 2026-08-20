@@ -1,5 +1,11 @@
 # Changelog — Você S.A.
 
+## v5.0.1 — 2026-08-20
+
+Polimento pós-v5: auditoria de QA na versão em produção.
+
+- **Gráfico de energia do Dashboard**: a seção "Energia — últimos 14 dias" existia desde a v4 mas nunca era desenhada (a função ficou pronta e sem uso) — o card aparecia sempre vazio, sem os últimos 14 dias nem o destaque de melhor dia. Corrigido: volta a renderizar normalmente.
+
 ## v5.0.0 — 2026-08-18
 
 Mega atualização v5 (Fase 6 de 6, fechando a v5): exportação completa + onboarding.

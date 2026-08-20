@@ -347,6 +347,8 @@ export async function renderDashboard() {
       <div class="bar-bg"><div class="bar-fill" style="width:${p2}%;background:${color}"></div></div>${dots}
     </div>`;
   }).join('');
+
+  renderEnergyChart();
 }
 
 export function setPeriod(p, el) {
