@@ -9,7 +9,49 @@ function pop(el) {
   el.classList.add('pop');
 }
 
+const OBI_TOTAL = 4;
+let obiIdx = 0;
+
 export function startOnboarding() {
+  obiIdx = 0;
+  document.getElementById('pg-ob-intro').style.display = 'flex';
+  obIntroShow(0);
+}
+
+function obIntroRender() {
+  document.querySelectorAll('.obi-slide').forEach((el, i) => {
+    el.classList.remove('on', 'out-left');
+    if (i < obiIdx) el.classList.add('out-left');
+  });
+  const cur = document.querySelector(`.obi-slide[data-i="${obiIdx}"]`);
+  if (cur) requestAnimationFrame(() => cur.classList.add('on'));
+  document.getElementById('obi-dots').innerHTML = Array.from({ length: OBI_TOTAL }, (_, i) =>
+    `<div class="obi-dot ${i === obiIdx ? 'on' : ''}" onclick="obIntroGoto(${i})"></div>`
+  ).join('');
+  const btn = document.getElementById('obi-next-btn');
+  if (btn) btn.textContent = obiIdx === OBI_TOTAL - 1 ? 'Vamos montar seu plano →' : 'Próximo →';
+}
+
+export function obIntroShow(n) {
+  obiIdx = Math.max(0, Math.min(OBI_TOTAL - 1, n));
+  obIntroRender();
+}
+
+export function obIntroGoto(n) {
+  obIntroShow(n);
+}
+
+export function obIntroNext() {
+  if (obiIdx >= OBI_TOTAL - 1) { obIntroFinish(); return; }
+  obIntroShow(obiIdx + 1);
+}
+
+export function obIntroSkip() {
+  obIntroFinish();
+}
+
+function obIntroFinish() {
+  document.getElementById('pg-ob-intro').style.display = 'none';
   document.getElementById('pg-onboard').style.display = 'block';
   showObStep(1);
 }

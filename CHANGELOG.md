@@ -1,5 +1,13 @@
 # Changelog — Você S.A.
 
+## v5.0.3 — 2026-08-20
+
+Guia inicial antes do onboarding.
+
+- **Novo carrossel de boas-vindas** (4 telas) explicando o conceito do app antes de começar a montar o plano: o que é o Você S.A., as 5 áreas, o check-in diário, e a lógica de trimestres/retrospectiva
+- Pode ser pulado a qualquer momento ("Pular", canto superior direito) — não é obrigatório pra quem já conhece o app
+- Navegação por bolinhas (toque em qualquer uma pra pular direto) além do botão "Próximo"
+
 ## v5.0.2 — 2026-08-20
 
 Mais vida no onboarding.
