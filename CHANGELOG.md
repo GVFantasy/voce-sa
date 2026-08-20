@@ -1,5 +1,14 @@
 # Changelog — Você S.A.
 
+## v5.0.2 — 2026-08-20
+
+Mais vida no onboarding.
+
+- Transição entre os passos ganhou uma curva com leve "mola" em vez de deslizar reto
+- Cada seleção (área, prioridade, chip, dia da semana, idioma) dá um pop sutil de confirmação
+- A barrinha de progresso pulsa no passo recém-concluído
+- Ícone de "montando seu plano" gira enquanto o plano é gerado, e as mensagens (Analisando perfil/Definindo pilares/...) trocam com crossfade em vez de aparecer bruscamente
+
 ## v5.0.1 — 2026-08-20
 
 Polimento pós-v5: auditoria de QA na versão em produção.

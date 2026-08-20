@@ -331,15 +331,24 @@ body.dark .mais-item-icon{color:var(--preto)}
 .ob-btn-back{padding:13px 18px;border-radius:var(--radius-card);border:1px solid var(--borda);background:transparent;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;color:var(--cinza)}
 .ob-btn-next{flex:1;padding:13px;border-radius:var(--radius-card);border:none;background:var(--preto);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s}
 .ob-btn-next:disabled{opacity:.4;cursor:default}
-.ob-step{position:absolute;width:100%;top:0;left:0;opacity:0;pointer-events:none;transform:translateX(60px);transition:opacity .3s ease,transform .3s ease}
-.ob-step.on{opacity:1;pointer-events:all;transform:translateX(0);position:relative}
-.ob-step.out-left{opacity:0;transform:translateX(-60px);transition:opacity .2s,transform .2s}
+.ob-step{position:absolute;width:100%;top:0;left:0;opacity:0;pointer-events:none;transform:translateX(60px) scale(.97);transition:opacity .35s ease,transform .45s cubic-bezier(.22,1.4,.36,1)}
+.ob-step.on{opacity:1;pointer-events:all;transform:translateX(0) scale(1);position:relative}
+.ob-step.out-left{opacity:0;transform:translateX(-60px) scale(.97);transition:opacity .2s,transform .25s ease}
 .ob-option{transition:all .18s ease}
 .ob-option:hover{border-color:var(--roxo);background:var(--roxo-bg);color:var(--roxo);transform:translateY(-1px)}
 .ob-chip{transition:all .15s ease}
 .ob-chip:hover{border-color:var(--roxo);background:var(--roxo-bg);color:var(--roxo)}
 .ob-day-btn{transition:all .15s ease}
 .ob-day-btn:hover{border-color:var(--roxo);color:var(--roxo);background:var(--roxo-bg)}
+@keyframes obPop{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
+.ob-option.pop,.ob-chip.pop,.ob-day-btn.pop{animation:obPop 240ms cubic-bezier(.34,1.56,.64,1)}
+@keyframes obDotPop{0%{transform:scaleY(1)}50%{transform:scaleY(2.4)}100%{transform:scaleY(1)}}
+.ob-prog-dot.just{animation:obDotPop 320ms ease-out}
+.ob-intro-icon{display:inline-block;animation:obIconIn 550ms cubic-bezier(.34,1.56,.64,1)}
+@keyframes obIconIn{0%{transform:scale(.4) rotate(-12deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.ob-loading-icon{display:inline-block;animation:obSpin 1.8s linear infinite}
+@keyframes obSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+#ob-generating{transition:opacity .18s ease}
 
 /* CHECK-IN */
 .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}

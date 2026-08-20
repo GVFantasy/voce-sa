@@ -3,6 +3,12 @@ import { saveCfgLocal, saveCfgRemote, saveCfgAll, setSyncStatus } from './db.js'
 import { showToast, todayKey, sanitize } from './utils.js';
 import { buildHabitsFromCfg } from './habits.js';
 
+function pop(el) {
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
 export function startOnboarding() {
   document.getElementById('pg-onboard').style.display = 'block';
   showObStep(1);
@@ -25,7 +31,7 @@ export function showObStep(n) {
   const total = 4;
   let html = '';
   for (let i = 1; i <= total; i++) {
-    html += `<div class="ob-prog-dot ${i <= n ? 'done' : ''}"></div>`;
+    html += `<div class="ob-prog-dot ${i <= n ? 'done' : ''}${i === n ? ' just' : ''}"></div>`;
   }
   document.getElementById('ob-progress').innerHTML = html;
   if (n === 3) {
@@ -75,7 +81,7 @@ export function obToggleArea(btn) {
   const val = btn.dataset.val;
   const idx = state.obData.areas.indexOf(val);
   if (idx >= 0) { state.obData.areas.splice(idx, 1); btn.classList.remove('on'); }
-  else { state.obData.areas.push(val); btn.classList.add('on'); }
+  else { state.obData.areas.push(val); btn.classList.add('on'); pop(btn); }
   checkObStep2();
 }
 
@@ -83,6 +89,7 @@ export function obSingleMeta(btn) {
   const parent = btn.closest('.ob-options');
   if (parent) parent.querySelectorAll('.ob-option').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
+  pop(btn);
   state.obData.metas = [btn.dataset.val];
   checkObStep2();
 }
@@ -93,7 +100,9 @@ export function checkObStep2() {
 }
 
 export function obToggleIdioma(btn) {
+  const turningOn = !btn.classList.contains('on');
   btn.classList.toggle('on');
+  if (turningOn) pop(btn);
   const val = btn.dataset.val;
   const idx = state.obData.idiomas.indexOf(val);
   if (idx >= 0) state.obData.idiomas.splice(idx, 1);
@@ -106,6 +115,7 @@ export function obSonoMeta(btn) {
   const parent = btn.closest('.ob-chips');
   if (parent) parent.querySelectorAll('.ob-chip').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
+  pop(btn);
   state.obData.sonoMeta = parseInt(btn.dataset.val);
 }
 
@@ -113,6 +123,7 @@ export function obEstudoMeta(btn) {
   const parent = btn.closest('.ob-chips');
   if (parent) parent.querySelectorAll('.ob-chip').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
+  pop(btn);
   state.obData.estudoMeta = parseInt(btn.dataset.val);
 }
 
@@ -123,7 +134,7 @@ export function obToggleChip(group, btn) {
     : state.obData.aprender;
   const idx = arr.indexOf(val);
   if (idx >= 0) { arr.splice(idx, 1); btn.classList.remove('on'); }
-  else { arr.push(val); btn.classList.add('on'); }
+  else { arr.push(val); btn.classList.add('on'); pop(btn); }
 }
 
 export function obToggleDay(group, btn) {
@@ -133,13 +144,14 @@ export function obToggleDay(group, btn) {
     : state.obData.estudoDias;
   const idx = arr.indexOf(val);
   if (idx >= 0) { arr.splice(idx, 1); btn.classList.remove('on'); }
-  else { arr.push(val); btn.classList.add('on'); }
+  else { arr.push(val); btn.classList.add('on'); pop(btn); }
 }
 
 export function obSingle(group, btn) {
   const parent = btn.closest('.ob-options,.ob-chips');
   if (parent) parent.querySelectorAll('.ob-option,.ob-chip').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
+  pop(btn);
   if (group === 'situation') {
     state.obData.situation = btn.dataset.val;
     const nb = document.getElementById('ob-next-1'); if (nb) nb.disabled = false;
@@ -156,7 +168,13 @@ export async function generatePlan() {
   const msgs = ['Analisando seu perfil...', 'Definindo pilares...', 'Gerando OKRs...', 'Montando rotina...', 'Finalizando...'];
   let i = 0;
   const el = document.getElementById('ob-generating');
-  const iv = setInterval(() => { if (i < msgs.length) { if (el) el.textContent = msgs[i]; i++; } }, 600);
+  const iv = setInterval(() => {
+    if (i < msgs.length && el) {
+      el.style.opacity = 0;
+      setTimeout(() => { el.textContent = msgs[i]; el.style.opacity = 1; }, 150);
+      i++;
+    }
+  }, 600);
   // idioma so tem fallback pra 'ingles' quando a area "mente" foi escolhida (idioma obrigatorio
   // nesse caso) - quem pulou o passo 3 por nao ter marcado "mente" fica sem habito de idioma,
   // em vez de ganhar um Inglês forçado que não pediu.
