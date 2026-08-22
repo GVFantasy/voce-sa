@@ -340,6 +340,11 @@ body.dark .mais-item-icon{color:var(--preto)}
 .ob-chip:hover{border-color:var(--roxo);background:var(--roxo-bg);color:var(--roxo)}
 .ob-day-btn{transition:all .15s ease}
 .ob-day-btn:hover{border-color:var(--roxo);color:var(--roxo);background:var(--roxo-bg)}
+.ob-option-title{font-weight:600}
+.ob-option-sub{font-size:11px;color:var(--cinza)}
+.ob-section-label{font-size:13px;font-weight:600;color:var(--preto);margin:16px 0 8px}
+.ob-center-block{text-align:center;padding:20px 0 16px}
+.ob-center-block-lg{text-align:center;padding:48px 0}
 @keyframes obPop{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
 .ob-option.pop,.ob-chip.pop,.ob-day-btn.pop{animation:obPop 240ms cubic-bezier(.34,1.56,.64,1)}
 @keyframes obDotPop{0%{transform:scaleY(1)}50%{transform:scaleY(2.4)}100%{transform:scaleY(1)}}
