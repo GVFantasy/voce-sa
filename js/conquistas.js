@@ -18,7 +18,7 @@ function ensureBibConcluidosLoaded() {
 }
 
 // Mapeamento de raridade por achievement id
-const RARITY = {
+export const RARITY = {
   primeiro: 'comum',
   semana1:  'comum',
   treino10: 'comum',
@@ -36,7 +36,7 @@ const RARITY = {
   mes3:     'epico',
 };
 
-const RARITY_BADGE = {
+export const RARITY_BADGE = {
   raro:  'Raro',
   epico: 'Épico',
 };
@@ -135,7 +135,9 @@ export function renderConquistas() {
       : '';
     const prog = unlocked ? null : getProgress(a, state.log, streak);
     const progHTML = prog ? `<div class="achiev-prog"><div class="achiev-prog-bar" style="width:${Math.round(prog.cur/prog.max*100)}%"></div></div><div class="achiev-prog-txt">${prog.cur}/${prog.max}</div>` : '';
+    const shareBtn = unlocked ? `<button class="icon-btn achiev-share-btn" aria-label="Compartilhar conquista" onclick="event.stopPropagation();shareAchievement('${a.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>` : '';
     return `<div class="achiev-card${rarityClass}${unlocked ? ' unlocked' : ''}">
+      ${shareBtn}
       <div class="achiev-icon">${a.icon}</div>
       <div class="achiev-name">${a.name}</div>
       <div class="achiev-desc">${a.desc}</div>

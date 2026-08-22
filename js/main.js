@@ -15,6 +15,7 @@ import { getPlans, getActivePlanId, openPlanModal, closePlanModal, switchPlan, a
 import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } from './nav.js';
 import { setRetroTab, retroPrevQ, retroNextQ } from './retrospectiva.js';
 import { saveFinMes } from './financeiro.js';
+import { shareAchievement } from './share.js';
 
 // Expõe ao window para os onclick inline no HTML
 window.clearFieldErr = clearFieldErr;
@@ -81,6 +82,7 @@ window.setHistoricoHabitFilter = setHistoricoHabitFilter;
 window.navCalMonth = navCalMonth;
 window.showHiDay = showHiDay;
 window.renderConquistas = renderConquistas;
+window.shareAchievement = shareAchievement;
 
 window.renderPerfil = renderPerfil;
 window.savePerfil = savePerfil;
