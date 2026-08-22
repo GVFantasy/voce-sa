@@ -1,5 +1,12 @@
 # Changelog — Você S.A.
 
+## v5.0.6 — 2026-08-21
+
+Resumo semanal.
+
+- Novo aviso opcional aos domingos à noite, avisando quantos dias você fez check-in na semana (e como ficou vs. a semana anterior) — em Perfil → Lembrete diário, junto do lembrete que já existia
+- Continua funcionando mesmo com o app fechado (mesma infraestrutura de push do lembrete diário)
+
 ## v5.0.5 — 2026-08-21
 
 Streak com congelamento.
