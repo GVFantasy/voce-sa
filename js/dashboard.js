@@ -1,5 +1,5 @@
 import { state, DLABELS, META_LABELS, SITUATION_START_HINTS } from './state.js';
-import { todayKey, dateKey, fmtDate, isExpected, calcStreak, getBestStreak, getPeriodDates, getActiveQ, sanitize, sumGastosInPeriod } from './utils.js';
+import { todayKey, dateKey, fmtDate, isExpected, calcStreakWithFreezes, getBestStreak, getPeriodDates, getActiveQ, sanitize, sumGastosInPeriod } from './utils.js';
 
 // % cumprido de cada habito num intervalo de datas, individual e agregado - usado pra comparar
 // a semana atual com a anterior (generateDashboardInsight) sem duplicar o loop duas vezes.
@@ -21,7 +21,7 @@ function habitStatsForDates(dates, logMap) {
 }
 
 export function generateDashboardInsight() {
-  const today = todayKey(); const streak = calcStreak(state.log);
+  const today = todayKey(); const { streak, freezes } = calcStreakWithFreezes(state.log);
   const logMap = Object.fromEntries(state.log.map(e => [e.date, e]));
   const dates7 = getPeriodDates('semana');
   const prevDates7 = dates7.map(dt => { const d = new Date(dt + 'T12:00:00'); d.setDate(d.getDate() - 7); return dateKey(d); });
@@ -128,7 +128,7 @@ export function generateDashboardInsight() {
     }
   }
   return {
-    msg, sub, color, label, streak, pct7, pct7Prev: prev7.pct, pct7Delta, hasPrevWeek,
+    msg, sub, color, label, streak, freezes, pct7, pct7Prev: prev7.pct, pct7Delta, hasPrevWeek,
     worstHabit, worstPct, improvedHabit, declinedHabit,
     bestStreak, recordGap, isRecord,
     trimPct, trimPassed, trimTotal, aq, ql,
@@ -141,7 +141,7 @@ export async function renderDashboard() {
   const insight = generateDashboardInsight();
   document.getElementById('dash-hero-wrap').innerHTML = `
     <div class="dash-hero ${insight.color}">
-      ${insight.streak > 0 ? `<div class="dash-hero-streak"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${insight.streak}d${insight.isRecord ? ' <span class="dash-hero-record">★</span>' : ''}</div>` : ''}
+      ${insight.streak > 0 ? `<div class="dash-hero-streak"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${insight.streak}d${insight.isRecord ? ' <span class="dash-hero-record">★</span>' : ''}${insight.freezes > 0 ? ` <span class="dash-hero-freeze">❄️${insight.freezes}</span>` : ''}</div>` : ''}
       <div class="dash-hero-label">${insight.label}</div>
       <div class="dash-hero-msg">${insight.msg}</div>
       <div class="dash-hero-sub">${insight.sub}</div>

@@ -312,9 +312,15 @@
   <div id="pg-checkin" class="page on">
     <div class="topbar">
       <div><div class="greeting" id="greeting"></div><div class="sub-date" id="sub-date"></div></div>
-      <div class="streak-pill" onclick="nav('conquistas',null)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <span id="streak-val">0d</span>
+      <div class="topbar-badges">
+        <div class="streak-pill" onclick="nav('conquistas',null)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span id="streak-val">0d</span>
+        </div>
+        <div class="freeze-pill" id="freeze-pill" style="display:none" title="Congelamentos disponíveis — perdoam um dia perdido sem quebrar a sequência">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M12 2l-4 4M12 2l4 4M12 22l-4-4M12 22l4-4M2 12h20M2 12l4-4M2 12l4 4M22 12l-4-4M22 12l-4 4"/></svg>
+          <span id="freeze-val">0</span>
+        </div>
       </div>
     </div>
     <div id="weekly-review-banner" style="display:none">

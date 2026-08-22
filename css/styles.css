@@ -360,6 +360,8 @@ body.dark .mais-item-icon{color:var(--preto)}
 .greeting{font-size:19px;font-weight:600}
 .sub-date{font-size:11px;color:var(--cinza);margin-top:2px}
 .streak-pill{background:var(--roxo-bg);color:var(--roxo);font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer}
+.topbar-badges{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.freeze-pill{background:var(--info-bg);color:var(--info-txt);font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;white-space:nowrap}
 .habit-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-card);margin-bottom:8px;overflow:hidden;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .habit-card.done{border-color:var(--verde)}
 .habit-card.skip{opacity:.35}
@@ -690,6 +692,7 @@ body.dark .pomo-stat-tile{box-shadow:none}
 .dash-divider{border:none;border-top:1px solid var(--borda);margin:12px 0 16px}
 .dash-hero-streak{position:absolute;top:18px;right:20px;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 11px}
 .dash-hero-record{color:#FFE9A8}
+.dash-hero-freeze{margin-left:2px;font-size:11px;font-weight:600;opacity:.85}
 .dash-pace{font-size:12px;font-weight:500;margin:8px 0;line-height:1.4}
 
 /* SKELETON — placeholder de carregamento generico, evita flash de conteudo vazio

@@ -121,48 +121,60 @@ export function dayFulfilled(entry, date, threshold = 1) {
   return doneCount / expected.length >= threshold;
 }
 
-// Chave de mês-calendário (ex: "2026-7" pra agosto/2026, mês 0-indexado como Date.getMonth())
-// usada pelo perdão de streak abaixo — 1 por mês, não reseta por streak, é do calendário real.
-const monthKeyOf = date => { const d = new Date(date + 'T12:00:00'); return `${d.getFullYear()}-${d.getMonth()}`; };
+// Congelamento de streak "por consistência" (substitui o antigo perdão fixo de 1 falha por
+// mês-calendário): a cada FREEZE_EARN_EVERY dias cumpridos seguidos dentro da sequência atual,
+// o usuário ganha +1 congelamento, até um teto de FREEZE_MAX acumulados. Um dia não cumprido
+// consome 1 congelamento se houver saldo (sequência continua, sem contar o dia); sem saldo,
+// quebra normalmente. O "direito a falhar" passa a ser conquistado pelo uso do app em vez de
+// concedido de graça todo mês.
+export const FREEZE_EARN_EVERY = 10;
+export const FREEZE_MAX = 2;
 
-// Sequência atual (streak "ao vivo"), andando pra trás a partir de ontem. 1 perdão automático
-// por mês-calendário: um dia não cumprido não soma à sequência, mas também não a quebra — a
-// menos que o perdão daquele mês já tenha sido usado, aí quebra normalmente. O limite de
-// iteração fica independente do contador de streak (que pode ficar "parado" em dias perdoados),
-// senão um histórico com meses inteiros sem dado nenhum faria o laço rodar indefinidamente.
-export function calcStreak(lg) {
+// Sequência atual (streak "ao vivo") + saldo de congelamentos, andando pra trás a partir de
+// ontem. Para no primeiro dia anterior ao início real da conta (startDate) ou ao 1º registro do
+// log, o que vier primeiro — sem esse limite, dias "antes de existir conta" seriam lidos como
+// falhas e gastariam congelamento à toa, zerando o saldo mesmo com uma sequência saudável.
+export function calcStreakWithFreezes(lg) {
   const map = Object.fromEntries(lg.map(e => [e.date, e]));
-  const pardonedMonths = new Set();
-  let s = 0; let d = new Date(); d.setDate(d.getDate() - 1);
+  const firstDates = [state.userCfg.startDate, ...lg.map(e => e.date)].filter(Boolean).sort();
+  const floor = firstDates[0] || todayKey();
+  let s = 0, freezes = 0, fulfilledRun = 0;
+  let d = new Date(); d.setDate(d.getDate() - 1);
   for (let i = 0; i < 365; i++) {
     const k = dateKey(d);
+    if (k < floor) break;
     if (dayFulfilled(map[k], k, STREAK_THRESHOLD)) {
-      s++;
+      s++; fulfilledRun++;
+      if (fulfilledRun % FREEZE_EARN_EVERY === 0 && freezes < FREEZE_MAX) freezes++;
+    } else if (freezes > 0) {
+      freezes--;
     } else {
-      const mk = monthKeyOf(k);
-      if (pardonedMonths.has(mk)) break;
-      pardonedMonths.add(mk);
+      break;
     }
     d.setDate(d.getDate() - 1);
   }
   if (dayFulfilled(map[todayKey()], todayKey(), STREAK_THRESHOLD)) s++;
-  return s;
+  return { streak: s, freezes };
+}
+
+export function calcStreak(lg) {
+  return calcStreakWithFreezes(lg).streak;
 }
 
 // Maior sequência dentro de um intervalo de datas (ordem cronológica, mais antiga primeiro),
-// com o mesmo perdão de 1 dia por mês-calendário do calcStreak — usada por getBestStreak() e
-// pelas métricas de sequência do motor de KRs automáticos (habitStreakInQuarter/
+// com o mesmo congelamento por consistência do calcStreakWithFreezes — usada por getBestStreak()
+// e pelas métricas de sequência do motor de KRs automáticos (habitStreakInQuarter/
 // overallStreakInQuarter), pra que toda medida de "sequência" do app siga o mesmo critério.
 export function longestRunWithPardon(dates, isFulfilledFn) {
-  const pardonedMonths = new Set();
-  let best = 0, cur = 0;
+  let best = 0, cur = 0, freezes = 0, fulfilledRun = 0;
   dates.forEach(date => {
     if (isFulfilledFn(date)) {
-      cur++; if (cur > best) best = cur;
+      cur++; fulfilledRun++; if (cur > best) best = cur;
+      if (fulfilledRun % FREEZE_EARN_EVERY === 0 && freezes < FREEZE_MAX) freezes++;
+    } else if (freezes > 0) {
+      freezes--;
     } else {
-      const mk = monthKeyOf(date);
-      if (pardonedMonths.has(mk)) cur = 0;
-      else pardonedMonths.add(mk);
+      cur = 0; fulfilledRun = 0; freezes = 0;
     }
   });
   return best;

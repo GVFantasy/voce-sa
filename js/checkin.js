@@ -1,7 +1,7 @@
 import { state, ECLASS, REFLECTIONS } from './state.js';
 import { getActiveObjective } from './okrs.js';
 import { sb, setSyncStatus, saveCfgAll, saveTsLocal, loadTsLocal, clearTsLocal, queuePendingCheckin, clearPendingCheckin, refreshPendingCheckinIfQueued } from './db.js';
-import { todayKey, isExpected, showToast, calcStreak, getPeriodDates, sanitize } from './utils.js';
+import { todayKey, isExpected, showToast, calcStreak, calcStreakWithFreezes, getPeriodDates, sanitize } from './utils.js';
 import { getActivePlanId } from './plans.js';
 
 // Persiste o rascunho não salvo do check-in de hoje, para não perder alterações ao trocar de aba.
@@ -114,7 +114,13 @@ export function renderCheckin() {
     (h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite') + ', ' + state.userCfg.name;
   document.getElementById('sub-date').textContent =
     new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('streak-val').textContent = calcStreak(state.log) + 'd';
+  const { streak: curStreak, freezes: curFreezes } = calcStreakWithFreezes(state.log);
+  document.getElementById('streak-val').textContent = curStreak + 'd';
+  const freezePill = document.getElementById('freeze-pill');
+  if (freezePill) {
+    freezePill.style.display = curFreezes > 0 ? 'flex' : 'none';
+    document.getElementById('freeze-val').textContent = curFreezes;
+  }
 
   renderOkrFocusStrip();
   document.getElementById('reflection-q').textContent = REFLECTIONS[new Date().getDay() % REFLECTIONS.length];
