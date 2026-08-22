@@ -102,11 +102,56 @@ Deno.serve(async (req) => {
     if (staleIds.length) await admin.from("push_subscriptions").delete().in("id", staleIds);
   }
 
+  // Rotina travada: aviso no INICIO de cada bloco (so notificacao/cobranca, nunca bloqueio -
+  // decisao explicita do usuario ao planejar). Dedup por blocoId+data dentro do proprio JSONB
+  // (rotinaSentBlocks), zerado pelo client quando a rotina e encerrada/arquivada (js/rotina.js).
+  async function sendRotinaBlockAlerts(rotinaDue: { userId: string; blocoId: string; label: string; localDate: string }[]) {
+    if (!rotinaDue.length) return;
+    const userIds = [...new Set(rotinaDue.map(d => d.userId))];
+    const { data: subs } = await admin
+      .from("push_subscriptions")
+      .select("id, user_id, endpoint, p256dh, auth")
+      .in("user_id", userIds);
+    const subsByUser = new Map<string, typeof subs>();
+    (subs || []).forEach(s => {
+      if (!subsByUser.has(s.user_id)) subsByUser.set(s.user_id, []);
+      subsByUser.get(s.user_id)!.push(s);
+    });
+
+    const staleIds: string[] = [];
+    const sentKeysByUser = new Map<string, string[]>();
+    await Promise.all(rotinaDue.map(async (d) => {
+      const payload = JSON.stringify({ title: "Hora da rotina ⏰", body: d.label, url: "./#rotina" });
+      const userSubs = subsByUser.get(d.userId) || [];
+      await Promise.all(userSubs.map(async (sub) => {
+        try {
+          await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
+        } catch (e) {
+          if (e.statusCode === 404 || e.statusCode === 410) staleIds.push(sub.id);
+        }
+      }));
+      const key = `${d.blocoId}|${d.localDate}`;
+      if (!sentKeysByUser.has(d.userId)) sentKeysByUser.set(d.userId, []);
+      sentKeysByUser.get(d.userId)!.push(key);
+    }));
+
+    await Promise.all([...sentKeysByUser.entries()].map(async ([userId, keys]) => {
+      const { data: cfgRow } = await admin.from("user_config").select("config").eq("user_id", userId).single();
+      const cfg = cfgRow?.config || {};
+      const rotinaSentBlocks = { ...(cfg.rotinaSentBlocks || {}) };
+      keys.forEach(k => { rotinaSentBlocks[k] = true; });
+      await admin.from("user_config").update({ config: { ...cfg, rotinaSentBlocks } }).eq("user_id", userId);
+    }));
+
+    if (staleIds.length) await admin.from("push_subscriptions").delete().in("id", staleIds);
+  }
+
   const due: { userId: string; localDate: string; tzOffsetMin: number; localHour: number }[] = [];
   // Resumo semanal: domingo ~20h local, opt-in separado (resumoSemanalAtivo), 1x por semana
   // (guardado como lastWeeklySummaryDate no proprio blob de config, sem tabela/coluna nova).
   const WEEKLY_HOUR = 20;
   const weeklyDue: { userId: string; localDate: string; tzOffsetMin: number }[] = [];
+  const rotinaDue: { userId: string; blocoId: string; label: string; localDate: string }[] = [];
   for (const row of configs || []) {
     const cfg = row.config || {};
     const tzOffsetMin = cfg.tzOffsetMin || 0;
@@ -130,11 +175,28 @@ Deno.serve(async (req) => {
         weeklyDue.push({ userId: row.user_id, localDate: today, tzOffsetMin });
       }
     }
+    if (cfg.rotina?.blocos?.length) {
+      const localNow = localMinutesNow(tzOffsetMin);
+      const localDow = new Date(Date.now() - tzOffsetMin * 60000).getUTCDay();
+      const today = localDateStr(tzOffsetMin);
+      const sent = cfg.rotinaSentBlocks || {};
+      for (const bloco of cfg.rotina.blocos) {
+        if (!bloco.diasSemana?.includes(localDow)) continue;
+        const [ih, im] = String(bloco.inicio).split(":").map(Number);
+        if (Number.isNaN(ih) || Number.isNaN(im)) continue;
+        const targetMin = ih * 60 + im;
+        const diff = Math.min(Math.abs(localNow - targetMin), 1440 - Math.abs(localNow - targetMin));
+        if (diff > WINDOW_MIN) continue;
+        if (sent[`${bloco.id}|${today}`]) continue;
+        rotinaDue.push({ userId: row.user_id, blocoId: bloco.id, label: bloco.label, localDate: today });
+      }
+    }
   }
 
   if (weeklyDue.length) await sendWeeklySummaries(weeklyDue);
+  if (rotinaDue.length) await sendRotinaBlockAlerts(rotinaDue);
 
-  if (!due.length) return new Response(JSON.stringify({ sent: 0, weekly: weeklyDue.length }), { status: 200 });
+  if (!due.length) return new Response(JSON.stringify({ sent: 0, weekly: weeklyDue.length, rotina: rotinaDue.length }), { status: 200 });
 
   // Não notifica quem já fez check-in hoje (data local de cada usuário, conforme seu próprio fuso).
   const distinctDates = [...new Set(due.map(d => d.localDate))];

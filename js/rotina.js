@@ -331,6 +331,7 @@ export async function encerrarRotina(manual = true) {
   state.userCfg.rotinasArquivadas = state.userCfg.rotinasArquivadas || [];
   state.userCfg.rotinasArquivadas.unshift({ ...rotina, aderenciaFinal: ader.pct, encerradaEm: todayKey() });
   state.userCfg.rotina = null;
+  state.userCfg.rotinaSentBlocks = {};
   await saveCfgAll(false);
   if (manual) { showToast('Rotina encerrada.'); renderRotina(); }
 }
