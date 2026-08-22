@@ -1,5 +1,14 @@
 # Changelog — Você S.A.
 
+## v5.1.0 — 2026-08-22
+
+Rotinas travadas — modo sprint pra objetivos com prazo.
+
+- **Novo**: crie uma rotina intensiva pra um objetivo com data-alvo (concurso, idioma, entrevista, prova) — informe o objetivo, o prazo, as matérias/tarefas e sua disponibilidade, e o app distribui os blocos de horário sozinho
+- Página própria com os blocos de hoje (com status: próximo, agora, feito, perdido), checklist diário opcional, % de aderência e contagem regressiva pro prazo — tudo separado do streak geral do check-in
+- Acessível pelo drawer "Mais"; quando ativa, aparece um card resumido no Dashboard
+- Rotinas encerradas (manualmente ou ao vencer o prazo) ficam no histórico, com a aderência final
+
 ## v5.0.8 — 2026-08-21
 
 Termos de uso e Política de privacidade.
