@@ -1,5 +1,11 @@
 # Changelog — Você S.A.
 
+## v5.1.1 — 2026-08-22
+
+Notificações da rotina travada.
+
+- Cada bloco de horário da rotina agora avisa no início, mesmo com o app fechado — reaproveita a mesma infraestrutura de push do lembrete diário e do resumo semanal
+
 ## v5.1.0 — 2026-08-22
 
 Rotinas travadas — modo sprint pra objetivos com prazo.
