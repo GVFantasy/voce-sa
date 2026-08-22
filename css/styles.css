@@ -303,6 +303,7 @@ body.dark .mais-item-icon{color:var(--preto)}
 .auth-err{font-size:12px;color:var(--dan-txt);text-align:center;margin-bottom:8px;min-height:16px}
 .auth-toggle{text-align:center;font-size:12px;color:var(--cinza);cursor:pointer;margin-top:10px}
 .auth-toggle span{color:var(--roxo);font-weight:500;text-decoration:underline}
+.auth-legal-link{text-align:center;font-size:11px;color:var(--cinza);cursor:pointer;margin-top:14px;text-decoration:underline}
 
 /* ONBOARDING */
 .ob-wrap{max-width:480px;margin:0 auto;padding:28px 18px 60px}
@@ -1008,6 +1009,14 @@ body.dark .mais-item:hover{box-shadow:0 4px 12px rgba(0,0,0,.3)}
 }
 .kickoff-habit-row:last-child{border-bottom:none}
 .kickoff-habit-days{margin-left:auto;font-size:11px;color:rgba(255,255,255,.55)}
+
+/* TERMOS E PRIVACIDADE */
+.legal-screen{display:none;position:fixed;inset:0;background:var(--fundo);z-index:1000;overflow-y:auto}
+.legal-inner{max-width:480px;margin:0 auto;padding:calc(28px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));position:relative}
+.legal-close{position:absolute;top:calc(20px + env(safe-area-inset-top));right:16px;background:none;border:none;font-size:18px;color:var(--cinza);cursor:pointer;padding:6px;line-height:1}
+.legal-section-title{font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--preto)}
+.legal-section-title:first-child{margin-top:16px}
+.legal-p{font-size:13px;color:var(--preto);line-height:1.7;margin-bottom:4px}
 
 /* INTRODUCAO (carrossel pre-onboarding) */
 .obi-inner{flex:1;display:flex;flex-direction:column;padding:calc(24px + env(safe-area-inset-top)) 24px calc(28px + env(safe-area-inset-bottom));min-height:100%}

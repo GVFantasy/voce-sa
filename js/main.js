@@ -16,6 +16,7 @@ import { nav, startApp, loadLog, openMaisDrawer, closeMaisDrawer, navFromMais } 
 import { setRetroTab, retroPrevQ, retroNextQ } from './retrospectiva.js';
 import { saveFinMes } from './financeiro.js';
 import { shareAchievement } from './share.js';
+import { showLegal, closeLegal, setLegalTab } from './legal.js';
 
 // Expõe ao window para os onclick inline no HTML
 window.clearFieldErr = clearFieldErr;
@@ -83,6 +84,9 @@ window.navCalMonth = navCalMonth;
 window.showHiDay = showHiDay;
 window.renderConquistas = renderConquistas;
 window.shareAchievement = shareAchievement;
+window.showLegal = showLegal;
+window.closeLegal = closeLegal;
+window.setLegalTab = setLegalTab;
 
 window.renderPerfil = renderPerfil;
 window.savePerfil = savePerfil;
