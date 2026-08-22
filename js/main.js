@@ -17,6 +17,7 @@ import { setRetroTab, retroPrevQ, retroNextQ } from './retrospectiva.js';
 import { saveFinMes } from './financeiro.js';
 import { shareAchievement } from './share.js';
 import { showLegal, closeLegal, setLegalTab } from './legal.js';
+import { startRotinaWizard, closeRotinaWizard, rwCheckStep1, rwNext, rwBack, rwAddMateria, rwRemoveMateria, rwAddChecklist, rwRemoveChecklist, rwToggleDia, rwSetDuracao, rwGenerate, rwRemoveBloco, rwConfirm, toggleRotinaBloco, toggleRotinaChecklist, encerrarRotina } from './rotina.js';
 
 // Expõe ao window para os onclick inline no HTML
 window.clearFieldErr = clearFieldErr;
@@ -87,6 +88,24 @@ window.shareAchievement = shareAchievement;
 window.showLegal = showLegal;
 window.closeLegal = closeLegal;
 window.setLegalTab = setLegalTab;
+
+window.startRotinaWizard = startRotinaWizard;
+window.closeRotinaWizard = closeRotinaWizard;
+window.rwCheckStep1 = rwCheckStep1;
+window.rwNext = rwNext;
+window.rwBack = rwBack;
+window.rwAddMateria = rwAddMateria;
+window.rwRemoveMateria = rwRemoveMateria;
+window.rwAddChecklist = rwAddChecklist;
+window.rwRemoveChecklist = rwRemoveChecklist;
+window.rwToggleDia = rwToggleDia;
+window.rwSetDuracao = rwSetDuracao;
+window.rwGenerate = rwGenerate;
+window.rwRemoveBloco = rwRemoveBloco;
+window.rwConfirm = rwConfirm;
+window.toggleRotinaBloco = toggleRotinaBloco;
+window.toggleRotinaChecklist = toggleRotinaChecklist;
+window.encerrarRotina = encerrarRotina;
 
 window.renderPerfil = renderPerfil;
 window.savePerfil = savePerfil;

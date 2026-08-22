@@ -407,6 +407,7 @@
     <div id="dash-hero-wrap"></div>
     <div id="dash-compare-wrap"></div>
     <div id="dash-fin-wrap"></div>
+    <div id="dash-rotina-wrap"></div>
     <div id="dash-okr-wrap"></div>
     <div id="dash-focus-wrap"></div>
     <hr class="dash-divider">
@@ -762,6 +763,98 @@
     <div id="retro-content"></div>
   </div>
 
+  <!-- ROTINA TRAVADA -->
+  <div id="pg-rotina" class="page" style="display:none">
+    <div id="rotina-empty">
+      <div class="title-page">Rotina travada</div>
+      <div class="manual-sub">Um sprint com prazo pra uma meta que exige foco total</div>
+      <div class="card" style="margin-top:16px">
+        <div style="font-size:13px;color:var(--cinza);line-height:1.6;margin-bottom:14px">Defina um objetivo com prazo — concurso, idioma, entrevista, prova — e a gente monta os blocos de horário pra você, com aviso na hora certa.</div>
+        <button class="btn-primary" onclick="startRotinaWizard()">Criar rotina</button>
+      </div>
+      <div id="rotina-historico"></div>
+    </div>
+    <div id="rotina-active" style="display:none">
+      <div class="dash-hero roxo" id="rotina-hero-wrap">
+        <div class="dash-hero-label">ROTINA ATIVA</div>
+        <div class="dash-hero-msg" id="rotina-objetivo"></div>
+        <div class="dash-hero-sub"><span id="rotina-dias-restantes"></span> · <span id="rotina-aderencia"></span> de aderência</div>
+      </div>
+      <div class="sec-label" style="margin-top:16px">Blocos de hoje</div>
+      <div id="rotina-blocos-hoje"></div>
+      <div class="sec-label">Checklist diário</div>
+      <div id="rotina-checklist-hoje"></div>
+      <button class="btn-ghost" style="margin-top:16px" onclick="encerrarRotina()">Encerrar rotina</button>
+    </div>
+  </div>
+
+  <!-- ROTINA TRAVADA - WIZARD DE CRIACAO -->
+  <div id="pg-rotina-wizard" class="page" style="display:none">
+    <div class="ob-wrap" style="padding-top:8px">
+      <div class="ob-progress" id="rw-progress"></div>
+
+      <div class="ob-step on" id="rws-1">
+        <div class="ob-question">Qual é o seu objetivo?</div>
+        <div class="ob-hint">Em poucas palavras — o que você quer conquistar com prazo.</div>
+        <input class="ob-input" id="rw-objetivo" type="text" placeholder="Ex: Passar no concurso X" oninput="rwCheckStep1()">
+        <div class="ob-question" style="font-size:18px;margin-bottom:5px;margin-top:8px">Até quando?</div>
+        <input class="ob-input" id="rw-prazo" type="date" oninput="rwCheckStep1()">
+        <div class="ob-nav"><button class="ob-btn-back" onclick="closeRotinaWizard()">Cancelar</button><button class="ob-btn-next" id="rw-next-1" onclick="rwNext(1)" disabled>Continuar →</button></div>
+      </div>
+
+      <div class="ob-step" id="rws-2">
+        <div class="ob-question">O que você vai estudar ou praticar?</div>
+        <div class="ob-hint">Adicione as matérias ou tarefas — vamos distribuir entre os horários disponíveis.</div>
+        <div style="display:flex;gap:8px;margin-bottom:6px">
+          <input class="ob-input" id="rw-materia-input" type="text" placeholder="Ex: Direito Constitucional" style="margin-bottom:0" onkeydown="if(event.key==='Enter'){event.preventDefault();rwAddMateria()}">
+          <button class="btn-ghost" style="margin-top:0;width:auto;padding:12px 16px;white-space:nowrap" onclick="rwAddMateria()">+ Adicionar</button>
+        </div>
+        <div id="rw-materias-list" style="margin-bottom:16px"></div>
+        <div class="ob-section-label">Checklist diário <span style="font-weight:400;text-transform:none">(opcional)</span></div>
+        <div class="ob-hint">Uma tarefa fixa todo dia, além dos blocos — ex: "Revisar erros do dia".</div>
+        <div style="display:flex;gap:8px;margin-bottom:6px">
+          <input class="ob-input" id="rw-checklist-input" type="text" placeholder="Ex: Revisar erros do dia" style="margin-bottom:0" onkeydown="if(event.key==='Enter'){event.preventDefault();rwAddChecklist()}">
+          <button class="btn-ghost" style="margin-top:0;width:auto;padding:12px 16px;white-space:nowrap" onclick="rwAddChecklist()">+ Adicionar</button>
+        </div>
+        <div id="rw-checklist-list"></div>
+        <div class="ob-nav"><button class="ob-btn-back" onclick="rwBack(2)">←</button><button class="ob-btn-next" id="rw-next-2" onclick="rwNext(2)" disabled>Continuar →</button></div>
+      </div>
+
+      <div class="ob-step" id="rws-3">
+        <div class="ob-question">Quando você tem disponibilidade?</div>
+        <div class="ob-hint">Dias da semana e horário — vamos encaixar os blocos aí.</div>
+        <div class="ob-days-grid" id="rw-dias">
+          <button class="ob-day-btn" data-val="0" onclick="rwToggleDia(this)">Dom</button>
+          <button class="ob-day-btn" data-val="1" onclick="rwToggleDia(this)">Seg</button>
+          <button class="ob-day-btn" data-val="2" onclick="rwToggleDia(this)">Ter</button>
+          <button class="ob-day-btn" data-val="3" onclick="rwToggleDia(this)">Qua</button>
+          <button class="ob-day-btn" data-val="4" onclick="rwToggleDia(this)">Qui</button>
+          <button class="ob-day-btn" data-val="5" onclick="rwToggleDia(this)">Sex</button>
+          <button class="ob-day-btn" data-val="6" onclick="rwToggleDia(this)">Sáb</button>
+        </div>
+        <div style="display:flex;gap:8px;margin:14px 0">
+          <div style="flex:1"><div class="sec-label">Das</div><input class="ob-input" id="rw-hora-inicio" type="time" value="19:00" style="margin-bottom:0"></div>
+          <div style="flex:1"><div class="sec-label">Até</div><input class="ob-input" id="rw-hora-fim" type="time" value="21:00" style="margin-bottom:0"></div>
+        </div>
+        <div class="sec-label">Duração de cada bloco</div>
+        <div class="ob-chips" id="rw-duracao-chips">
+          <button class="ob-chip" data-val="30" onclick="rwSetDuracao(this)">30min</button>
+          <button class="ob-chip on" data-val="60" onclick="rwSetDuracao(this)">1h</button>
+          <button class="ob-chip" data-val="90" onclick="rwSetDuracao(this)">1h30</button>
+          <button class="ob-chip" data-val="120" onclick="rwSetDuracao(this)">2h</button>
+        </div>
+        <div class="ob-nav"><button class="ob-btn-back" onclick="rwBack(3)">←</button><button class="ob-btn-next" onclick="rwGenerate()">Gerar rotina →</button></div>
+      </div>
+
+      <div class="ob-step" id="rws-4">
+        <div class="ob-question">Sua rotina ficou assim</div>
+        <div class="ob-hint">Confira os blocos — remova o que não fizer sentido antes de confirmar.</div>
+        <div id="rw-preview" style="margin-bottom:16px"></div>
+        <div class="ob-nav"><button class="ob-btn-back" onclick="rwBack(4)">←</button><button class="ob-btn-next" onclick="rwConfirm()">Começar minha rotina →</button></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- MAIS BACKDROP (overlay separado — display:none quando fechado) -->
@@ -778,6 +871,7 @@
     <button class="mais-item" onclick="navFromMais('manual')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="mais-item-label">Manual</span></button>
     <button class="mais-item" onclick="closeMaisDrawer();showLegal('termos')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><span class="mais-item-label">Termos</span></button>
     <button class="mais-item" onclick="navFromMais('retrospectiva')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></span><span class="mais-item-label">Retrospectiva</span></button>
+    <button class="mais-item" onclick="navFromMais('rotina')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M12 2a10 10 0 0 1 8.66 5"/></svg></span><span class="mais-item-label">Rotina</span></button>
     <button class="mais-item" onclick="navFromMais('conquistas')"><span class="mais-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><polyline points="8.5 13.5 7 22 12 19 17 22 15.5 13.5"/></svg></span><span class="mais-item-label">Conquistas</span></button>
   </div>
 </div>

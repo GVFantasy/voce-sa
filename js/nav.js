@@ -11,6 +11,7 @@ import { renderBiblioteca } from './biblioteca.js';
 import { renderPomodoroTime, renderPomodoroSessions, restorePomodoro, renderPomodoroDuration, renderPomodoroLog, renderPomodoroStats, renderPomoSubjectChips } from './pomodoro.js';
 import { renderRetrospectiva } from './retrospectiva.js';
 import { renderFinanceiro } from './financeiro.js';
+import { renderRotina, renderRotinaDashCard, checkRotinaExpirada } from './rotina.js';
 
 export function startApp() {
   document.getElementById('app').style.display = 'block';
@@ -64,14 +65,15 @@ export async function loadLog() {
   });
   state.logLoaded = true;
   setSyncStatus('ok', 'Sincronizado');
-  renderCheckin(); renderDashboard(); renderHistorico(); renderOKRs(); renderPerfil(); renderConquistas();
+  checkRotinaExpirada();
+  renderCheckin(); renderDashboard(); renderHistorico(); renderOKRs(); renderPerfil(); renderConquistas(); renderRotinaDashCard();
   notifyStreakRecalcOnce();
 }
 
 const MAIS_PAGES = ['historico', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'];
 
 export function nav(id, el) {
-  ['checkin', 'dashboard', 'okrs', 'financeiro', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
+  ['checkin', 'dashboard', 'okrs', 'financeiro', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva', 'rotina', 'rotina-wizard'].forEach(p => {
     const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
   });
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
@@ -84,7 +86,7 @@ export function nav(id, el) {
   }
   if (el) el.classList.add('on');
   if (id === 'checkin') renderCheckin();
-  if (id === 'dashboard') renderDashboard();
+  if (id === 'dashboard') { renderDashboard(); renderRotinaDashCard(); }
   if (id === 'okrs') renderOKRs();
   if (id === 'financeiro') renderFinanceiro();
   if (id === 'historico') renderHistorico();
@@ -93,6 +95,7 @@ export function nav(id, el) {
   if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); renderPomodoroStats(); renderPomoSubjectChips(); }
   if (id === 'biblioteca') renderBiblioteca();
   if (id === 'retrospectiva') renderRetrospectiva();
+  if (id === 'rotina') renderRotina();
 }
 
 export function openMaisDrawer() {
@@ -108,7 +111,7 @@ export function closeMaisDrawer() {
 export function navFromMais(id) {
   closeMaisDrawer(null);
   setTimeout(() => {
-    ['checkin', 'dashboard', 'okrs', 'financeiro', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva'].forEach(p => {
+    ['checkin', 'dashboard', 'okrs', 'financeiro', 'historico', 'conquistas', 'biblioteca', 'pomodoro', 'perfil', 'manual', 'retrospectiva', 'rotina', 'rotina-wizard'].forEach(p => {
       const pg = document.getElementById('pg-' + p); if (pg) pg.style.display = 'none';
     });
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
@@ -127,5 +130,6 @@ export function navFromMais(id) {
     if (id === 'pomodoro') { renderPomodoroTime(); renderPomodoroSessions(); renderPomodoroDuration(); renderPomodoroLog(); renderPomodoroStats(); renderPomoSubjectChips(); }
     if (id === 'biblioteca') renderBiblioteca();
     if (id === 'retrospectiva') renderRetrospectiva();
+    if (id === 'rotina') renderRotina();
   }, 280);
 }
