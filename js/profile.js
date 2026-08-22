@@ -114,6 +114,14 @@ export function renderPerfil() {
   lembreteToggleEl.classList.toggle('on', lembreteOn);
   lembreteToggleEl.setAttribute('aria-checked', lembreteOn);
   document.getElementById('notif-status').textContent = state.userCfg.lembreteAtivo ? 'Lembrete ativo ✓' : '';
+  const weeklyRow = document.getElementById('weekly-summary-row');
+  if (weeklyRow) {
+    weeklyRow.style.display = lembreteOn ? 'block' : 'none';
+    const weeklyOn = !!state.userCfg.resumoSemanalAtivo;
+    const weeklyToggleEl = document.getElementById('weekly-summary-toggle');
+    weeklyToggleEl.classList.toggle('on', weeklyOn);
+    weeklyToggleEl.setAttribute('aria-checked', weeklyOn);
+  }
   const activePlan = getPlans().find(p => p.id === getActivePlanId());
   if (activePlan) document.getElementById('plan-badge').textContent = activePlan.emoji + ' ' + activePlan.name;
 
@@ -375,6 +383,14 @@ export async function toggleReminder(el) {
   } else {
     unsubscribeFromPush();
   }
+}
+
+export async function toggleWeeklySummary(el) {
+  state.userCfg.resumoSemanalAtivo = !state.userCfg.resumoSemanalAtivo;
+  el.classList.toggle('on', state.userCfg.resumoSemanalAtivo);
+  el.setAttribute('aria-checked', state.userCfg.resumoSemanalAtivo);
+  await saveCfgAll(false);
+  showToast(state.userCfg.resumoSemanalAtivo ? 'Resumo semanal ativado!' : 'Resumo semanal desativado');
 }
 
 export function scheduleReminder() {

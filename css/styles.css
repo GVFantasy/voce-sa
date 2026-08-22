@@ -672,6 +672,7 @@ body.dark .pomo-stat-tile{box-shadow:none}
 .prof-section{margin-bottom:20px}
 .prof-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--borda)}
 .prof-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borda)}
+.prof-divider{margin-top:8px;padding-top:4px;border-top:1px solid var(--borda)}
 .prof-row:last-child{border-bottom:none}
 .prof-label{font-size:13px;color:var(--preto)}
 .prof-val{font-size:12px;color:var(--cinza)}

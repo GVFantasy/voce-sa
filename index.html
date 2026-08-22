@@ -630,6 +630,10 @@
       <div class="field-err" id="pref-lembrete-err"></div>
       <div class="prof-row"><div class="prof-label">Ativo</div><div class="toggle-switch" id="lembrete-toggle" role="switch" aria-checked="false" aria-label="Lembrete diário ativo" tabindex="0" onclick="toggleReminder(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleReminder(this)}"></div></div>
       <div id="notif-status" style="font-size:11px;color:var(--cinza);margin-top:4px"></div>
+      <div class="prof-divider" id="weekly-summary-row" style="display:none">
+        <div class="prof-row"><div class="prof-label">Resumo semanal</div><div class="toggle-switch" id="weekly-summary-toggle" role="switch" aria-checked="false" aria-label="Resumo semanal ativo" tabindex="0" onclick="toggleWeeklySummary(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleWeeklySummary(this)}"></div></div>
+        <div style="font-size:11px;color:var(--cinza);margin-top:4px">Um aviso todo domingo à noite com quantos dias você fez check-in essa semana</div>
+      </div>
       </div>
     </div>
     <div class="pillar-card">
