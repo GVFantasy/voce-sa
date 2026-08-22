@@ -1,5 +1,12 @@
 # Changelog — Você S.A.
 
+## v5.0.5 — 2026-08-21
+
+Streak com congelamento.
+
+- A sequência (streak) agora perdoa faltas de um jeito mais justo: a cada 10 dias cumpridos, você ganha 1 "congelamento" (até 2 acumulados), que perdoa automaticamente um dia perdido sem quebrar a sequência — antes era um perdão invisível de 1 falha por mês-calendário, sem controle nenhum do usuário
+- Saldo de congelamentos aparece ao lado do streak (check-in e Dashboard), só quando há algum disponível
+
 ## v5.0.4 — 2026-08-21
 
 Débito técnico: onboarding sai de estilo inline.
