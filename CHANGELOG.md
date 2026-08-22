@@ -1,5 +1,12 @@
 # Changelog — Você S.A.
 
+## v5.0.4 — 2026-08-21
+
+Débito técnico: onboarding sai de estilo inline.
+
+- Wizard de onboarding (5 passos) migrado de estilo inline pra classes CSS reais — mesma limpeza que o Kickoff já tinha recebido. Puramente interno, visual idêntico.
+- Suíte de testes automatizados adicionada ao repositório (`npm test`), cobrindo login, check-in, criação de plano, navegação principal e dark mode — primeira vez que o projeto tem testes persistidos em vez de scripts manuais descartáveis.
+
 ## v5.0.3 — 2026-08-20
 
 Guia inicial antes do onboarding.
