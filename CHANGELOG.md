@@ -1,5 +1,11 @@
 # Changelog — Você S.A.
 
+## v5.0.7 — 2026-08-21
+
+Compartilhar conquista.
+
+- Cada conquista desbloqueada ganha um botão de compartilhar — gera uma imagem no estilo do app (cor da marca, ícone, nome, badge de raro/épico) e abre o compartilhamento nativo do celular (ou salva a imagem, no desktop)
+
 ## v5.0.6 — 2026-08-21
 
 Resumo semanal.
