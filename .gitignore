@@ -13,3 +13,5 @@ package-lock.json
 .qa-fase5d.mjs
 .qa-sdk-fix.mjs
 supabase/.temp/
+test-results/
+playwright-report/

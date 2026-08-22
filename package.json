@@ -4,7 +4,7 @@
   "description": "Aplicativo web de desenvolvimento pessoal com check-in diario, dashboard, OKRs, biblioteca, pomodoro, perfil e sincronizacao via Supabase.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "playwright test",
     "start": "node server.js"
   },
   "repository": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/GVFantasy/voce-sa#readme",
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "playwright": "^1.62.1"
   }
 }
