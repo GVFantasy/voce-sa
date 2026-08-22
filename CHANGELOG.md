@@ -1,5 +1,11 @@
 # Changelog — Você S.A.
 
+## v5.0.8 — 2026-08-21
+
+Termos de uso e Política de privacidade.
+
+- Nova tela com os dois documentos, acessível na tela de login (antes de criar conta) e pelo drawer "Mais" — conteúdo real sobre dados coletados, onde ficam armazenados, e os direitos que você já tem no app (exportar, excluir conta)
+
 ## v5.0.7 — 2026-08-21
 
 Compartilhar conquista.
