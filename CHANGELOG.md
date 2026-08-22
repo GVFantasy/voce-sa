@@ -1,5 +1,11 @@
 # Changelog — Você S.A.
 
+## v5.1.2 — 2026-08-22
+
+Correção de bug — QA no Rotinas travadas.
+
+- Fix: tocar na notificação "Hora da rotina" abria o app na tela padrão em vez de levar direto pra Rotina — o link usado (`#rotina`) nunca era lido pelo app; agora reaproveita o mesmo mecanismo de deep link já usado pelo atalho do Pomodoro (`?tab=`)
+
 ## v5.1.1 — 2026-08-22
 
 Notificações da rotina travada.

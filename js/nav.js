@@ -23,8 +23,8 @@ export function startApp() {
   // allowlist fixa - nunca interpola o valor da URL num seletor
   const MAIN_NAV_TABS = ['dashboard', 'okrs', 'conquistas'];
   const tab = new URLSearchParams(location.search).get('tab');
-  if (tab === 'pomodoro') {
-    navFromMais('pomodoro');
+  if (tab === 'pomodoro' || tab === 'rotina') {
+    navFromMais(tab);
   } else if (MAIN_NAV_TABS.includes(tab)) {
     // seguro interpolar aqui: tab so chega a este ponto se for exatamente um dos 3
     // valores fixos do allowlist acima, nunca um valor arbitrario vindo da URL

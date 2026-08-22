@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     const staleIds: string[] = [];
     const sentKeysByUser = new Map<string, string[]>();
     await Promise.all(rotinaDue.map(async (d) => {
-      const payload = JSON.stringify({ title: "Hora da rotina ⏰", body: d.label, url: "./#rotina" });
+      const payload = JSON.stringify({ title: "Hora da rotina ⏰", body: d.label, url: "./?tab=rotina" });
       const userSubs = subsByUser.get(d.userId) || [];
       await Promise.all(userSubs.map(async (sub) => {
         try {
