@@ -1,5 +1,13 @@
 # Changelog — Você S.A.
 
+## v5.1.3 — 2026-08-22
+
+Usabilidade no Rotinas travadas.
+
+- Aviso claro no preview do wizard quando alguma matéria não coube na agenda gerada (distribuição por rodízio), em vez de ela simplesmente sumir sem explicação
+- Preview de blocos agora agrupado por dia da semana (com cabeçalho), mais fácil de escanear com várias matérias/dias
+- Barra de progresso visual pra aderência na tela da rotina ativa, além do percentual em texto
+
 ## v5.1.2 — 2026-08-22
 
 Correção de bug — QA no Rotinas travadas.

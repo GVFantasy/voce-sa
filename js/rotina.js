@@ -225,16 +225,36 @@ export function rwRemoveBloco(idx) {
 }
 
 function renderRwPreview() {
-  const blocosHtml = rw.geradoBlocos.map((b, i) => `
-    <div class="rotina-bloco" style="cursor:default">
-      <div class="rotina-bloco-time">${DLABELS_ROTINA[b.diasSemana[0]]} ${b.inicio}</div>
-      <div class="rotina-bloco-label">${sanitize(b.label)}</div>
-      <button class="icon-btn" onclick="rwRemoveBloco(${i})" aria-label="Remover bloco">✕</button>
-    </div>`).join('');
+  // Agrupado por dia (com cabecalho) em vez de lista plana - fica facil de escanear
+  // quando ha varios dias/blocos. rw.geradoBlocos ja vem ordenado por dia (gerarBlocos).
+  const porDia = new Map();
+  rw.geradoBlocos.forEach((b, i) => {
+    const dow = b.diasSemana[0];
+    if (!porDia.has(dow)) porDia.set(dow, []);
+    porDia.get(dow).push({ ...b, _idx: i });
+  });
+  const blocosHtml = [...porDia.entries()].map(([dow, blocos]) => `
+    <div class="ob-section-label">${DLABELS_ROTINA[dow]}</div>
+    ${blocos.map(b => `
+      <div class="rotina-bloco" style="cursor:default">
+        <div class="rotina-bloco-time">${b.inicio}–${b.fim}</div>
+        <div class="rotina-bloco-label">${sanitize(b.label)}</div>
+        <button class="icon-btn" onclick="rwRemoveBloco(${b._idx})" aria-label="Remover bloco">✕</button>
+      </div>`).join('')}
+  `).join('');
+
+  // Round-robin distribui 1 materia por slot - se houver menos slots que materias, algumas
+  // ficam de fora silenciosamente. Avisa explicitamente em vez de deixar o usuario descobrir sozinho.
+  const usadas = new Set(rw.geradoBlocos.map(b => b.label));
+  const semEspaco = rw.materias.filter(m => !usadas.has(m));
+  const avisoHtml = semEspaco.length
+    ? `<div class="alert alert-warn">Sem espaço na agenda pra: <strong>${semEspaco.map(sanitize).join(', ')}</strong>. Aumente os dias/horário disponíveis ou diminua a duração do bloco pra encaixar todas.</div>`
+    : '';
+
   const checklistHtml = rw.checklist.length
     ? `<div class="ob-section-label">Checklist diário</div>` + rw.checklist.map(c => `<div class="rw-list-row"><span>${sanitize(c)}</span></div>`).join('')
     : '';
-  document.getElementById('rw-preview').innerHTML = blocosHtml + checklistHtml;
+  document.getElementById('rw-preview').innerHTML = avisoHtml + blocosHtml + checklistHtml;
 }
 
 export async function rwConfirm() {
@@ -280,6 +300,7 @@ export function renderRotina() {
   document.getElementById('rotina-objetivo').textContent = rotina.objetivo;
   document.getElementById('rotina-dias-restantes').textContent = dias === 1 ? '1 dia restante' : `${dias} dias restantes`;
   document.getElementById('rotina-aderencia').textContent = ader.pct + '%';
+  document.getElementById('rotina-aderencia-bar').style.width = ader.pct + '%';
 
   const blocosHoje = rotina.blocos.filter(b => b.diasSemana.includes(dow));
   document.getElementById('rotina-blocos-hoje').innerHTML = blocosHoje.length
