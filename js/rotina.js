@@ -56,9 +56,27 @@ export function blocoStatus(bloco, doneToday, agora = new Date()) {
   return 'perdido';
 }
 
+function addDays(dayKey, delta) {
+  const d = new Date(dayKey + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  return dateKey(d);
+}
+
+// Cronograma valido num dia especifico - resolve contra o historico de versoes (rotina.versoesAnteriores)
+// quando a rotina ja foi editada, senao usa o vigente. Cada entrada de versoesAnteriores vale ate
+// (e incluindo) seu validoAte; dias mais recentes caem no cronograma atual (rotina.blocos/checklist).
+function scheduleForDay(rotina, dayKey) {
+  for (const v of rotina.versoesAnteriores || []) {
+    if (dayKey <= v.validoAte) return { blocos: v.blocos, checklist: v.checklist };
+  }
+  return { blocos: rotina.blocos, checklist: rotina.checklist };
+}
+
 // Aderencia acumulada desde a criacao da rotina ate hoje (ou o prazo, o que vier primeiro) -
 // mesmo espirito do dayFulfilled/STREAK_THRESHOLD do check-in geral, mas em cima de rotinaLog,
-// separado do streak principal por decisao explicita do usuario.
+// separado do streak principal por decisao explicita do usuario. Usa scheduleForDay em vez do
+// cronograma fixo pra congelar dias passados no cronograma que valia neles, caso a rotina tenha
+// sido editada no meio do caminho.
 export function calcAderencia(rotina, rotinaLog) {
   if (!rotina) return { pct: 0, esperado: 0, feito: 0 };
   const today = todayKey();
@@ -68,10 +86,11 @@ export function calcAderencia(rotina, rotinaLog) {
     const k = dateKey(d);
     const dow = d.getDay();
     const dayLog = rotinaLog[k] || { blocos: {}, checklist: {} };
-    (rotina.blocos || []).forEach(b => {
+    const { blocos, checklist } = scheduleForDay(rotina, k);
+    (blocos || []).forEach(b => {
       if (b.diasSemana.includes(dow)) { esperado++; if (dayLog.blocos?.[b.id]) feito++; }
     });
-    (rotina.checklist || []).forEach(c => {
+    (checklist || []).forEach(c => {
       if (c.diasSemana.includes(dow)) { esperado++; if (dayLog.checklist?.[c.id]) feito++; }
     });
   }
@@ -90,7 +109,7 @@ export function diasRestantes(rotina) {
 let rw = null;
 
 function rwReset() {
-  rw = { objetivo: '', prazo: '', materias: [], checklist: [], dias: [], duracao: 60, geradoBlocos: [] };
+  rw = { editMode: false, objetivo: '', prazo: '', materias: [], checklist: [], dias: [], duracao: 60, geradoBlocos: [] };
 }
 
 export function startRotinaWizard() {
@@ -106,6 +125,48 @@ export function startRotinaWizard() {
   document.querySelectorAll('#rw-dias .ob-day-btn').forEach(b => b.classList.remove('on'));
   document.querySelectorAll('#rw-duracao-chips .ob-chip').forEach(b => b.classList.remove('on'));
   document.querySelector('#rw-duracao-chips .ob-chip[data-val="60"]').classList.add('on');
+  document.getElementById('rw-confirm-btn').textContent = 'Começar minha rotina →';
+  showRwStep(1);
+  import('./nav.js').then(({ nav }) => nav('rotina-wizard', null));
+}
+
+// Reabre o mesmo wizard da criacao, pre-preenchido com o cronograma vigente da rotina ativa -
+// permite ajustar objetivo/prazo/materias/disponibilidade sem precisar encerrar e comecar do zero.
+export function startRotinaWizardEdit() {
+  const rotina = state.userCfg.rotina;
+  if (!rotina) return;
+  rwReset();
+  rw.editMode = true;
+
+  document.getElementById('rw-objetivo').value = rotina.objetivo;
+  document.getElementById('rw-prazo').value = rotina.prazo;
+  document.getElementById('rw-materia-input').value = '';
+  document.getElementById('rw-checklist-input').value = '';
+  rwCheckStep1();
+
+  rw.materias = [...new Set(rotina.blocos.map(b => b.label))];
+  renderRwMaterias();
+  rw.checklist = (rotina.checklist || []).map(c => c.label);
+  renderRwChecklist();
+  rwCheckStep2();
+
+  const dias = new Set(rotina.blocos.flatMap(b => b.diasSemana));
+  document.querySelectorAll('#rw-dias .ob-day-btn').forEach(b => {
+    const val = parseInt(b.dataset.val);
+    b.classList.toggle('on', dias.has(val));
+  });
+  rw.dias = [...dias].sort((a, b) => a - b);
+
+  const primeiro = rotina.blocos[0];
+  const [ih, im] = primeiro.inicio.split(':').map(Number);
+  const [fh, fm] = primeiro.fim.split(':').map(Number);
+  rw.duracao = (fh * 60 + fm) - (ih * 60 + im);
+  document.querySelectorAll('#rw-duracao-chips .ob-chip').forEach(b =>
+    b.classList.toggle('on', parseInt(b.dataset.val) === rw.duracao));
+  document.getElementById('rw-hora-inicio').value = rotina.blocos.reduce((min, b) => b.inicio < min ? b.inicio : min, primeiro.inicio);
+  document.getElementById('rw-hora-fim').value = rotina.blocos.reduce((max, b) => b.fim > max ? b.fim : max, primeiro.fim);
+
+  document.getElementById('rw-confirm-btn').textContent = 'Salvar alterações →';
   showRwStep(1);
   import('./nav.js').then(({ nav }) => nav('rotina-wizard', null));
 }
@@ -260,17 +321,38 @@ function renderRwPreview() {
 export async function rwConfirm() {
   if (!rw.geradoBlocos.length) { showToast('Adicione pelo menos um bloco.', 'info', 3000); return; }
   const checklist = rw.checklist.map(label => ({ id: crypto.randomUUID(), label, diasSemana: [0, 1, 2, 3, 4, 5, 6] }));
-  state.userCfg.rotina = {
-    id: crypto.randomUUID(),
-    objetivo: rw.objetivo,
-    prazo: rw.prazo,
-    criadoEm: todayKey(),
-    blocos: rw.geradoBlocos,
-    checklist,
-  };
-  state.userCfg.rotinaLog = state.userCfg.rotinaLog || {};
-  await saveCfgAll(false);
-  showToast('Rotina criada! Bora começar.');
+  const today = todayKey();
+
+  if (rw.editMode) {
+    const rotina = state.userCfg.rotina;
+    // so arquiva o cronograma antigo se ele ja tiver valido em algum dia passado - uma segunda
+    // edicao no mesmo dia so substitui em memoria, sem gerar uma versao historica propria.
+    if (rotina.vigenteDesde < today) {
+      rotina.versoesAnteriores = rotina.versoesAnteriores || [];
+      rotina.versoesAnteriores.push({ validoAte: addDays(today, -1), blocos: rotina.blocos, checklist: rotina.checklist || [] });
+    }
+    rotina.objetivo = rw.objetivo;
+    rotina.prazo = rw.prazo;
+    rotina.blocos = rw.geradoBlocos;
+    rotina.checklist = checklist;
+    rotina.vigenteDesde = today;
+    state.userCfg.rotinaSentBlocks = {};
+    await saveCfgAll(false);
+    showToast('Rotina atualizada!');
+  } else {
+    state.userCfg.rotina = {
+      id: crypto.randomUUID(),
+      objetivo: rw.objetivo,
+      prazo: rw.prazo,
+      criadoEm: today,
+      vigenteDesde: today,
+      blocos: rw.geradoBlocos,
+      checklist,
+    };
+    state.userCfg.rotinaLog = state.userCfg.rotinaLog || {};
+    await saveCfgAll(false);
+    showToast('Rotina criada! Bora começar.');
+  }
   const { nav } = await import('./nav.js');
   nav('rotina', null);
 }

@@ -1,5 +1,12 @@
 # Changelog — Você S.A.
 
+## v5.2.0 — 2026-08-22
+
+Editar rotina ativa.
+
+- **Novo**: dá pra ajustar uma rotina em andamento (objetivo, prazo, matérias, disponibilidade, checklist) sem precisar encerrar e recomeçar do zero — botão "Editar rotina" reabre o mesmo wizard da criação, preenchido com os dados atuais
+- A aderência acumulada é preservada: dias já passados continuam avaliados pelo cronograma que valia neles; o cronograma novo passa a valer a partir da edição em diante
+
 ## v5.1.3 — 2026-08-22
 
 Usabilidade no Rotinas travadas.
